@@ -1,3 +1,4 @@
+# generate interesting phrases based on input supplied
 
 # in response to a player giving their name
 player_name_phrases = ["Ok (if that's your real name),",
@@ -24,6 +25,12 @@ places_phrases = ["I can't remember whether that's in the North or the South. Oh
                  "The weather is pretty changeable in those parts, I hear."]
 
 def get_phrase(text, phrases):
+    """
+    return an interesting phrase from one of the phrase lists, given a word
+    :param text:
+    :param phrases:
+    :return:
+    """
     hash_value = hash(text)
     # Use modulo to map the hash value into the range [0, num-1]
     result = hash_value % len(phrases)

@@ -1,10 +1,10 @@
 import mainloop
-import ship_cmds
+import basic_cmds
 import state
 import setup
 
-player = state.Player()
+gs = state.GlobalState()
 
-if setup.do_setup(player):
-    ship_cmds.show_status(player, [])
-    mainloop.run_loop(player)
+if setup.do_setup(gs):
+    basic_cmds.show_status(gs, [])
+    mainloop.run_loop(gs)
