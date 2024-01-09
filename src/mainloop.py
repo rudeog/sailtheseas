@@ -1,24 +1,14 @@
-import state
-import basic_cmds
-import port_cmds
-import command
+from state import global_state
 
-def ask_quit(gs, toks):
-    if input("Are you sure? [y/n]").lower() == 'y':
-        gs.quitting=True
 
-help_topics = {
-    "about": ["about the game", "here it is"],
-}
-
-def get_prompt(gs):
-    if gs.num_commands < 5: # initially show this as the prompt
+def get_prompt():
+    if global_state.num_commands < 5:  # initially show this as the prompt
         return "? for help"
-    return f"{gs.player.name}: Day {gs.player.days}"
+    return f"{global_state.player.name}: Day {global_state.player.days}"
 
-def run_loop(gs:state.GlobalState, cs: command.CommandSystem):
-    while not gs.quitting:
-        inp=gs.input(f"{get_prompt(gs)}> ")
-        gs.num_commands=gs.num_commands+1
-        cs.process_input(inp)
 
+def run_loop():
+    while not global_state.quitting:
+        inp = global_state.input(f"{get_prompt()}> ")
+        global_state.num_commands = global_state.num_commands + 1
+        global_state.cmdsys.process_input(inp)

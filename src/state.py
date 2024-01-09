@@ -3,13 +3,15 @@
 import textwrap
 import shutil
 
-
 class GlobalState:
     def __init__(self):
+        self.world_name = "Atlanticus"
         self.player = None
         self.map = None
+        self.cmdsys = None
         self.num_commands = 0
         self.quitting = False
+
         terminal_size = shutil.get_terminal_size(fallback=(120, 24))
         self.wrap_width = min(terminal_size.columns, 120)
 
@@ -23,3 +25,20 @@ class GlobalState:
 
     def input(self, prompt):
         return input(prompt)
+
+    def confirm(self, prompt="Are you sure?", cancel=False):
+        valid = ['y', 'n']
+        if cancel:
+            valid.append('cancel')
+        r = ''
+        while r not in valid:
+            r = input(f"{prompt} [{'/'.join(valid)}] ").lower()
+        if r == 'y':
+            return True
+        if r == 'n':
+            return False
+        return None  # cancel
+
+
+# a single global instance
+global_state = GlobalState()

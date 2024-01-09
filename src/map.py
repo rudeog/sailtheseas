@@ -3,6 +3,7 @@
 
 import random
 from util import clamp
+from names import PlaceGenerator
 
 # number of chars for each location while dumping (may be overriden
 # if total locations exceed 999)
@@ -20,6 +21,7 @@ class Location:
         self.y = y
         self.populated = False
         self.index = -1
+        self.name: str = ""
 
     # set the location as being populated
     def set_place(self, idx):
@@ -39,16 +41,17 @@ class Map:
         if width < 10 or height < 10:
             raise Exception("invalid size. min is 10x10")
 
-        self.cols = width
-        self.rows = height
-        self.seed = seed
-        self.num_places = (width * height) // DENSITY_COEFF
+        self.cols: int = width
+        self.rows: int = height
+        self.seed: int = seed
+        self.num_places: int = (width * height) // DENSITY_COEFF
         # initialize an empty map with given dimensions
         # row first then col
         self.map = [[Location(i, j) for i in range(self.cols)] for j in range(self.rows)]
         # we have an array of populated places
-        self.places = []
+        self.places: list[Location] = []
         self._populate_map()
+        self._define_places()
 
     def _populate_map(self):
         # populate with places
@@ -171,6 +174,10 @@ class Map:
         parts.append(hdr)
         return "".join(parts)
 
+    def _define_places(self):
+        ng = PlaceGenerator(self.seed)
+        for loc in self.places:
+            loc.name = ng.name()
 
 # number of spaces to move to get between 2 points assuming moving
 # diagonal counts as one move

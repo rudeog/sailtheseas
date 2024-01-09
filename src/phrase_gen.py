@@ -17,12 +17,13 @@ ship_name_phrases = ["A ship with that name is bound to have good luck.",
                      "Hilarious!",
                      "Sounds like you put a lot of thought into that."]
 places_phrases = ["I can't remember whether that's in the North or the South. Oh well.",
-                 "I hear they make great pineapple cakes there.",
-                 "My great uncle Folderol was from there.",
-                 "My deceased aunt used to live there as well.",
-                 "I've never heard of the place.",
-                 "A likely story.",
-                 "The weather is pretty changeable in those parts, I hear."]
+                  "I hear they make great pineapple cakes there.",
+                  "My great uncle Folderol was from there.",
+                  "My deceased aunt used to live there as well.",
+                  "I've never heard of the place.",
+                  "A likely story.",
+                  "The weather is pretty changeable in those parts, I hear."]
+
 
 def get_phrase(text, phrases):
     """
@@ -35,5 +36,3 @@ def get_phrase(text, phrases):
     # Use modulo to map the hash value into the range [0, num-1]
     result = hash_value % len(phrases)
     return phrases[result]
-
-
