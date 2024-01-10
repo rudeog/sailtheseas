@@ -41,4 +41,4 @@ class GlobalState:
 
 
 # a single global instance
-global_state = GlobalState()
+gs = GlobalState()

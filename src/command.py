@@ -1,4 +1,4 @@
-from state import global_state
+from state import gs
 from enum import Enum
 
 
@@ -61,9 +61,12 @@ class CommandSystem:
         if cmd_to_run in self.cmds:  # first token is command name
             c = self.cmds[cmd_to_run]
             other_args = toks[1:]
-            c.fn(RunType.RUN, other_args)
+            if c.fn(RunType.CHECK_AVAILABLE, other_args):
+                c.fn(RunType.RUN, other_args)
+            else:
+                gs.output("Command is unavailable at this time.")
             return
-        global_state.output("Command not understood. Enter ? for help")
+        gs.output("Command not understood. Enter ? for help")
 
     def register_basic(self, cmd: Command):
         cmd.is_basic = True
@@ -92,30 +95,31 @@ class CommandSystem:
         if run_type == RunType.CHECK_AVAILABLE:
             return True
         if run_type == RunType.HELP:
-            global_state.output("Will list all commands available now. Some commands may be unavailable at certain times.")
+            gs.output("Will list all commands available now. Some commands may be unavailable at certain times.")
             return
 
-        global_state.output("Available commands:")
+        gs.output("Available commands:")
         for k, v in self.cmds.items():
             if not v.is_basic:
-                global_state.output(f"{v.name} {v.brief} - {v.help_text}", sub_indented=True)
-                if v.aliases:
-                    global_state.output(f"aliases: {', '.join(v.aliases)}", indented=True)
+                if v.fn(RunType.CHECK_AVAILABLE, []):
+                    gs.output(f"{v.name} {v.brief + ' ' if v.brief else ''}- {v.help_text}", sub_indented=True)
+                    if v.aliases:
+                        gs.output(f"aliases: {', '.join(v.aliases)}", indented=True)
 
     def _basic_help(self, run_type: RunType, toks):
         if run_type == RunType.CHECK_AVAILABLE:
             return True
         if run_type == RunType.HELP:
-            global_state.output("The help command may be used by itself, or followed by a topic or a command")
+            gs.output("The help command may be used by itself, or followed by a topic or a command")
             return
 
         if not toks:  # no arg specified
-            global_state.output("Help Overview:")
+            gs.output("Help Overview:")
             for k, v in self.cmds.items():
                 if v.is_basic:
-                    global_state.output(f"{v.name} {v.brief} - {v.help_text}", sub_indented=True)
+                    gs.output(f"{v.name} {v.brief} - {v.help_text}", sub_indented=True)
                     if v.aliases:
-                        global_state.output(f"aliases: {', '.join(v.aliases)}", indented=True)
+                        gs.output(f"aliases: {', '.join(v.aliases)}", indented=True)
             return
 
         if toks[0] in self.aliases:

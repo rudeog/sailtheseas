@@ -32,7 +32,7 @@ def get_phrase(text, phrases):
     :param phrases:
     :return:
     """
-    hash_value = hash(text)
+    hash_value = hash((32123,text)) # get a consistent value across runs
     # Use modulo to map the hash value into the range [0, num-1]
     result = hash_value % len(phrases)
     return phrases[result]
