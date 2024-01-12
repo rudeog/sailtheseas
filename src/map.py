@@ -177,14 +177,19 @@ class Map:
         Render the map or a portion of the map.
         :param xstart: left side start
         :param ystart: top side start
-        :param xend: right side end
-        :param yend:bottom side end
+        :param xend: right side end inclusive
+        :param yend:bottom side end inclusive
         :param override_fn: if specified, will call this function with each
                location, passing in the x and y of that location and will use
                the returned string for that location, unless its an empty string in
                which case it uses the default
         :return:
         """
+
+        ystart = clamp(ystart, 0, self.rows - 1)
+        yend = clamp(yend+1, 0, self.rows)
+        xstart = clamp(xstart, 0, self.cols - 1)
+        xend = clamp(xend+1, 0, self.cols)
 
         padding = max(PADDING, len(str(self.num_places)))
         width = xend - xstart
@@ -247,30 +252,41 @@ class Map:
         ystart = max(my_loc[1]-LOCAL_VIEW_SIZE,0)
         xend = min(my_loc[0]+LOCAL_VIEW_SIZE, self.cols)
         yend = min(my_loc[1]+LOCAL_VIEW_SIZE, self.rows)
-        places = []
+
+        nearby = self.get_all_nearby_places(my_loc)
+        legend = self._render_legend(my_loc, nearby)
         me = self.get_place_at_location(my_loc)
         if me:
             fill = '*'
-            places.append(f"{{*}} -- (your current location: {me.name})")
         else:
             fill = '.'
-            places.append(f"{{.}} -- (your current location)")
-        places.append(". -- Visited spaces")
         ret_map = self.render(xstart,ystart,xend,yend,generate_ship_function(my_loc, fill))
-        return ret_map + "\n".join(places)
+        return ret_map + legend
+
+    def _render_legend(self, my_loc, nearby=None):
+        if nearby is None:
+            nearby = []
+        leg = []
+        for p in nearby:
+            s= f"{p.index}".rjust(PADDING)
+            leg.append(f"{s}  {p.name}")
+        me = self.get_place_at_location(my_loc)
+        if me:
+            leg.append(f"{'{*}'.rjust(PADDING)}  (your current location: {me.name})")
+        else:
+            leg.append(f"{'{.}'.rjust(PADDING)}  (your current location)")
+        leg.append(f"{'.'.rjust(PADDING)}  Visited spaces")
+        return "\n".join(leg)
 
     def render_all_visited(self, my_loc: tuple[int,int]):
+        legend = self._render_legend(my_loc)
         me = self.get_place_at_location(my_loc)
-        txt = []
         if me:
             fill = '*'
-            txt.append(f"{{*}} -- (your current location: {me.name})")
         else:
             fill = '.'
-            txt.append(f"{{.}} -- (your current location)")
-        txt.append(". -- Visited spaces")
         return self.render(0, 0, self.cols, self.rows,
-                           override_fn=generate_ship_function(my_loc, fill), visited_only=True) + "\n".join(txt)
+                           override_fn=generate_ship_function(my_loc, fill), visited_only=True) + legend
 
 # number of spaces to move to get between 2 points assuming moving
 # diagonal counts as one move

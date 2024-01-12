@@ -64,7 +64,7 @@ class CommandSystem:
             if c.fn(RunType.CHECK_AVAILABLE, other_args):
                 c.fn(RunType.RUN, other_args)
             else:
-                gs.output("Command is unavailable at this time.")
+                gs.output("Command is unavailable at this time. Use 'commands' to see available commands.")
             return
         gs.output("Command not understood. Enter ? for help")
 

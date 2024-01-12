@@ -41,5 +41,5 @@ def set_player_start_location():
     gs.player.ship.location = start_loc.location
     # we will be docked at the port
     gs.player.state = player.PlayerState.DOCKED
-    gs.player.ship.reset_bearing()
+    gs.player.ship.bearing.reset()
     gs.map.places[0].visited = True

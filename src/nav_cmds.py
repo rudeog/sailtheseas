@@ -18,7 +18,7 @@ def register_nav_cmds():
                                "Sail your ship. This assumes you are navigating to a location or have set your bearing."))
     gs.cmdsys.register_alias("s", "sail")
 
-    gs.cmdsys.register(Command("map", "[all]", map_cmd,
+    gs.cmdsys.register(Command("map", "[world]", map_cmd,
                                "Display a map."))
 
 
@@ -55,13 +55,13 @@ def navigate_cmd(rt: RunType, toks):
         return
 
     # reset regardless at this point
-    gs.player.ship.reset_bearing()
+    gs.player.ship.bearing.reset()
 
     if place.location == gs.player.ship.location:
         gs.output("You are already there.")
         return
-
-    gs.player.ship.target = place.location
+    gs.output(f"{gs.player.ship.name} is set to sail to {place.name}")
+    gs.player.ship.bearing.set_target(place.location)
 
 
 def direction_cmd(rt: RunType, toks):
@@ -76,23 +76,27 @@ def direction_cmd(rt: RunType, toks):
             "the 'sail' command, you will sail in that direction, assuming you have not reached the end of the earth.")
         return
     old_dir = None
-    if gs.player.ship.direction:
-        old_dir = gs.player.ship.direction
-    gs.player.ship.reset_bearing() # not navigating
-    gs.player.ship.direction = Direction(toks[0])
-    if old_dir:
-        gs.output(f"{gs.player.ship.name} has changed direction from {old_dir} to {gs.player.ship.direction}")
+    t,v = gs.player.ship.bearing.get()
+    if t is gs.player.ship.bearing.Type.DIRECTION:
+        old_dir = v
+    gs.player.ship.bearing.reset()  # not navigating
+    new_dir = Direction(toks[0])
+    gs.player.ship.bearing.set_direction(new_dir)
 
+    if old_dir and (old_dir != new_dir):
+        gs.output(f"{gs.player.ship.name} has changed direction from {old_dir} to {new_dir}")
+    else:
+        gs.output(f"{gs.player.ship.name} is set to sail {new_dir}")
 
 def map_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
         if gs.player.state is PlayerState.SAILING:
             return True
         return False
-    if rt == RunType.HELP or (toks and toks[0] != 'visited'):
+    if rt == RunType.HELP or (toks and toks[0] != 'world'):
         gs.output(
             "Display a map. By default this map shows the are around your ship. If that area includes islands, "
-            "they are displayed with their name. If you specify 'visited', it will "
+            "they are displayed with their name. If you specify 'world', it will "
             "show a world map that includes all areas that you have visited. The world map does not include island "
             "names.")
         return
@@ -111,18 +115,20 @@ def sail_cmd(rt: RunType, toks):
         if gs.player.state is PlayerState.SAILING:
             return True
         return False
-    if rt == RunType.HELP or not gs.player.ship.have_bearing():
+    if rt == RunType.HELP or not gs.player.ship.bearing.is_set():
         gs.output(
             "To use this command, you must first set your direction, or navigate using the direction or navigate command. ")
         return
 
-    if gs.player.ship.direction: # moving in a dir as opposed to nav
-        coords = gs.player.ship.direction.to_coords()
+    # just make sure we are not at the edge of the world
+    t,v = gs.player.ship.bearing.get()
+    if t is gs.player.ship.bearing.Type.DIRECTION:  # moving in a dir as opposed to nav
+        coords = v.to_coords()
         new_coords = add_pair(gs.player.ship.location, coords)
         loc = gs.map.get_location(new_coords)
         if not loc:
             gs.output("You cannot sail any further in that direction without falling off the edge of the world.")
-            gs.player.ship.reset_bearing()
+            gs.player.ship.bearing.reset()
             return
 
     gs.output(f"{gs.player.ship.name} sails the seas.")

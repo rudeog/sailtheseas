@@ -41,15 +41,15 @@ def show_status(rt: RunType, toks):
                 gs.output(".")
 
         if gs.player.state is PlayerState.SAILING:
-            if gs.player.ship.have_bearing():
-                if gs.player.ship.direction:
-                    gs.output(f"{gs.player.ship.name} is heading to the {gs.player.ship.direction}.")
-                else:
-                    place = gs.map.get_place_at_location(gs.player.ship.target)
-                    if place:
-                        gs.output(f"{gs.player.ship.name} is heading toward {place.name}.")
-                    else: # shouldnt happen
-                        gs.output(f"{gs.player.ship.name} is heading to an undisclosed location.")
+            t, v = gs.player.ship.bearing.get()
+            if t==gs.player.ship.bearing.Type.DIRECTION:
+                gs.output(f"{gs.player.ship.name} is heading to the {v}.")
+            elif t==gs.player.ship.bearing.Type.TARGET:
+                place = gs.map.get_place_at_location(v)
+                if place:
+                    gs.output(f"{gs.player.ship.name} is heading toward {place.name}.")
+                else: # shouldnt happen
+                    gs.output(f"{gs.player.ship.name} is heading to an undisclosed location.")
 
         return
     if toks[0] == 'crew':

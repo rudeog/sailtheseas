@@ -7,16 +7,23 @@ from state import gs
 
 def pass_time():
     gs.player.days=gs.player.days+1
+    sail()
+
+
+def sail():
     # if we are sailing we need to move if possible
-    if gs.player.state is PlayerState.SAILING and gs.player.ship.have_bearing():
+
+    if gs.player.state is PlayerState.SAILING and gs.player.ship.bearing.is_set():
         if gs.player.ship.travel_pct < 100:
             gs.player.ship.travel_pct += 50
         if gs.player.ship.travel_pct >= 100:
-            gs.player.ship.travel_pct=0
-            if gs.player.ship.direction:
-                coords = gs.player.ship.direction.to_coords()
+            gs.player.ship.travel_pct = 0
+            k,v = gs.player.ship.bearing.get()
+
+            if k == gs.player.ship.bearing.Type.DIRECTION:
+                coords = v.to_coords()
             else:
-                coords = get_step_towards_destination(gs.player.ship.location,gs.player.ship.target)
+                coords = get_step_towards_destination(gs.player.ship.location, v)
             new_coords = add_pair(gs.player.ship.location, coords)
             loc = gs.map.get_location(new_coords)
             if loc:
@@ -24,15 +31,14 @@ def pass_time():
                 loc.visited = True
             else:
                 gs.output("You have reached the edge of the world.")
-                gs.player.ship.reset_bearing()
+                gs.player.ship.bearing.reset()
 
             # if we are navigating and we reached our destination...
-            if not gs.player.ship.direction and gs.player.ship.location == gs.player.ship.target:
+            if k == gs.player.ship.bearing.Type.TARGET and gs.player.ship.location == v:
                 p = gs.map.get_place_at_location(gs.player.ship.location)
                 if p:
                     d = p.name
                 else:
                     d = "your destination"
                 gs.output(f"You have reached {d}.")
-                gs.player.ship.reset_bearing()
-
+                gs.player.ship.bearing.reset()

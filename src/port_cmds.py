@@ -23,7 +23,8 @@ def dock_cmd(rt: RunType, toks):
         p = gs.map.get_place_at_location(gs.player.ship.location)
         if p and p.port:
             gs.player.state = PlayerState.DOCKED
-            gs.output(f"{gs.player.ship.name} is now docked at {p.port.name} on {p.name}.")
+            gs.output(f"{gs.player.ship.name} is now docked at {p.port.name} on the island of {p.name}.")
+            gs.player.ship.bearing.reset()
 
 def depart_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:

@@ -1,5 +1,17 @@
-from math import copysign
 
+def custom_hash(string):
+    """
+    Stable hash function so we can get same hash between runs
+    :param string:
+    :return:
+    """
+    prime = 31
+    result = 0
+
+    for char in string:
+        result = (result * prime + ord(char)) & 0xFFFFFFFF
+
+    return result
 
 def clamp(value, minimum, maximum):
     """
@@ -63,7 +75,10 @@ class Direction:
 
     def __str__(self):
         return _dir_names[self.dir]
-
+    def __eq__(self, other):
+        if isinstance(other, Direction):
+            return self.dir == other.dir
+        return False
     def to_coords(self):
         return _dir_coords[self.dir]
 

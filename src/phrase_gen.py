@@ -1,5 +1,5 @@
 # generate interesting phrases based on input supplied
-
+from util import custom_hash
 # in response to a player giving their name
 player_name_phrases = ["Ok (if that's your real name),",
                        "I have a relative with that name, they are in jail,",
@@ -8,7 +8,8 @@ player_name_phrases = ["Ok (if that's your real name),",
                        "I don't know how you live with yourself,",
                        "Hopefully your siblings were not as unlucky,",
                        "I had a pet monkey with that name,",
-                       "Sounds like you escaped from an institution,"]
+                       "That sounds French, or maybe Irish,",
+                       "Very fancy!"]
 ship_name_phrases = ["A ship with that name is bound to have good luck.",
                      "Well, I never heard of such a thing.",
                      "I'll get that stenciled on right away.",
@@ -25,6 +26,7 @@ places_phrases = ["I can't remember whether that's in the North or the South. Oh
                   "The weather is pretty changeable in those parts, I hear."]
 
 
+
 def get_phrase(text, phrases):
     """
     return an interesting phrase from one of the phrase lists, given a word
@@ -32,7 +34,7 @@ def get_phrase(text, phrases):
     :param phrases:
     :return:
     """
-    hash_value = hash((32123,text)) # get a consistent value across runs
+    hash_value = custom_hash(text)  # get a consistent value across runs
     # Use modulo to map the hash value into the range [0, num-1]
     result = hash_value % len(phrases)
     return phrases[result]
