@@ -1,6 +1,5 @@
 # command file for ship commands
 from command import RunType, Command
-from player import PlayerState
 from state import gs
 
 
@@ -20,36 +19,36 @@ def show_status(rt: RunType, toks):
     if not toks:
         gs.output(
             f"You are captain {gs.player.name} who hails from {gs.player.birthplace}.")
-        gs.output(f"You are on day {gs.player.days} of your voyage, and "
+        gs.output(f"You are on day {gs.player.num_days_elapsed()+1} of your voyage, and "
                   f"have {gs.player.doubloons} doubloons.")
 
         # see if we are at a place
-        place = gs.map.get_place_at_location(gs.player.ship.location)
+        place = gs.map.get_place_at_location(gs.ship.location)
         if place:
             gs.output(f"You are at {place.name}", False)
-            if gs.player.state is PlayerState.DOCKED:
+            if gs.player.is_docked():
                 if place.port: # should always be true in this case
                     port_name = " " + place.port.name
                 else:
                     port_name = ""
-                gs.output(f" and {gs.player.ship.name} is docked at{port_name}.")
-            elif gs.player.state is PlayerState.EXPLORING:
+                gs.output(f" and {gs.ship.name} is docked at{port_name}.")
+            elif gs.player.is_exploring():
                 gs.output(f" and you are exploring the island.")
-            elif gs.player.state is PlayerState.SAILING:
-                gs.output(f" and {gs.player.ship.name} is close to shore.")
+            elif gs.player.is_sailing():
+                gs.output(f" and {gs.ship.name} is close to shore.")
             else:
                 gs.output(".")
 
-        if gs.player.state is PlayerState.SAILING:
-            t, v = gs.player.ship.bearing.get()
-            if t==gs.player.ship.bearing.Type.DIRECTION:
-                gs.output(f"{gs.player.ship.name} is heading to the {v}.")
-            elif t==gs.player.ship.bearing.Type.TARGET:
-                place = gs.map.get_place_at_location(v)
+        if gs.player.is_sailing():
+
+            if gs.ship.b.is_direction():
+                gs.output(f"{gs.ship.name} is heading to the {gs.ship.b.get()}.")
+            elif gs.ship.b.is_target():
+                place = gs.map.get_place_at_location(gs.ship.b.get())
                 if place:
-                    gs.output(f"{gs.player.ship.name} is heading toward {place.name}.")
+                    gs.output(f"{gs.ship.name} is heading toward {place.name}.")
                 else: # shouldnt happen
-                    gs.output(f"{gs.player.ship.name} is heading to an undisclosed location.")
+                    gs.output(f"{gs.ship.name} is heading to an undisclosed location.")
 
         return
     if toks[0] == 'crew':
@@ -67,11 +66,11 @@ def show_cargo(rt: RunType, toks):
             "Show what cargo your ship is carrying at this time. You may also examine or jettison cargo using this command.")
         return
     if not toks:
-        if len(gs.player.ship.cargo) == 0:
-            gs.output(f"{gs.player.ship.name} is not carrying any cargo at this time.")
+        if len(gs.ship.cargo) == 0:
+            gs.output(f"{gs.ship.name} is not carrying any cargo at this time.")
         else:
-            gs.output(f"{gs.player.ship.name} is currently carrying the following cargo:")
+            gs.output(f"{gs.ship.name} is currently carrying the following cargo:")
             i = 1
-            for c in gs.player.ship.cargo:
+            for c in gs.ship.cargo:
                 gs.output(f"{str(i).rjust(2)}) {c}")
                 i = i + 1

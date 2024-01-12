@@ -52,7 +52,7 @@ if setup.player_setup():
     show_status(RunType.RUN, [])
 
     # todo remove
-    gs.player.ship.cargo.add_remove(cargo_types[0], 10)
+    gs.ship.cargo.add_remove(cargo_types[0], 10)
 
     # start the play loop
     run_loop()

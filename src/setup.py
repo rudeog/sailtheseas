@@ -1,13 +1,15 @@
 #
 # Do initial player setup. Ask player for info
 #
-import player
+from player import Player
+from ship import Ship
 from state import gs
 import phrase_gen
 
 
 def player_setup():
-    gs.player = player.Player()
+    gs.player = Player()
+    gs.ship = Ship()
     gs.output(
         f"Welcome to {gs.world_name}. Lets get started. At any time you may enter '!' to quit.")
     n = gs.input("What name will you be using? ")
@@ -28,8 +30,8 @@ def player_setup():
 
     if n == '!':
         return False
-    gs.player.ship.name = n
-    print(phrase_gen.get_phrase(gs.player.ship.name, phrase_gen.ship_name_phrases))
+    gs.ship.name = n
+    print(phrase_gen.get_phrase(gs.ship.name, phrase_gen.ship_name_phrases))
 
     print("You are ready to start your adventures! Best of luck to you.")
 
@@ -38,8 +40,8 @@ def player_setup():
 
 def set_player_start_location():
     start_loc = gs.map.places[0]
-    gs.player.ship.location = start_loc.location
+    gs.ship.location = start_loc.location
     # we will be docked at the port
-    gs.player.state = player.PlayerState.DOCKED
-    gs.player.ship.bearing.reset()
+    gs.player.set_state_docked()
+    gs.ship.b.reset()
     gs.map.places[0].visited = True

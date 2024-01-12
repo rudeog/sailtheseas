@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 
 def custom_hash(string):
     """
@@ -93,3 +95,13 @@ def get_step_towards_destination(coord1, coord2):
     if ydiff:
         ydiff = -1 if ydiff < 0 else 1
     return xdiff, ydiff
+
+def fancy_date(current_date):
+    def ordinal_suffix(day):
+        if 10 <= day % 100 <= 20:
+            suffix = 'th'
+        else:
+            suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')
+        return suffix
+
+    return f"{current_date.day}{ordinal_suffix(current_date.day)} of {current_date.strftime('%B')} {current_date.year}"

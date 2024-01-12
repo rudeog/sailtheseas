@@ -1,5 +1,4 @@
 from command import RunType, Command
-from player import PlayerState
 from state import gs
 
 def register_port_cmds():
@@ -10,8 +9,8 @@ def register_port_cmds():
 
 def dock_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.state is PlayerState.SAILING:
-            p = gs.map.get_place_at_location(gs.player.ship.location)
+        if gs.player.is_sailing():
+            p = gs.map.get_place_at_location(gs.ship.location)
             if p and p.port:
                 return True
         return False
@@ -20,15 +19,15 @@ def dock_cmd(rt: RunType, toks):
             "If you are nearby an island with a port, you may dock your ship at that port.")
         return
     if not toks:
-        p = gs.map.get_place_at_location(gs.player.ship.location)
+        p = gs.map.get_place_at_location(gs.ship.location)
         if p and p.port:
-            gs.player.state = PlayerState.DOCKED
-            gs.output(f"{gs.player.ship.name} is now docked at {p.port.name} on the island of {p.name}.")
-            gs.player.ship.bearing.reset()
+            gs.player.set_state_docked()
+            gs.output(f"{gs.ship.name} is now docked at {p.port.name} on the island of {p.name}.")
+            gs.ship.b.reset()
 
 def depart_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.state in (PlayerState.DOCKED, PlayerState.EXPLORING):
+        if gs.player.is_exploring() or gs.player.is_docked():
             return True
         return False
     if rt == RunType.HELP:
@@ -36,6 +35,6 @@ def depart_cmd(rt: RunType, toks):
             "This command allows you to embark.")
         return
     if not toks:
-        gs.player.state = PlayerState.SAILING
-        p = gs.map.get_place_at_location(gs.player.ship.location)
-        gs.output(f"{gs.player.ship.name} has departed from {p.name}.")
+        gs.player.set_state_sailing()
+        p = gs.map.get_place_at_location(gs.ship.location)
+        gs.output(f"{gs.ship.name} has departed from {p.name}.")

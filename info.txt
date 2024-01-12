@@ -1,0 +1,13 @@
+todo:
+- Startup allow selecting seed?
+- Save/load
+- Bypass intro by supplying cmd line args
+- render world map shrank down and make map bigger
+- eliminate %age movement
+
+
+period facts:
+1 knot is 1 nautical mile per hour
+merchant ships at this time could sail 4 to 8 knots
+
+architecture

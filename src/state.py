@@ -3,10 +3,15 @@
 import textwrap
 import shutil
 
+
 class GlobalState:
+    """
+    Represents the top level global object
+    """
     def __init__(self):
         self.world_name = "Atlanticus"
         self.player = None
+        self.ship = None
         self.map = None
         self.cmdsys = None
         self.num_commands = 0
