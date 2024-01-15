@@ -56,7 +56,7 @@ def navigate_cmd(rt: RunType, toks):
     # reset regardless at this point
     gs.ship.b.reset()
 
-    if place.location == gs.ship.location:
+    if place.location == gs.ship.location and gs.ship.miles_traveled_in_square == 0 and not gs.ship.toward_center:
         gs.output("You are already there.")
         return
     gs.output(f"{gs.ship.name} is set to sail to {place.name}")
@@ -117,16 +117,6 @@ def sail_cmd(rt: RunType, toks):
         gs.output(
             "To use this command, you must first set your direction, or navigate using the direction or navigate command. ")
         return
-
-    # just make sure we are not at the edge of the world
-    if gs.ship.b.is_direction():  # moving in a dir as opposed to nav
-        coords = gs.ship.b.get().to_coords()
-        new_coords = add_pair(gs.ship.location, coords)
-        loc = gs.map.get_location(new_coords)
-        if not loc:
-            gs.output("You cannot sail any further in that direction without falling off the edge of the world.")
-            gs.ship.b.reset()
-            return
 
     gs.output(f"{gs.ship.name} sails the seas.")
     pass_time()

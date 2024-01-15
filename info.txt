@@ -8,6 +8,14 @@ todo:
 
 period facts:
 1 knot is 1 nautical mile per hour
-merchant ships at this time could sail 4 to 8 knots
+merchant ships at this time could sail at a speed of 4 to 8 knots
+a good telescope might extend visibility to several miles, possibly up to 10 miles or more under favorable conditions.
 
 architecture
+
+travel:
+Moving between squares takes time. Each square represents a degree of lat/long and is 60 nautical miles in length.
+When you are at an island you are always in the center of a square. When you enter a square, you will ALWAYS move
+to the center of that square before moving to another square.
+Therefore you are always moving toward center or away from center. If you change direction and you are moving toward
+center at the time, you will first complete your motion toward the center before moving away from center.

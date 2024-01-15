@@ -81,8 +81,9 @@ class Direction:
         if isinstance(other, Direction):
             return self.dir == other.dir
         return False
+
     def to_coords(self):
-        return _dir_coords[self.dir]
+       return _dir_coords[self.dir]
 
 
 def get_step_towards_destination(coord1, coord2):
@@ -105,3 +106,12 @@ def fancy_date(current_date):
         return suffix
 
     return f"{current_date.day}{ordinal_suffix(current_date.day)} of {current_date.strftime('%B')} {current_date.year}"
+
+def fancy_time(current_time):
+    if not current_time:
+        return "morning"
+    elif current_time == 1:
+        return "afternoon"
+    elif current_time ==2:
+        return "evening"
+    return "night"

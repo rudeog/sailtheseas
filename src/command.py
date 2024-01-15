@@ -92,9 +92,9 @@ class CommandSystem:
         self.cmds[refers_to].aliases.append(alias)
 
     def _list_cmds(self, run_type: RunType, toks):
-        if run_type == RunType.CHECK_AVAILABLE:
+        if run_type is RunType.CHECK_AVAILABLE:
             return True
-        if run_type == RunType.HELP:
+        if run_type is RunType.HELP:
             gs.output("Will list all commands available now. Some commands may be unavailable at certain times.")
             return
 
@@ -107,9 +107,9 @@ class CommandSystem:
                         gs.output(f"aliases: {', '.join(v.aliases)}", indented=True)
 
     def _basic_help(self, run_type: RunType, toks):
-        if run_type == RunType.CHECK_AVAILABLE:
+        if run_type is RunType.CHECK_AVAILABLE:
             return True
-        if run_type == RunType.HELP:
+        if run_type is RunType.HELP:
             gs.output("The help command may be used by itself, or followed by a topic or a command")
             return
 

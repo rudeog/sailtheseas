@@ -3,12 +3,14 @@
 import textwrap
 import shutil
 
+DEBUGGING = True
 
 class GlobalState:
     """
     Represents the top level global object
     """
     def __init__(self):
+        # the name may determine the seed at some point?
         self.world_name = "Atlanticus"
         self.player = None
         self.ship = None
@@ -16,6 +18,7 @@ class GlobalState:
         self.cmdsys = None
         self.num_commands = 0
         self.quitting = False
+        self.debug_mode = DEBUGGING
 
         terminal_size = shutil.get_terminal_size(fallback=(120, 24))
         self.wrap_width = min(terminal_size.columns, 120)

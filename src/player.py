@@ -24,6 +24,7 @@ class Player:
 
         # number of days sailing the seas
         self._days = 0
+        self._day_frags = 0  # morning, afternoon, evening, night
 
         # personal property
         self.doubloons = 10
@@ -33,10 +34,18 @@ class Player:
 
     def num_days_elapsed(self):
         return self._days
-    def day_increment(self):
-        self._days = self._days + 1
+
+    def time_increment(self):
+        if self._day_frags == 3:
+            self._days = self._days + 1
+            self._day_frags = 0 # morning of the next day
+        else:
+            self._day_frags = self._day_frags + 1
+
     def current_date(self):
         return STARTING_DATE + timedelta(days=self._days)
+    def current_time(self):
+        return self._day_frags
 
     def is_sailing(self):
         return self._state is self._state_e.SAILING

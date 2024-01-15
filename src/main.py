@@ -13,12 +13,11 @@ SEED = 51041
 WIDTH = 10
 HEIGHT = 10
 
-
 # registered quit command
 def cmd_quit(run_type, toks):
-    if run_type == RunType.CHECK_AVAILABLE:
+    if run_type is RunType.CHECK_AVAILABLE:
         return True
-    if run_type == RunType.HELP:
+    if run_type is RunType.HELP:
         gs.output("Sometimes you gotta quit. When you quit, your progress will be saved for next time.")
         return
     gs.quitting = gs.confirm()

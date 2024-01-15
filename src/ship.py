@@ -68,5 +68,13 @@ class Ship:
         # if sailing we might have a dir/target
         self.b: Bearing = Bearing()
 
-        # what percentage of the current location we've travelled
-        self.travel_pct = 0
+        # we are either moving toward center of square or away from center
+        self.toward_center = False
+
+        # nautical miles traveled from either center, or edge
+        self.miles_traveled_in_square = 0
+
+        # will be true if we entered the square from a corner. there are 42 miles to center
+        # from a corner, but only 30 miles from a vertical/horizontal entry
+        self.diagonal_entry = False
+

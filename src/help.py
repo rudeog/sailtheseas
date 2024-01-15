@@ -11,9 +11,9 @@ topics = {"about": ["About the game",
 
 
 def cmd_info(run_type: RunType, toks):
-    if run_type == RunType.CHECK_AVAILABLE:
+    if run_type is RunType.CHECK_AVAILABLE:
         return True
-    if run_type == RunType.HELP:
+    if run_type is RunType.HELP:
         gs.output("Info topics provide info and background about the game.")
         return
     if toks:

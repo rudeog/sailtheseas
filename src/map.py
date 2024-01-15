@@ -272,7 +272,7 @@ class Map:
             leg.append(f"{s}  {p.name}")
         me = self.get_place_at_location(my_loc)
         if me:
-            leg.append(f"{'{*}'.rjust(PADDING)}  (your current location: {me.name})")
+            leg.append(f"{'{*}'.rjust(PADDING)}  {me.index} {me.name} (your current location)")
         else:
             leg.append(f"{'{.}'.rjust(PADDING)}  (your current location)")
         leg.append(f"{'.'.rjust(PADDING)}  Visited spaces")
