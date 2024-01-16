@@ -7,9 +7,8 @@ from state import gs
 import phrase_gen
 
 
+# this should only store what is asked
 def player_setup():
-    gs.player = Player()
-    gs.ship = Ship()
     gs.output(
         f"Welcome to {gs.world_name}. Lets get started. At any time you may enter '!' to quit.")
     n = gs.input("What name will you be using? ")

@@ -8,6 +8,7 @@ import map
 from command import CommandSystem, RunType, Command
 from help import register_info_cmds
 from cargo import cargo_types
+from save import save_file_exists, load_game, save_game
 
 SEED = 51041
 WIDTH = 10
@@ -21,10 +22,29 @@ def cmd_quit(run_type, toks):
         gs.output("Sometimes you gotta quit. When you quit, your progress will be saved for next time.")
         return
     gs.quitting = gs.confirm()
+    if gs.quitting:
+        err = save_game()
+        if err:
+            gs.output(f"Error saving game: {err}")
+            if not gs.confirm("Do you want to quit anyway?"):
+                gs.quitting = False
 
+
+# see if a save game exists
+game_loaded=False
+if save_file_exists():
+    p = gs.confirm("Found a saved game. Do you want to load it?",True)
+    if p is None:
+        exit(0)
+    if p:
+        err = load_game()
+        if err:
+            gs.output(f"Error loading game: {err}")
+        else:
+            game_loaded = True
 
 # Get player info, etc
-if setup.player_setup():
+if game_loaded or setup.player_setup():
     # figure out our seed
     # todo
 
