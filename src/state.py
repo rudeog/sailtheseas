@@ -2,8 +2,6 @@
 # also handles IO
 import textwrap
 import shutil
-from player import Player
-from ship import Ship
 
 DEBUGGING = True
 
@@ -12,8 +10,8 @@ class GlobalState:
     Represents the top level global object
     """
     def __init__(self):
-        self.player = Player()
-        self.ship = Ship()
+        self.player = None
+        self.ship = None
 
         # the name may determine the seed at some point?
         self.world_name = "Atlanticus"
@@ -50,7 +48,6 @@ class GlobalState:
         if r == 'n':
             return False
         return None  # cancel
-
 
 # a single global instance
 gs = GlobalState()

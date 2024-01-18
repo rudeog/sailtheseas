@@ -98,7 +98,7 @@ class CommandSystem:
             gs.output("Will list all commands available now. Some commands may be unavailable at certain times.")
             return
 
-        gs.output("Available commands:")
+        gs.output(f"Available commands while {gs.player.get_state_str()}:")
         for k, v in self.cmds.items():
             if not v.is_basic:
                 if v.fn(RunType.CHECK_AVAILABLE, []):

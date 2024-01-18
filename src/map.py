@@ -25,7 +25,7 @@ LOCAL_VIEW_SIZE = 2
 class Location:
     def __init__(self, x, y):
         self.location = (x, y)
-        self.populated = False
+        self.populated = False  # meaning it has an island
         self.visited = False
         self.index = -1
         self.name: str = ""
@@ -36,13 +36,19 @@ class Location:
         self.populated = True
         self.index = idx
 
-    def dump(self, padding, visited_only):
-        if self.populated:
+    # visited_only: will only dump it if its been visited
+    def dump(self, padding, visited_only, my_loc):
+        if self.populated: # has island
             if (visited_only and self.visited) or not visited_only:
-                v = f"{self.index}"
+                if my_loc:
+                    v = f"{{{self.index}}}"
+                else:
+                    v = f"{self.index}"
                 vv = v.center(padding)
                 return vv
         if self.visited:
+            if my_loc:
+                return "{.}".center(padding)
             return ".".center(padding)
         return " " * padding
 
@@ -99,9 +105,11 @@ class Map:
     def _get_random_location(self):
         return random.randint(0, self.cols - 1), random.randint(0, self.rows - 1)
 
-    def get_all_nearby_places(self, location: tuple[int, int], count_only: bool = False, dist: int = LOCAL_VIEW_SIZE):
+    def get_all_nearby_places(self, location: tuple[int, int], count_only: bool = False,
+                              dist: int = LOCAL_VIEW_SIZE, exclude_center: bool = False):
         '''
-        given a location returns a list of adjacent locations that are populated.
+        given a center point returns a list of locations in the area centered at that point.
+        :param exclude_center: if true will exclude the specified location if it is a populated square
         :param x:
         :param y:
         :param count_only: just return a count instead of an array
@@ -119,11 +127,12 @@ class Map:
         count = 0
         for yy in range(ystart, yend):
             for xx in range(xstart, xend):
-                if not (yy == y and xx == x) and self.map[yy][xx].populated:
-                    if count_only:
-                        count = count + 1
-                    else:
-                        adj.append(self.map[yy][xx])
+                if self.map[yy][xx].populated:
+                    if not(exclude_center and (yy == y and xx == x)):
+                        if count_only:
+                            count = count + 1
+                        else:
+                            adj.append(self.map[yy][xx])
         if count_only:
             return count
         return adj
@@ -137,7 +146,7 @@ class Map:
 
             if self.map[y][x].populated:  # don't populate same one twice
                 continue
-            count = self.get_all_nearby_places((x, y), True, 1)
+            count = self.get_all_nearby_places((x, y), True, 1, True)
             if not count:
                 return (x, y)
             t = t - 1
@@ -145,7 +154,7 @@ class Map:
 
     def get_place_at_location(self, location: tuple[int, int]):
         """
-        Get a place at a location. return None if there isnt any
+        Get a place that is within a location. return None if there isnt any in that square
         :return:
         """
         for p in self.places:
@@ -153,26 +162,10 @@ class Map:
                 return p
         return None
 
-    def unused_get_nearby_places(self, location: tuple[int, int], min, max_dist = LOCAL_VIEW_SIZE):
-        '''
-        Get a list of places that are close to a given location. will start close and work outwards
-        :param location: the x/y location
-        :param min: try to get a minimum of this amount
-        :param max)distance: how many maximum spaces away in each direction to look
-        :return: array of places. Empty set if no places within max_dist
-        '''
-        tmp = []
-        for i in range(1, max_dist):
-            a = self.get_all_nearby_places(location, False, i)
-            if len(a) >= min:
-                return a
-            tmp = a
-        return tmp
-
     def __str__(self):
         return self.render(0, 0, self.cols, self.rows)
 
-    def render(self, xstart, ystart, xend, yend, override_fn=None, visited_only=False):
+    def render(self, xstart, ystart, xend, yend, my_loc, visited_only=False):
         """
         Render the map or a portion of the map.
         :param xstart: left side start
@@ -207,7 +200,7 @@ class Map:
         hdr=hdr+f"+{'-' * (width * padding)}+\n"
 
         parts.append(hdr)
-
+        trims = [0] * len(parts)
         y = ystart
         for row in self.map[ystart:yend]:
             if INCLUDE_XY_RULER:
@@ -215,18 +208,35 @@ class Map:
             else:
                 rh = ""
             parts.append(rh + "|")
+            trims.append(0)
+            x = xstart
             for item in row[xstart:xend]:
-                overriden = ""
-                if override_fn:  # override function should return a non-empty string to override this location
-                    overriden = override_fn(item.location)
-                if overriden:
-                    parts.append(overriden.rjust(padding))
-                else:
-                    parts.append(f"{item.dump(padding, visited_only)}")
+                to_add = item.dump(padding, visited_only, my_loc==(x,y))
+                trims.append(len(to_add))
+                parts.append(f"{to_add}")
+                x += 1
             parts.append("|\n")
+            trims.append(0)
             y = y + 1
         parts.append(hdr)
-        return "".join(parts)
+        trims.append(0)
+
+        ind = 0
+        result = ""
+        # parts within the grid that have size >3 need to have surrounding parts shrunk.
+        # if its 4 we shrink the one after it, if its 5 we shrink both before and after
+        pi=0
+        for t in trims:
+            if t > 3:
+                parts[pi+1] = parts[pi+1][1:]
+            if t ==5:
+                parts[pi-1] = parts[pi-1][:-1]
+            pi += 1
+        for p in parts:
+            result = result + p
+            ind += 1
+
+        return result
 
     def _define_places(self):
         pg = PlaceGenerator(self.seed)
@@ -254,68 +264,32 @@ class Map:
         yend = min(my_loc[1]+LOCAL_VIEW_SIZE, self.rows)
 
         nearby = self.get_all_nearby_places(my_loc)
-        legend = self._render_legend(my_loc, nearby)
-        me = self.get_place_at_location(my_loc)
-        if me:
-            fill = '*'
-        else:
-            fill = '.'
-        ret_map = self.render(xstart,ystart,xend,yend,generate_ship_function(my_loc, fill))
+        legend = self._render_legend(nearby)
+        ret_map = self.render(xstart,ystart,xend,yend,my_loc)
         return ret_map + legend
 
-    def _render_legend(self, my_loc, nearby=None):
+    def _render_legend(self, nearby=None):
         if nearby is None:
             nearby = []
         leg = []
         for p in nearby:
             s= f"{p.index}".rjust(PADDING)
             leg.append(f"{s}  {p.name}")
-        me = self.get_place_at_location(my_loc)
-        if me:
-            leg.append(f"{'{*}'.rjust(PADDING)}  {me.index} {me.name} (your current location)")
-        else:
-            leg.append(f"{'{.}'.rjust(PADDING)}  (your current location)")
+        leg.append(f"{'{ }'.rjust(PADDING)}  (your current location)")
         leg.append(f"{'.'.rjust(PADDING)}  Visited spaces")
         return "\n".join(leg)
 
+
     def render_all_visited(self, my_loc: tuple[int,int]):
-        legend = self._render_legend(my_loc)
-        me = self.get_place_at_location(my_loc)
-        if me:
-            fill = '*'
-        else:
-            fill = '.'
+        # this is to print the full world map with places visited being rendered.
+        legend = self._render_legend()
         return self.render(0, 0, self.cols, self.rows,
-                           override_fn=generate_ship_function(my_loc, fill), visited_only=True) + legend
-
-# number of spaces to move to get between 2 points assuming moving
-# diagonal counts as one move
-def distance_between_points(x1, y1, x2, y2):
-    horz = abs(x2 - x1)
-    vert = abs(y2 - y1)
-    # min covers the diagonal movement, abs covers the remaining spaces
-    return min(vert, horz) + abs(vert - horz)
-
-
-# function to print a ship at a specific location
-def generate_ship_function(location: tuple[int, int], fill):
-    def inner_function(inner_loc):
-        if location == inner_loc:
-            return f"{{{fill}}}"
-        else:
-            return ""
-
-    return inner_function
+                            my_loc, visited_only=True) + legend
 
 
 if __name__ == "__main__":
     world = Map(60, 25, 13)
     print(world)
     print(f"total places {world.num_places}")
-    r = world.unused_get_nearby_places(world.places[0].location, 4, 5)
-    for p in r:
-        print(p.index)
-    sub = world.render(24, 8, 44, 18, generate_ship_function((36, 10)))
-    print(sub)
     sub = world.render(27, 16, 28, 17)
     print(sub)

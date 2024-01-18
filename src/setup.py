@@ -39,7 +39,7 @@ def player_setup():
 
 def set_player_start_location():
     start_loc = gs.map.places[0]
-    gs.ship.location = start_loc.location
+    gs.ship.set_location(start_loc.location)
     # we will be docked at the port
     gs.player.set_state_docked()
     gs.ship.b.reset()

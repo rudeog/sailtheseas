@@ -69,7 +69,7 @@ class Player:
 
     def get_state_str(self):
         if self.is_docked():
-            return "docked"
+            return "on land"
         elif self.is_exploring():
             return "exploring"
         elif self.is_sailing():

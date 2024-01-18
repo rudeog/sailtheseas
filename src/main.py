@@ -9,7 +9,8 @@ from command import CommandSystem, RunType, Command
 from help import register_info_cmds
 from cargo import cargo_types
 from save import save_file_exists, load_game, save_game
-
+from player import Player
+from ship import Ship
 SEED = 51041
 WIDTH = 10
 HEIGHT = 10
@@ -29,6 +30,10 @@ def cmd_quit(run_type, toks):
             if not gs.confirm("Do you want to quit anyway?"):
                 gs.quitting = False
 
+
+# initialize our global obj (due to circular refs issue)
+gs.player = Player()
+gs.ship = Ship()
 
 # see if a save game exists
 game_loaded=False
