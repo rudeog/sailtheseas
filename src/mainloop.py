@@ -3,7 +3,7 @@ from util import fancy_date, fancy_time, coord_as_str
 
 def get_prompt():
     if gs.num_commands < 3:  # initially show this as the prompt
-        hint = "(? for help) "
+        hint = "(c for a list of commands) "
     else:
         hint = ""
 

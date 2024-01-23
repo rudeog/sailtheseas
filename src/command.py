@@ -22,28 +22,16 @@ class Command:
 
     """
 
-    def __init__(self, name, brief, fn, help_text):
+    def __init__(self, name, cmdargs, fn, help_text):
         self.name = name  # name of command
-        self.brief = brief  # brief description
+        self.cmdargs = cmdargs  # help text for args
         self.fn = fn  # function to run
         self.help_text = help_text  # help topic
-        self.is_basic = False  # will not be printed in list of commands only shown in basic help
-        self.aliases = []
 
 
 class CommandSystem:
     def __init__(self):
         self.cmds: dict[str, Command] = {}
-        self.aliases: dict[str, str] = {}
-
-        self.register_basic(Command("commands", "", self._list_cmds,
-                                    "Display a list of currently available commands. "
-                                    "Some commands may be unavailable at certain times."))
-        self.register_alias("c", "commands")
-        self.register_basic(Command("help", "[command]", self._basic_help,
-                                    "Display help for a specific command. "
-                                    "For example '? status' will give help about the status command."))
-        self.register_alias("?", "help")
 
     def process_input(self, input_text):
         """
@@ -53,24 +41,23 @@ class CommandSystem:
         :return:
         """
         toks = input_text.lower().split(' ')
-        if toks[0] in self.aliases:
-            cmd_to_run = self.aliases[toks[0]]
+        cmd_to_run = toks[0]
+        if cmd_to_run == 'c' or cmd_to_run == 'help':
+            self._list_cmds()
         else:
-            cmd_to_run = toks[0]
+            if cmd_to_run in self.cmds:  # first token is command name
+                c = self.cmds[cmd_to_run]
+                other_args = toks[1:]
+                if c.fn(RunType.CHECK_AVAILABLE, other_args):
+                    if other_args and other_args[0]=='help':
+                        c.fn(RunType.HELP, other_args[1:])
+                    else:
+                        c.fn(RunType.RUN, other_args)
+                else:
+                    gs.output("Command is unavailable at this time. Enter 'c' to see available commands.")
+                return
+            gs.output("Command not understood. Enter 'c' to see available commands.")
 
-        if cmd_to_run in self.cmds:  # first token is command name
-            c = self.cmds[cmd_to_run]
-            other_args = toks[1:]
-            if c.fn(RunType.CHECK_AVAILABLE, other_args):
-                c.fn(RunType.RUN, other_args)
-            else:
-                gs.output("Command is unavailable at this time. Use 'commands' to see available commands.")
-            return
-        gs.output("Command not understood. Enter ? for help")
-
-    def register_basic(self, cmd: Command):
-        cmd.is_basic = True
-        self.register(cmd)
 
     def register(self, cmd: Command):
         """
@@ -81,52 +68,10 @@ class CommandSystem:
         """
         self.cmds[cmd.name] = cmd
 
-    def register_alias(self, alias, refers_to):
-        """
-        register an alias
-        :param alias:
-        :param refers_to:
-        :return:
-        """
-        self.aliases[alias] = refers_to
-        self.cmds[refers_to].aliases.append(alias)
 
-    def _list_cmds(self, run_type: RunType, toks):
-        if run_type is RunType.CHECK_AVAILABLE:
-            return True
-        if run_type is RunType.HELP:
-            gs.output("Will list all commands available now. Some commands may be unavailable at certain times.")
-            return
-
+    def _list_cmds(self):
         gs.output(f"Available commands while {gs.player.get_state_str()}:")
         for k, v in self.cmds.items():
-            if not v.is_basic:
-                if v.fn(RunType.CHECK_AVAILABLE, []):
-                    gs.output(f"{v.name} {v.brief + ' ' if v.brief else ''}- {v.help_text}", sub_indented=True)
-                    if v.aliases:
-                        gs.output(f"aliases: {', '.join(v.aliases)}", indented=True)
-
-    def _basic_help(self, run_type: RunType, toks):
-        if run_type is RunType.CHECK_AVAILABLE:
-            return True
-        if run_type is RunType.HELP:
-            gs.output("The help command may be used by itself, or followed by a topic or a command")
-            return
-
-        if not toks:  # no arg specified
-            gs.output("Help Overview:")
-            for k, v in self.cmds.items():
-                if v.is_basic:
-                    gs.output(f"{v.name} {v.brief} - {v.help_text}", sub_indented=True)
-                    if v.aliases:
-                        gs.output(f"aliases: {', '.join(v.aliases)}", indented=True)
-            return
-
-        if toks[0] in self.aliases:
-            cmd_help = self.aliases[toks[0]]
-        else:
-            cmd_help = toks[0]
-        if cmd_help in self.cmds:
-            # invoke help for a specific command
-            c = self.cmds[cmd_help]
-            c.fn(RunType.HELP, toks[1:])
+            if v.fn(RunType.CHECK_AVAILABLE, []):
+                gs.output(f"{v.name} {'[' + v.cmdargs + '] ' if v.cmdargs else ''}- {v.help_text}", sub_indented=True)
+        gs.output("You may enter a command followed by the word 'help' for more information about the command.")

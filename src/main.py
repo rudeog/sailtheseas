@@ -11,9 +11,9 @@ from cargo import cargo_types
 from save import save_file_exists, load_game, save_game
 from player import Player
 from ship import Ship
-SEED = 51041
-WIDTH = 10
-HEIGHT = 10
+SEED = 51042
+WIDTH = 15
+HEIGHT = 15
 
 # registered quit command
 def cmd_quit(run_type, toks):
@@ -59,9 +59,9 @@ if game_loaded or setup.player_setup():
     # set up the command interpreter
     gs.cmdsys = CommandSystem()
 
-    gs.cmdsys.register_basic(Command("quit", "Quit the game", cmd_quit,
-                                               "This will end the game. Progress will be saved."))
-    gs.cmdsys.register_alias("!", "quit")
+    gs.cmdsys.register(Command("!", "Quit the game", cmd_quit,
+                                               "This will end the game."))
+
 
     # register other commands
     register_info_cmds()

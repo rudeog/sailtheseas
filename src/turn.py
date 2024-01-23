@@ -26,13 +26,13 @@ def _sail():
     elif sail_result == gs.ship.SAIL_RESULT_ARRIVED:
         p = gs.map.get_place_at_location(gs.ship.location)
         if p:
-            d = p.name
+            d = p.island.name
         else:
             d = "your destination"
         gs.output(f"{gs.ship.name} has arrived at {d}.")
         gs.ship.b.reset()
     elif sail_result == gs.ship.SAIL_RESULT_ENTERED_NEW_SQUARE:
-        island = gs.map.get_place_at_location(gs.ship.location)
-        if island:
+        pl = gs.map.get_place_at_location(gs.ship.location)
+        if pl:
             dist = gs.ship.distance_to_location(gs.ship.location)
-            gs.output(f"Your lookout has sighted the island of {island.name}. The island is {dist} miles away.")
+            gs.output(f"Your lookout has sighted the island of {pl.island.name}. The island is {dist} miles away.")

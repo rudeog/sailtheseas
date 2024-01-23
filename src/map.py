@@ -3,8 +3,7 @@
 
 import random
 from util import clamp
-from names import PlaceGenerator, NameGenerator
-from port import Port
+import islands
 
 # number of chars for each location while dumping (may be overriden
 # if total locations exceed 999)
@@ -12,24 +11,21 @@ PADDING = 3
 
 # how densely to populate.
 # higher is less dense
-DENSITY_COEFF = 15
-
-PORT_PROBABILITY = 75.0
+DENSITY_COEFF = 12
 
 INCLUDE_XY_RULER=True
 
 # for local map render, how many spaces in each dir
 LOCAL_VIEW_SIZE = 2
 
-# a location within the map
+# a location within the map. This may be an empty square or one that has an island
 class Location:
     def __init__(self, x, y):
         self.location = (x, y)
         self.populated = False  # meaning it has an island
         self.visited = False
         self.index = -1
-        self.name: str = ""
-        self.port = None
+        self.island = None
 
     # set the location as being populated
     def set_place(self, idx):
@@ -61,15 +57,19 @@ class Map:
         self.cols: int = width
         self.rows: int = height
         self.seed: int = seed
+        # this determines how many islands exist
         self.num_places: int = (width * height) // DENSITY_COEFF
+
         # initialize an empty map with given dimensions
         # row first then col
         self.map = [[Location(i, j) for i in range(self.cols)] for j in range(self.rows)]
-        # we have an array of populated places
+
+        # we have an array of populated places (squares that have an island)
         self.places: list[Location] = []
         self._populate_map()
-        self._define_places()
+        self._define_islands()
 
+    # places are populated coordinates in the map (right now that means they have an island)
     def get_place_by_index(self, index: int):
         if index <0 or index >= len(self.places):
             return None
@@ -88,12 +88,13 @@ class Map:
         return self.map[y][x]
 
     def _populate_map(self):
-        # populate with places
+        # populate with islands
         # start in the middle
         x = self.cols // 2
         y = self.rows // 2
         self.map[y][x].set_place(0)
         self.places.append(self.map[y][x])
+
         # scatter the rest randomly
         random.seed(self.seed)
         for i in range(0, self.num_places - 1):
@@ -238,20 +239,15 @@ class Map:
 
         return result
 
-    def _define_places(self):
-        pg = PlaceGenerator(self.seed)
-        ng = NameGenerator(self.seed)
-        first=True # we always want a port at the first location
+    def _define_islands(self):
+        g = islands.Generator(self.num_places, self.seed)
+
+        first = True # we always want a port at the first location with high civ
         for loc in self.places:
-            loc.name = pg.name()
-            if first or random.random() < PORT_PROBABILITY / 100.0:
-                # has a port
-                if random.random() < .4:
-                    # use a name rather than a place
-                    port_name = "Port " + ng.name().last
-                else:
-                    port_name = str(pg.name()) + " Harbor"
-                loc.port = Port(port_name)
+            if first:
+                loc.island = g.generate_island(loc.index, islands.ISLAND_CIV_CITY)
+            else:
+                loc.island = g.generate_island(loc.index)
             first=False
 
 
@@ -274,7 +270,7 @@ class Map:
         leg = []
         for p in nearby:
             s= f"{p.index}".rjust(PADDING)
-            leg.append(f"{s}  {p.name}")
+            leg.append(f"{s}  {p.island.name}")
         leg.append(f"{'{ }'.rjust(PADDING)}  (your current location)")
         leg.append(f"{'.'.rjust(PADDING)}  Visited spaces")
         return "\n".join(leg)

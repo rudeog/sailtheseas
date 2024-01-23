@@ -11,7 +11,7 @@ def dock_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
         if gs.player.is_sailing():
             p = gs.map.get_place_at_location(gs.ship.location)
-            if p and p.port:
+            if p and p.island.port:
                 return True
         return False
     if rt == RunType.HELP:
@@ -20,9 +20,12 @@ def dock_cmd(rt: RunType, toks):
         return
     if not toks:
         p = gs.map.get_place_at_location(gs.ship.location)
-        if p and p.port:
+        if gs.ship.distance_to_location(gs.ship.location)>0:
+            gs.output("You are not close enough to the island to dock")
+            return
+        if p and p.island.port:
             gs.player.set_state_docked()
-            gs.output(f"{gs.ship.name} is now docked at {p.port.name} on the island of {p.name}.")
+            gs.output(f"{gs.ship.name} is now docked at {p.island.port.name} on the island of {p.island.name}.")
             gs.ship.b.reset()
 
 def depart_cmd(rt: RunType, toks):
@@ -37,4 +40,4 @@ def depart_cmd(rt: RunType, toks):
     if not toks:
         gs.player.set_state_sailing()
         p = gs.map.get_place_at_location(gs.ship.location)
-        gs.output(f"{gs.ship.name} has departed from {p.name}.")
+        gs.output(f"{gs.ship.name} has departed from {p.island.name}.")

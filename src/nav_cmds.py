@@ -5,22 +5,19 @@ from util import list_valid_directions, is_direction_valid, Direction, direction
 
 
 def register_nav_cmds():
-    gs.cmdsys.register(Command("navigate", "[island id]", navigate_cmd,
+    gs.cmdsys.register(Command("nav", "id", navigate_cmd,
                                "Navigate to an island specified by its numeric id."))
-    gs.cmdsys.register_alias("nav", "navigate")
 
-    gs.cmdsys.register(Command("direction", "[direction]", direction_cmd,
+    gs.cmdsys.register(Command("dir", "direction", direction_cmd,
                                "Set your ship to sail in a specific direction."))
-    gs.cmdsys.register_alias("dir", "direction")
 
-    gs.cmdsys.register(Command("sail", "", sail_cmd,
+    gs.cmdsys.register(Command("s", "", sail_cmd,
                                "Sail your ship. This assumes you are navigating to a location or have set your bearing."))
-    gs.cmdsys.register_alias("s", "sail")
 
-    gs.cmdsys.register(Command("map", "[world]", map_cmd,
+    gs.cmdsys.register(Command("map", "local|world", map_cmd,
                                "Display either a local or world map."))
 
-    gs.cmdsys.register(Command("islands", "[local]",list_islands_cmd,
+    gs.cmdsys.register(Command("islands", "all|local", list_islands_cmd,
                                "Display a list of islands along with their id."))
 
 
@@ -59,7 +56,7 @@ def navigate_cmd(rt: RunType, toks):
     if gs.ship.distance_to_location(place.location) == 0:
         gs.output("You are already there.")
         return
-    gs.output(f"{gs.ship.name} is set to sail to {place.name}")
+    gs.output(f"{gs.ship.name} is set to sail to {place.island.name}")
     gs.ship.b.set_target(place.location)
 
 
@@ -72,7 +69,7 @@ def direction_cmd(rt: RunType, toks):
         gs.output(
             "To use this command you must specify the direction that you want to point to. "
             f"Valid directions are {list_valid_directions()}. After you have set your direction, if you use "
-            "the 'sail' command, you will sail in that direction, assuming you have not reached the end of the earth.")
+            "the 's' command, you will sail in that direction, assuming you have not reached the end of the earth.")
         return
     old_dir = None
     if gs.ship.b.is_direction():
@@ -86,20 +83,21 @@ def direction_cmd(rt: RunType, toks):
     else:
         gs.output(f"{gs.ship.name} is set to sail {new_dir}")
 
+
 def map_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
         if gs.player.is_sailing():
             return True
         return False
-    if rt == RunType.HELP or (toks and toks[0] != 'world'):
-        gs.output(
-            "Display a map. By default this map shows the are around your ship. If that area includes islands, "
-            "they are displayed with their name. If you specify 'world', it will "
-            "show a world map that includes islands which are in coordinates you have visited. "
-            "The world map does not include island names.")
+    if rt == RunType.HELP or not toks or toks[0] not in ('world', 'local'):
+        gs.output("This displays either a local map or a world map.")
+        gs.output("local - this map shows the are around your ship. If that area includes islands, "
+                  "they are displayed with their name.", sub_indented=True)
+        gs.output("world - show a world map that includes islands which are in coordinates you have visited. "
+                  "The world map does not include island names.", sub_indented=True)
         return
 
-    if toks:
+    if toks and toks[0] == 'world':
         # show big map
         gs.output(gs.map.render_all_visited(gs.ship.location), nowrap=True)
         return
@@ -121,18 +119,19 @@ def sail_cmd(rt: RunType, toks):
     # all we need to do is pass the time, it will take care of the rest
     pass_time()
 
+
 def list_islands_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
         if gs.player.is_sailing():
             return True
         return False
-    if rt == RunType.HELP or (toks and toks[0] != "local"):
-        gs.output(
-            "List islands with their id, location and distance. Only islands that are within coordinates that "
-            "your ship has visited, or are in your nearby coordinates are displayed. If 'local' is specified, then only "
-            "islands in your nearby coordinates are displayed.")
+    if rt == RunType.HELP or not toks or toks[0] not in ("local", "all"):
+        gs.output("This displays a list of islands")
+        gs.output("local - List nearby islands with their id, distance and direction.", sub_indented=True)
+        gs.output("all - List all islands that either nearby or are within coordinates that your ship has visited.",
+                  sub_indented=True)
         return
-    if toks:
+    if toks[0] == 'local':
         local_only = True
     else:
         local_only = False
@@ -148,9 +147,4 @@ def list_islands_cmd(rt: RunType, toks):
             dir = direction_from_two_coords(gs.ship.location, p.location)
             if dir is None:
                 dir = "away"
-            gs.output(f"{str(p.index).rjust(3)} {p.name} - {dist} miles {dir}")
-
-
-
-
-
+            gs.output(f"{str(p.index).rjust(3)} {p.island.name} - {dist} miles {dir}")

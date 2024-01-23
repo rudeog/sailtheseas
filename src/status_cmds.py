@@ -4,7 +4,7 @@ from state import gs
 
 
 def register_status_cmds():
-    gs.cmdsys.register(Command("status", "[sub]", show_status, "Show status"))
+    gs.cmdsys.register(Command("status", "...", show_status, "Show status"))
     gs.cmdsys.register(Command("cargo", "", show_cargo, "list cargo on vessel"))
 
 
@@ -25,10 +25,11 @@ def show_status(rt: RunType, toks):
         # see if we are at a place
         place = gs.map.get_place_at_location(gs.ship.location)
         if place:
-            gs.output(f"You are at {place.name}", False)
+            # there should always be an island at a place
+            gs.output(f"You are at {place.island.name}", False)
             if gs.player.is_docked():
-                if place.port: # should always be true in this case
-                    port_name = " " + place.port.name
+                if place.island.port: # should always be true in this case
+                    port_name = " " + place.island.port.name
                 else:
                     port_name = ""
                 gs.output(f" and {gs.ship.name} is docked at{port_name}.")
@@ -46,7 +47,7 @@ def show_status(rt: RunType, toks):
             elif gs.ship.b.is_target():
                 place = gs.map.get_place_at_location(gs.ship.b.get())
                 if place:
-                    gs.output(f"{gs.ship.name} is heading toward {place.name}.")
+                    gs.output(f"{gs.ship.name} is heading toward {place.island.name}.")
                 else: # shouldnt happen
                     gs.output(f"{gs.ship.name} is heading to an undisclosed location.")
 
