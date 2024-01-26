@@ -54,9 +54,9 @@ class CommandSystem:
                     else:
                         c.fn(RunType.RUN, other_args)
                 else:
-                    gs.output("Command is unavailable at this time. Enter 'c' to see available commands.")
+                    gs.gm_output("Command is unavailable at this time. Enter 'c' to see available commands.")
                 return
-            gs.output("Command not understood. Enter 'c' to see available commands.")
+            gs.gm_output("Command not understood. Enter 'c' to see available commands.")
 
 
     def register(self, cmd: Command):

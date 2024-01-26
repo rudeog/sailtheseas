@@ -27,11 +27,15 @@ western_last_names = ["Smith", "Jones", "Trought", "Roth", "Hamm", "Winter", "Ro
                       "Arcy", "Shirmers", "Edwards", "Axe", "Skenus", "Slurm", "Ball"]
 
 last_name_prefixes = ["Mc","O'","De","St. ", "Le", "D'", "Fitz", "Van"]
-last_name_suffixes = ["kin","son","ski","sky","ian","o", "i", "christ", "aloe", "patrick", "is", "fifi","sey","sby"]
+last_name_suffixes = ["kin","son","ski","sky","sly","ian","o", "i", "christ", "low", "patrick", "is", "fifi","sey","sby"]
 
 # exotic name chunks
-names_compound = ["wenn", "gu", "urt", "xa", "sen", "kla", "puj", "jeq", "sto",
-                  "ok", "iz", "fee", "owl", "bop", "thek", "uze", "afe", "aat", "qu","spra","nce"]
+names_compound_prefixes =["","","","Mc","De","n'","u'","La"]
+names_compound = ["wen", "gu", "ru", "xa", "po", "kla", "pu", "jela", "to",
+                  "ko", "zi", "ka", "wo", "bo", "the", "ze", "fea", "taa", "qu","spra","cke"]
+names_compound_suffixes = ["so","lo","ez", "la", "cla", "hla", "xy", "fi"]
+# places compound share prefix from above
+places_compound = ["fa", "gro","qua","bal","su","xin","cha","ka","kwa","wa","a","o"]
 
 
 western_places = ["Giles", "York", "Wales", "London", "Amsterdam", "Paris", "East", "North", "South", "West",
@@ -39,13 +43,18 @@ western_places = ["Giles", "York", "Wales", "London", "Amsterdam", "Paris", "Eas
                   "Sisk", "Quayle", "Kitty", "Crescent", "Whiskey", "Bourbon", "Francis", "Paul", "Peter", "Bath",
                   "Cheeks", "Greentree", "Cloud", "Jefferson", "Jacksasm", "Chicken", "Duck", "Bird", "Reginald",
                   "Albert", "William", "Wags", "Chups", "Mumps"]
-place_suffixes = ["gate", "ton", "town", " Forest", " Farms", " Patch", " on Avon", " on James", "thorpe", "thwaite",
-                  " in the Fields", "wich", " row", "burg", "borough", " Hollow", " Fort", "ville", "port", " Colony",
-                  "'s Knee", "'s Armpit", "'s Elbow"]
+place_suffixes = ["gate", "ton", "town", " Forest", " Farms", " Patch", "-on-Avon", "-on-James", "thorpe", "thwaite",
+                  " in-the-Fields", "wich", "-Row", "burg", "borough", " Hollow", " Fort", "ville", "port", " Colony",
+                  "'s-Knee", "'s-Armpit", "'s-Elbow", "'s-Folly", "-End"]
 
-place_prefixes = ["Holy ", "New ", "Olde ", "Righteous ", "Left ", "Cheap ",
+place_prefixes = ["Holy ", "New ", "Olde ", "Righteous ", "Far ", "The ",
                   "Mc", "Van", "The ", "Green ", "White ", "St. ", "Upper ", "Lower "]
-places_compound = ["bal","bu","chin","cha","kap","kwa","iwa","wep"]
+
+
+
+fancy_prefixes = ["Webe", "Bid", "Atl", "Bor", "Oner", "Mor", "Wan", "Pac", "App", "Crux", "Dex", "Eur", "Fraz", "Gon", "Her","Bra"]
+fancy_mid = ["ac","eh","ist", "on", "ed", "at", "an","ast","il","ih","oh","ent"]
+fancy_suffixes = ["ian", "az", "ius", "icus", "ast", "end", "ond", "ios", "onid", "id", "apae", "ot", "st"]
 
 class Name:
     def __init__(self):
@@ -67,28 +76,44 @@ class Place:
         return self.name
 
 class PlaceGenerator:
+    '''
+    Generate place names and fancy words
+    '''
     def __init__(self, seed):
         self.rng = random.Random(seed)
         self._western_places = ListSelector(self.rng, western_places)
         self._place_prefixes = ListSelector(self.rng, place_prefixes)
         self._place_suffixes = ListSelector(self.rng, place_suffixes)
+
+        # for compound names
         self._places_compound = ListSelector(self.rng, places_compound)
+        self._names_compound_prefixes = ListSelector(self.rng, names_compound_prefixes)
+
+
+        self._fancy_prefixes = ListSelector(self.rng, fancy_prefixes)
+        self._fancy_mid = ListSelector(self.rng, fancy_mid)
+        self._fancy_suffixes = ListSelector(self.rng, fancy_suffixes)
 
     def name(self, desired_class=""):
         """
         Generate a place. returns place
-        :param desired_class: w=western, e=exotic, empty string = leave to chance
+        :param desired_class: w=western, e=exotic, f=fancy,  empty string = leave to chance (w or e)
         :return: a Place string
         """
         r = Place()
 
-        if desired_class not in ("w", "e"):
+        if desired_class not in ("w", "e", "f"):
             cl = self.rng.choice(["w", "e"])
         else:
             cl = desired_class
 
-        if cl == "e":  # exotic - build using chunks
-            r.name = to_proper_case(self._compound())
+        if cl == "f": # fancy word
+            pre = self._fancy_prefixes.select()
+            mid = self._fancy_mid.select()
+            suf = self._fancy_suffixes.select()
+            r.name = pre + mid + suf
+        elif cl == "e":  # exotic - build using chunks
+            r.name = self._compound()
             have_prefix = self.rng.choices([True,False],[1,3],k=1)[0]
             if have_prefix:
                 r.name = self._place_prefixes.select() + r.name
@@ -106,18 +131,23 @@ class PlaceGenerator:
             if not have_prefix or self.rng.choice([True,False]):
                 r.name = r.name + self._place_suffixes.select()
         return r
+
     def _compound(self):
         """
         Make a compound word from a list of words. repeats are ok
         :param l: list to use
         :return:
         """
+        pre = self._names_compound_prefixes.select()
+        r = []
         # do we want 1, 2 or 3 sections. mostly we want 2
         h = self.rng.choices([1, 2, 3,4], [1, 2,2, 1], k=1)
-        r = []
         for i in range(0, h[0]):
             r.append(self._places_compound.select())
-        return "".join(r)
+        ret = "".join(r)
+
+        ret = to_proper_case(ret)
+        return pre + ret
 
 
 class NameGenerator:
@@ -130,6 +160,8 @@ class NameGenerator:
         self._last_name_prefixes = ListSelector(self.rng, last_name_prefixes)
         self._last_name_suffixes = ListSelector(self.rng, last_name_suffixes)
         self._names_compound = ListSelector(self.rng, names_compound)
+        self._names_compound_prefixes = ListSelector(self.rng, names_compound_prefixes)
+        self._names_compound_suffixes = ListSelector(self.rng, names_compound_suffixes)
 
     def name(self, desired_gender="", desired_class=""):
         """
@@ -146,17 +178,19 @@ class NameGenerator:
             r.gender = desired_gender
 
         if r.gender == "m":
-            r.title = self.rng.choices(["Mr.","Master","Dr.", "Rev.", "Capt."],[5,1,1,1,1],k=1)[0]
+            r.title = self.rng.choices(["Mr.","Master","Dr.", "Rev.", "Capt.", "Sir"],[5,1,1,1,1,1],k=1)[0]
         elif r.gender == "f":
-            r.title = self.rng.choices(["Mrs.","Miss","Widow","Lady","Auntie"],[9,3,1,1,1],k=1)[0]
+            r.title = self.rng.choices(["Mrs.","Miss","Widow","Lady","Auntie","Sister"],[9,3,1,1,1,1],k=1)[0]
+        else: # non-binary
+            r.title = self.rng.choices(["Private","Partner","Citizen",""],[2,1,1,4],k=1)[0]
         if desired_class not in ("w", "e"):
             cl = self.rng.choice(["w", "e"])
         else:
             cl = desired_class
 
         if cl == "e":  # exotic - build using chunks
-            r.first = to_proper_case(self._compound())
-            r.last = to_proper_case(self._compound())
+            r.first = self._compound(False)
+            r.last = self._compound(True)
 
         else:  # western name
             src = self._male_first_names if r.gender == "m" \
@@ -171,35 +205,50 @@ class NameGenerator:
             if self.rng.choices([True,False], [1,4])[0]:
                 r.last = self._last_name_prefixes.select() + r.last
             # suffix on last name?
-            if self.rng.choices([True,False], [1,4])[0]:
+            if self.rng.choices([True,False], [1,2])[0]:
                 r.last = r.last + self._last_name_suffixes.select()
 
 
         return r
 
-    def _compound(self):
+    def _compound(self, want_suffix):
         """
         Make a compound word from a list of words. repeats are ok
         :param l: list to use
         :return:
         """
+        pre = self._names_compound_prefixes.select()
+        if want_suffix:
+            post = self._names_compound_suffixes.select()
+        else:
+            post=""
+
         # do we want 1, 2 or 3 sections. mostly we want 2
         h = self.rng.choices([1, 2, 3], [1, 3, 1], k=1)
         r = []
         for i in range(0, h[0]):
             r.append(self._names_compound.select())
-        return "".join(r)
+        ret =  to_proper_case("".join(r))
+        return pre + ret + post
+
 
 
 if __name__ == "__main__":
     i = 0
-    ng=NameGenerator(12)
-    for x in range(0, 100):
-        print(f"{i} {ng.name(desired_gender='f', desired_class='w')}")
-        i = i + 1
-    pg = PlaceGenerator(3)
-    i=0
-    print("========================")
-    for x in range (0,100):
-        print(f"{i} {pg.name(desired_class='e')}")
-        i=i+1
+
+    d = {}
+    tot = 100
+    ng=NameGenerator(99999)
+    for i in range(0,tot):
+        n = ng.name(desired_class='w')
+        v = n
+        print(v)
+        if v in d:
+            d[v] = d[v]+1
+        else:
+            d[v] = 1
+
+    #print(len(d)/float(tot))
+
+
+

@@ -17,9 +17,9 @@ def show_status(rt: RunType, toks):
             " to show specific summary info. Available sub-commands are: crew, ship, weather")
         return
     if not toks:
-        gs.output(
-            f"You are captain {gs.player.name} who hails from {gs.player.birthplace}.")
-        gs.output(f"You are on day {gs.player.num_days_elapsed()+1} of your voyage, and "
+        gs.output(f"You are captain {gs.player.name} who hails from {gs.player.birthplace}. "
+            f"You are in the world of {gs.world_name} which is ruled by emperor {gs.emperor.last} and " 
+            f"are on day {gs.player.num_days_elapsed()+1} of your voyage. You "
                   f"have {gs.player.doubloons} doubloons.")
 
         # see if we are at a place

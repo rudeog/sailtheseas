@@ -53,6 +53,7 @@ def _load():
 
 def save_game():
     data = {
+        "seed": gs.seed,
         "player_name": gs.player.name,
         "player_birthplace": gs.player.birthplace,
         "player_doubloons": gs.player.doubloons,
@@ -68,6 +69,7 @@ def load_game():
     if err:
         return err
     data = json.loads(json_string)
+    gs.seed = data["seed"]
     gs.player.name = data["player_name"]
     gs.player.birthplace = data["player_birthplace"]
     gs.player.doubloons = data["player_doubloons"]

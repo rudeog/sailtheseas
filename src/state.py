@@ -3,15 +3,22 @@
 import textwrap
 import shutil
 
+#
+# Game level defaults
+#
 DEBUGGING = True
-
 GAME_NAME = "Sail The Seas"
+DEFAULT_SEED = 51047
+MAP_WIDTH = 15
+MAP_HEIGHT = 15
+
 
 class GlobalState:
     """
     Represents the top level global object
     """
     def __init__(self):
+        self.seed = DEFAULT_SEED
         self.player = None
         self.ship = None
 
@@ -22,6 +29,7 @@ class GlobalState:
         self.name_gen = None
         self.place_gen = None
         self.game_master = None
+        self.emperor = None
         self.num_commands = 0
         self.quitting = False
         self.debug_mode = DEBUGGING

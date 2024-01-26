@@ -147,4 +147,4 @@ def list_islands_cmd(rt: RunType, toks):
             dir = direction_from_two_coords(gs.ship.location, p.location)
             if dir is None:
                 dir = "away"
-            gs.output(f"{str(p.index).rjust(3)} {p.island.name} - {dist} miles {dir}")
+            gs.output(f"{str(p.index).rjust(3)} {p.island.name} ({p.island.summary()}) - {dist} miles {dir}")

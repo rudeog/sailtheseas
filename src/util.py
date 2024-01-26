@@ -1,3 +1,5 @@
+import random
+
 def custom_hash(string):
     """
     Stable hash function so we can get same hash between runs
@@ -20,6 +22,31 @@ def clamp(value, minimum, maximum):
     return max(minimum, min(value, maximum))
 
 
+def choices_ex(distribution, weights, exclude=None):
+    '''
+    Like random.choices but excludes items in exclude
+    :param dist:
+    :param wght:
+    :param exclude:
+    :return:
+    '''
+    dist = distribution.copy()
+    wght = weights.copy()
+    # Remove each value in exclude from dist and its corresponding element from wght
+    if exclude is None:
+        exclude = []
+    for item in exclude:
+        if item in dist:
+            index_to_remove = dist.index(item)
+            dist.pop(index_to_remove)
+            wght.pop(index_to_remove)
+
+    # Use random.choices to select a random element from dist with corresponding weights from wght
+    selected_value = random.choices(dist, weights=wght, k=1)[0]
+
+    return selected_value
+
+
 def add_pair(a: tuple[int, int], b: tuple[int, int]):
     return (a[0] + b[0], a[1] + b[1])
 
@@ -37,19 +64,21 @@ class ListSelector:
     the list
     """
 
-    def __init__(self, rng, list):
+    def __init__(self, rng, in_list):
         self.rng = rng
-        self.list = list
-        self.index = len(list)
+        # need ptrs so we dont shuffle the original list
+        self.list_ptr = list(range(len(in_list)))
+        self.in_list = in_list
+        self.index = len(in_list)
 
     def select(self):
         # If all words have been used, shuffle the list and reset the index
-        if self.index == len(self.list):
-            self.rng.shuffle(self.list)
+        if self.index == len(self.list_ptr):
+            self.rng.shuffle(self.list_ptr)
             self.index = 0
 
         # Select the next word in the shuffled list
-        selected_word = self.list[self.index]
+        selected_word = self.in_list[self.list_ptr[self.index]]
         self.index += 1
         return selected_word
 
@@ -134,3 +163,4 @@ def direction_from_two_coords(a: tuple[int, int], b: tuple[int, int]):
     diff = (x,y)
     ind = _dir_coords.index(diff)
     return Direction(_valid_dirs[ind])
+

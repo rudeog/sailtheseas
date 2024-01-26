@@ -12,9 +12,7 @@ from cargo import cargo_types
 from save import save_file_exists, load_game, save_game
 from player import Player
 from ship import Ship
-SEED = 51047
-WIDTH = 15
-HEIGHT = 15
+
 
 # registered quit command
 def cmd_quit(run_type, toks):
@@ -32,39 +30,41 @@ def cmd_quit(run_type, toks):
                 gs.quitting = False
 
 
-# todo how do we want to determine our seed?
+##################################################################
 
 # initialize our global obj (due to circular refs issue)
 gs.player = Player()
 gs.ship = Ship()
-gs.name_gen = NameGenerator(SEED)
-gs.place_gen = PlaceGenerator(SEED)
 
 # see if a save game exists
-game_loaded=False
+cont = True
+game_loaded = False
 if save_file_exists():
-    p = gs.confirm("Found a saved game. Do you want to load it?",True)
+    p = gs.confirm("Found a saved game. Do you want to load it?", True)
     if p is None:
         exit(0)
     if p:
         err = load_game()
         if err:
             gs.output(f"Error loading game: {err}")
+            cont = False
         else:
             game_loaded = True
 
-# Get player info, etc
-if game_loaded or setup.player_setup():
+if cont and not game_loaded:
+    cont = setup.determine_seed()
 
-    # generate the map
-    gs.map = map.Map(WIDTH, HEIGHT, SEED)
+if cont:
+    setup.base_setup()
+    if not game_loaded:
+        cont = setup.player_setup()
 
+if cont:
     # set up the command interpreter
     gs.cmdsys = CommandSystem()
 
     gs.cmdsys.register(Command("!", "Quit the game", cmd_quit,
-                                               "This will end the game."))
-
+                               "This will end the game."))
 
     # register other commands
     register_info_cmds()
