@@ -13,20 +13,13 @@ topics = {"about": ["About the game",
 def cmd_info(run_type: RunType, toks):
     if run_type is RunType.CHECK_AVAILABLE:
         return True
-    if run_type is RunType.HELP:
-        gs.output("Info topics provide info and background about the game.")
+    if run_type is RunType.HELP or (not toks) or (toks[0] not in topics):
+        gs.output("The following topics are available:")
+        for k, v in topics.items():
+            gs.output(f"{k} - {v[0]}", sub_indented=True)
         return
-    if toks:
-        if toks[0] in topics:
-            gs.output(topics[toks[0]][1])
-        else:
-            gs.output("That topic does not exist.")
 
-    gs.output("The following info topics are available. Enter 'info' or 'i' "
-                        "followed by a topic name to read that topic:")
-    for k, v in topics.items():
-        gs.output(f"{k} - {v[0]}", sub_indented=True)
-    return
+    gs.output(topics[toks[0]][1])
 
 
 def register_info_cmds():

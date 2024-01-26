@@ -1,5 +1,6 @@
 from mainloop import run_loop
 from port_cmds import register_port_cmds
+from names import NameGenerator, PlaceGenerator
 from status_cmds import register_status_cmds, show_status
 from nav_cmds import register_nav_cmds
 from state import gs
@@ -11,7 +12,7 @@ from cargo import cargo_types
 from save import save_file_exists, load_game, save_game
 from player import Player
 from ship import Ship
-SEED = 51042
+SEED = 51047
 WIDTH = 15
 HEIGHT = 15
 
@@ -22,18 +23,22 @@ def cmd_quit(run_type, toks):
     if run_type is RunType.HELP:
         gs.output("Sometimes you gotta quit. When you quit, your progress will be saved for next time.")
         return
-    gs.quitting = gs.confirm()
+    gs.quitting = gs.gm_confirm()
     if gs.quitting:
         err = save_game()
         if err:
-            gs.output(f"Error saving game: {err}")
+            gs.gm_output(f"Error saving game: {err}")
             if not gs.confirm("Do you want to quit anyway?"):
                 gs.quitting = False
 
 
+# todo how do we want to determine our seed?
+
 # initialize our global obj (due to circular refs issue)
 gs.player = Player()
 gs.ship = Ship()
+gs.name_gen = NameGenerator(SEED)
+gs.place_gen = PlaceGenerator(SEED)
 
 # see if a save game exists
 game_loaded=False
@@ -50,8 +55,6 @@ if save_file_exists():
 
 # Get player info, etc
 if game_loaded or setup.player_setup():
-    # figure out our seed
-    # todo
 
     # generate the map
     gs.map = map.Map(WIDTH, HEIGHT, SEED)
