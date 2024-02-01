@@ -8,7 +8,7 @@ import setup
 import map
 from command import CommandSystem, RunType, Command
 from help import register_info_cmds
-from cargo import cargo_types
+from cargo import cargo_types, CARGO_GRAIN
 from save import save_file_exists, load_game, save_game
 from player import Player
 from ship import Ship
@@ -79,7 +79,7 @@ if cont:
     show_status(RunType.RUN, [])
 
     # todo remove
-    gs.ship.cargo.add_remove(cargo_types[0], 10)
+    gs.ship.cargo.add_remove(CARGO_GRAIN, 10)
 
     # start the play loop
     run_loop()

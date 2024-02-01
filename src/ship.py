@@ -1,7 +1,7 @@
 from cargo import CargoCollection
 from enum import Enum
 
-from state import gs
+from state import gs, DEFAULT_CARGO_CAPACITY
 from util import Direction, add_pair
 
 _SHORT_RADIUS = 30  # distance from left, right, top or bottom edge to center of square
@@ -67,6 +67,8 @@ class Bearing:
 class Ship:
     def __init__(self):
         self.name = ""
+        self.cargo_capacity = DEFAULT_CARGO_CAPACITY
+        self.miles_traveled = 0
         self.cargo: CargoCollection = CargoCollection()
         self._location: tuple = (-1, -1)
 
@@ -173,10 +175,12 @@ class Ship:
 
             if miles_available < to_target:  # just advance toward center or edge
                 self._miles_traveled_in_square += miles_available
+                self.miles_traveled += miles_available
                 miles_available=0
                 break
             else:  # we have enough miles to reach the center, or the edge of a square
                 miles_available -= to_target
+                self.miles_traveled += to_target
                 self._miles_traveled_in_square = 0
                 if self._toward_center:
                     # reached center, so start moving away from center next
@@ -213,6 +217,12 @@ class Ship:
         if new_location:
             return self.SAIL_RESULT_ENTERED_NEW_SQUARE, orig_miles-miles_available
         return 0,orig_miles-miles_available
+
+    def describe(self):
+        wt = int(self.cargo.total_weight()/2000)
+        gs.output(f"{self.name} is a merchant ship that has a cargo capacity of {int(self.cargo_capacity/2000)} tons. "
+              f"It has traveled {self.miles_traveled} nautical miles in the seas of {gs.world_name}. "
+              f"It is currently carrying cargo to the weight of approximately {wt} tons.")
 
     def debug_prompt(self):
         p = f"\n{'inward' if self._toward_center else 'outward'} {self._miles_traveled_in_square} miles"
