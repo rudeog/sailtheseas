@@ -1,1 +1,3 @@
-print(int("ttt"))
+a = {'a':  1}
+b=a['b']
+print(b)

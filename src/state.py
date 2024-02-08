@@ -21,6 +21,7 @@ class GlobalState:
     Represents the top level global object
     """
     def __init__(self):
+        # this will be overriden to DEFAULT_SEED + n when the player selects a world
         self.seed = DEFAULT_SEED
         self.player = None
         self.ship = None

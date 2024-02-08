@@ -14,6 +14,18 @@ def custom_hash(string):
 
     return result
 
+def as_int(v, def_val: int = -1):
+    '''
+    try converting v to int, returning default value if not possible or it's int value if so
+    :param v:
+    :return:
+    '''
+    try:
+        i = int(v)
+    except ValueError:
+        return def_val
+    return i
+
 
 def clamp(value, minimum, maximum):
     """

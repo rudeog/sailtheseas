@@ -1,7 +1,7 @@
 from command import Command, RunType
 from turn import pass_time
 from state import gs
-from util import list_valid_directions, is_direction_valid, Direction, direction_from_two_coords
+from util import list_valid_directions, is_direction_valid, Direction, direction_from_two_coords, as_int
 
 
 def register_nav_cmds():
@@ -32,9 +32,9 @@ def navigate_cmd(rt: RunType, toks):
             "'map' to get valid island id's. Note that you can only navigate to an island if it is visible on a "
             "map. That is to say that you have either been to it's coordinates, or it is within your local vicinity.")
         return
-    try:
-        integer_number = int(toks[0])
-    except ValueError:
+
+    integer_number = as_int(toks[0])
+    if integer_number<0:
         gs.output("Invalid location id. You must specify a number.")
         return
 

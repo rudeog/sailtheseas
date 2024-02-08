@@ -1,9 +1,9 @@
 todo:
-- Startup allow selecting seed?
 - Save/load
 - Bypass intro by supplying cmd line args
 - render world map shrank down and make map bigger
-- eliminate %age movement
+- separate log output
+
 
 
 period facts:

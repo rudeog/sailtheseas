@@ -27,7 +27,7 @@ class Player:
         self._day_frags = 0  # morning, afternoon, evening, night
 
         # personal property
-        self.doubloons = 10
+        self._doubloons = 0
 
         # whether docked or sailing or exploring, etc
         self._state = self._state_e.NONE
@@ -41,6 +41,14 @@ class Player:
             self._day_frags = 0 # morning of the next day
         else:
             self._day_frags = self._day_frags + 1
+
+    @property
+    def doubloons(self):
+        return self._doubloons
+
+    def add_remove_doubloons(self, qty):
+        self._doubloons += qty
+        return self._doubloons
 
     def current_date(self):
         return STARTING_DATE + timedelta(days=self._days)

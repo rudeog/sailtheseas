@@ -3,7 +3,7 @@ from port_cmds import register_port_cmds
 from names import NameGenerator, PlaceGenerator
 from status_cmds import register_status_cmds, show_status
 from nav_cmds import register_nav_cmds
-from state import gs
+from state import gs, MAP_WIDTH, MAP_HEIGHT
 import setup
 import map
 from command import CommandSystem, RunType, Command
@@ -56,6 +56,9 @@ if cont and not game_loaded:
 
 if cont:
     setup.base_setup()
+    # generate the map
+    gs.map = map.Map(MAP_WIDTH, MAP_HEIGHT, gs.seed)
+
     if not game_loaded:
         cont = setup.player_setup()
 
@@ -78,8 +81,6 @@ if cont:
     # show initial status
     show_status(RunType.RUN, [])
 
-    # todo remove
-    gs.ship.cargo.add_remove(CARGO_GRAIN, 10)
 
     # start the play loop
     run_loop()

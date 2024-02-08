@@ -5,6 +5,7 @@ from names import NameGenerator, PlaceGenerator
 from state import gs, GAME_NAME, MAP_WIDTH, MAP_HEIGHT
 from map import Map
 import phrase_gen
+from util import as_int
 
 # this should generate the map, set up the rng's and the game master
 # based on info we have either gotten from user or from save file
@@ -15,13 +16,7 @@ def base_setup():
     gs.emperor = gs.name_gen.name("m","e")
     gs.game_master = gs.name_gen.name("m","w")
     gs.world_name = gs.place_gen.name('f')
-    # generate the map
-    gs.map = Map(MAP_WIDTH, MAP_HEIGHT, gs.seed)
 
-    if gs.debug_mode:
-        print("Islands:")
-        for isl in gs.map.places:
-            print(f"{isl.island.name} - {isl.island.summary()}")
 
 # This should find out what seed the user wants to use
 def determine_seed() -> bool:
@@ -43,12 +38,13 @@ def determine_seed() -> bool:
                 return False
             if sel.lower() == 'm':
                 break
-            try:
-                nsel = int(sel)
+            nsel = as_int(sel)
+            if nsel<0:
+                gs.output("That was an invalid choice")
+            else:
                 gs.seed = gs.seed + nsel
                 return True
-            except ValueError:
-                gs.output("That was an invalid choice")
+
 
         start += 10
 
@@ -82,6 +78,7 @@ def player_setup() -> bool:
     gs.ship.name = n
     gs.gm_output(phrase_gen.get_phrase(gs.ship.name, phrase_gen.ship_name_phrases))
 
+    gs.player.add_remove_doubloons(10000) #temporary
     gs.output("You are ready to start your adventures! Best of luck to you.")
 
     return True

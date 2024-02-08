@@ -1,7 +1,7 @@
 # command file for ship commands
 from command import RunType, Command
 from state import gs
-
+from util import as_int
 
 def register_status_cmds():
     gs.cmdsys.register(Command("status", "...", show_status, "Show status"))
@@ -12,7 +12,7 @@ def register_status_cmds():
 def describe_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
         return True
-    if rt == RunType.HELP or not toks or toks[0] not in ['ship','island']:
+    if rt == RunType.HELP or not toks or (toks[0] not in ['ship','island'] and as_int(toks[0])==-1):
         gs.output(
             "Possible things to describe:")
         gs.output("ship - show information about your ship")
@@ -24,16 +24,18 @@ def describe_cmd(rt: RunType, toks):
         gs.ship.describe()
     elif toks[0] == "island":
         describe_island_cmd(toks[1:])
+    i = as_int(toks[0])
+    if i >-1:
+        describe_island_cmd([i])
 
 
 def describe_island_cmd(toks):
     iid = None
     if toks:
         iid = toks[0]
-        try:
-            iid = int(iid)
-        except ValueError:
-            gs.gm_output("You need to enter a valid number")
+        iid = as_int(iid)
+        if iid<0:
+            gs.gm_output("You need to enter a valid island number.")
 
     else:
         pl = gs.map.get_place_at_location(gs.ship.location)
@@ -58,8 +60,7 @@ def show_status(rt: RunType, toks):
         return True
     if rt == RunType.HELP:
         gs.output(
-            "By default this shows a summary about you and your ship. You may optionally specify a sub-command"
-            " to show specific summary info. Available sub-commands are: crew, ship, weather")
+            "This shows a summary about you and your voyage.")
         return
     if not toks:
         gs.output(f"You are captain {gs.player.name} who hails from {gs.player.birthplace}. "
@@ -97,11 +98,8 @@ def show_status(rt: RunType, toks):
                     gs.output(f"{gs.ship.name} is heading to an undisclosed location.")
 
         return
-    if toks[0] == 'crew':
-        gs.output("The crew is mutinous!")
-        return
 
-    gs.output("That type of status is not available at this time.")
+    gs.gm_output("That type of status is not available at this time.")
 
 
 def show_cargo(rt: RunType, toks):
@@ -116,7 +114,6 @@ def show_cargo(rt: RunType, toks):
             gs.output(f"{gs.ship.name} is not carrying any cargo at this time.")
         else:
             gs.output(f"{gs.ship.name} is currently carrying the following cargo:")
-            i = 1
             for c in gs.ship.cargo:
-                gs.output(f"{str(i).rjust(2)}) {c}")
-                i = i + 1
+                gs.output(f"[{c.type.code}] {c} (paid {c.price_per}D per unit)")
+

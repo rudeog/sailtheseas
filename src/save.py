@@ -72,6 +72,6 @@ def load_game():
     gs.seed = data["seed"]
     gs.player.name = data["player_name"]
     gs.player.birthplace = data["player_birthplace"]
-    gs.player.doubloons = data["player_doubloons"]
+    gs.player.add_remove_doubloons(data["player_doubloons"])
     gs.ship.name = data["ship_name"]
     return ""
