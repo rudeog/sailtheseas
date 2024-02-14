@@ -66,8 +66,8 @@ if cont:
     # set up the command interpreter
     gs.cmdsys = CommandSystem()
 
-    gs.cmdsys.register(Command("!", "Quit the game", cmd_quit,
-                               "This will end the game."))
+    gs.cmdsys.register(Command("!",  cmd_quit,
+                               "Quit the game."))
 
     # register other commands
     register_info_cmds()

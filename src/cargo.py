@@ -39,12 +39,29 @@ CARGO_GOLD = 7
 
 class CargoItem:
     def __init__(self, ti: int, q: int):
-        self.type_idx = ti
-        self.type: CargoType = cargo_types[ti]
-        self.quantity: int = q
+        self._type_idx = ti
+        self._type: CargoType = cargo_types[ti]
+        self._quantity: int = q
         # if selling this ends up being the price. if buying this ends up
         # being the amount paid per unit. if on ship, it is how much was paid for it(?)
-        self.price_per = 0
+        self._price_per = 0
+
+    @property
+    def price_per(self):
+        return self._price_per
+
+    @property
+    def quantity(self):
+        return self._quantity
+
+    @property
+    def type(self):
+        return self._type
+
+    @property
+    def type_idx(self):
+        return self._type_idx
+
 
     def __str__(self):
         return f"{self.quantity} {self.type.units} of {self.type.name}"
@@ -80,7 +97,7 @@ class CargoCollection:
     def add_remove(self, cargo_type_idx: int, qty):
         """
         Add or remove cargo from the collection. If it exists in the collection,
-        the qty only is updated
+        the qty only is updated. If removing equal or more than exists, the item is removed
         :param cargo_type_idx:
         :param cargo_type:
         :param qty: if 0 nothing happens
@@ -88,22 +105,22 @@ class CargoCollection:
         """
         it = self[cargo_type_idx]
         if it:  # exist   already, adjust qty
-            it.quantity = it.quantity + qty
-            ret = max(it.quantity, 0)
-            if it.quantity <= 0:
+            it._quantity = it.quantity + qty
+            it._quantity = max(it.quantity, 0)
+            if it.quantity == 0:
                 self.cargo.remove(it)
-            return ret
+            return it.quantity
 
         if qty > 0:
             self.cargo.append(CargoItem(cargo_type_idx, qty))
 
         return qty
 
-    def set_price(self, cargo_type_idx: int, price_per: int = 0):
+    def set_price(self, cargo_type_idx: int, price_per: int):
         """
         Set price of cargo if present
         :return:
         """
         item = self[cargo_type_idx]
         if item:
-            item.price_per = price_per
+            item._price_per = price_per

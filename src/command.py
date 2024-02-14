@@ -22,9 +22,8 @@ class Command:
 
     """
 
-    def __init__(self, name, cmdargs, fn, help_text):
+    def __init__(self, name,  fn, help_text):
         self.name = name  # name of command
-        self.cmdargs = cmdargs  # help text for args
         self.fn = fn  # function to run
         self.help_text = help_text  # help topic
 
@@ -71,7 +70,11 @@ class CommandSystem:
 
     def _list_cmds(self):
         gs.output(f"Available commands while {gs.player.get_state_str()}:")
+        tl = 0
+        for k, v in self.cmds.items():
+            tl = max(tl, len(v.name))
+        tl+=2
         for k, v in self.cmds.items():
             if v.fn(RunType.CHECK_AVAILABLE, []):
-                gs.output(f"{v.name} {'[' + v.cmdargs + '] ' if v.cmdargs else ''}- {v.help_text}", sub_indented=True)
+                gs.output(f"{v.name.ljust(tl,'.')}{v.help_text}", sub_indented=True)
         gs.output("You may enter a command followed by the word 'help' for more information about the command.")

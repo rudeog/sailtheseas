@@ -67,6 +67,13 @@ class Name:
         # full name
         return (self.title + " " if self.title else "") + \
             self.first + (" " + self.last if self.last else "")
+    def pronoun(self):
+        if self.gender == 'm':
+            return "he"
+        elif self.gender=='f':
+            return 'she'
+        else:
+            return 'they'
 
 class Place:
     def __init__(self):

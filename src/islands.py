@@ -33,7 +33,7 @@ ISLAND_CIV_TOWN = 3  # has a port with basics, as well as some repair services
 ISLAND_CIV_CITY = 4  # has port all the latest amenities, upgrades etc
 
 civ_descriptions = ["Uninhabited", "Tribal", "Outpost", "Small Town", "Big City"]
-civ_descriptions_conv = ["an uninhabited island", "has a tribal society", "has an outpost", "has a small town",
+civ_descriptions_conv = ["is an uninhabited island", "has a tribal society", "has an outpost", "has a small town",
                          "has a big city"]
 
 # what each one produces
@@ -59,7 +59,7 @@ consumption_table = {ISLAND_CLASS_NONE: [],
                                            cargo.CARGO_IRON],
                      ISLAND_CLASS_MINING: [cargo.CARGO_LUMBER, cargo.CARGO_FOOD, cargo.CARGO_RUM, cargo.CARGO_MFG],
                      ISLAND_CLASS_MFG: [cargo.CARGO_IRON, cargo.CARGO_LUMBER, cargo.CARGO_LIVESTOCK],
-                     ISLAND_CLASS_COMMERCE: [cargo.CARGO_FOOD, cargo.CARGO_RUM],
+                     ISLAND_CLASS_COMMERCE: [cargo.CARGO_GOLD, cargo.CARGO_MFG, cargo.CARGO_FOOD, cargo.CARGO_RUM],
                      }
 
 
@@ -196,6 +196,8 @@ class Island:
 
         if civ_type != ISLAND_CIV_UNINHABITED:
             self.ruler = ng.name("m", ruler_ethnicity)
+        else:
+            self.ruler = None
 
         # index into our main map
         self.island_index = index
@@ -309,6 +311,15 @@ class TradingPost:
         self._update_wtb(3, consumption_table[self.primary_class])
         self._update_wtb(2, consumption_table[self.secondary_class])
 
+        # if island consumes what it produces, remove the right amt of available resources
+        for need in self.want:
+            got = self.on_hand[need.type_idx]
+            if got is not None:
+                gq = got.quantity # because add_remove will adjust this ptr
+                nq = need.quantity
+                self.on_hand.add_remove(need.type_idx, -nq)
+                self.want.add_remove(need.type_idx, -gq)
+
         # set prices based on demand
         for ci in self.want:
             ct = cargo.cargo_types[ci.type_idx]
@@ -320,6 +331,9 @@ class TradingPost:
                 ce = max((float(qty)/float(normal),1.0))+0.15
                 price = int(ct.price_coefficient * ce)
                 self.want.set_price(ci.type_idx, price)
+
+
+
 
     def _update_wtb(self, mult, wanttobuy):
         for pi in wanttobuy:  # earlier in list is higher consumption

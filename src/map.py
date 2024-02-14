@@ -13,10 +13,11 @@ PADDING = 3
 # higher is less dense
 DENSITY_COEFF = 12
 
-INCLUDE_XY_RULER=True
+INCLUDE_XY_RULER = True
 
 # for local map render, how many spaces in each dir
 LOCAL_VIEW_SIZE = 2
+
 
 # a location within the map. This may be an empty square or one that has an island
 class Location:
@@ -34,7 +35,7 @@ class Location:
 
     # visited_only: will only dump it if its been visited
     def dump(self, padding, visited_only, my_loc):
-        if self.populated: # has island
+        if self.populated:  # has island
             if (visited_only and self.visited) or not visited_only:
                 if my_loc:
                     v = f"{{{self.index}}}"
@@ -71,11 +72,11 @@ class Map:
 
     # places are populated coordinates in the map (right now that means they have an island)
     def get_place_by_index(self, index: int):
-        if index <0 or index >= len(self.places):
+        if index < 0 or index >= len(self.places):
             return None
         return self.places[index]
 
-    def get_location(self, coords:tuple[int,int]):
+    def get_location(self, coords: tuple[int, int]):
         """
         Return a location at given coordinates. if invalid return None
         :param coords: 
@@ -83,8 +84,8 @@ class Map:
         """
         if coords[0] < 0 or coords[1] < 0 or coords[0] >= self.rows or coords[1] >= self.cols:
             return None
-        y=coords[1]
-        x=coords[0]
+        y = coords[1]
+        x = coords[0]
         return self.map[y][x]
 
     def _populate_map(self):
@@ -129,7 +130,7 @@ class Map:
         for yy in range(ystart, yend):
             for xx in range(xstart, xend):
                 if self.map[yy][xx].populated:
-                    if not(exclude_center and (yy == y and xx == x)):
+                    if not (exclude_center and (yy == y and xx == x)):
                         if count_only:
                             count = count + 1
                         else:
@@ -164,19 +165,18 @@ class Map:
         return None
 
     def __str__(self):
-        return self.render(0, 0, self.cols, self.rows)
+        p = self._render(0, 0, self.cols, self.rows)
+        return "\n".join(p)
 
-    def render(self, xstart, ystart, xend, yend, my_loc, visited_only=False):
+    def _render(self, xstart, ystart, xend, yend, my_loc, visited_only=False):
         """
-        Render the map or a portion of the map.
+        Render the map or a portion of the map. It is returned as a list
+        :param visited_only: only show islands that were visited
+        :param my_loc: this location will be rendered with {}
         :param xstart: left side start
         :param ystart: top side start
         :param xend: right side end inclusive
         :param yend:bottom side end inclusive
-        :param override_fn: if specified, will call this function with each
-               location, passing in the x and y of that location and will use
-               the returned string for that location, unless its an empty string in
-               which case it uses the default
         :return:
         """
 
@@ -193,7 +193,7 @@ class Map:
             for i in range(xstart, xend):
                 v = str(i).rjust(padding)
                 parts.append(v)
-            parts.append(f"\n")
+            parts.append(f" \n")
             hdr = f"{' ' * padding}"
         else:
             parts=[]
@@ -222,8 +222,6 @@ class Map:
         parts.append(hdr)
         trims.append(0)
 
-        ind = 0
-        result = ""
         # parts within the grid that have size >3 need to have surrounding parts shrunk.
         # if its 4 we shrink the one after it, if its 5 we shrink both before and after
         pi=0
@@ -233,59 +231,76 @@ class Map:
             if t ==5:
                 parts[pi-1] = parts[pi-1][:-1]
             pi += 1
-        for p in parts:
-            result = result + p
-            ind += 1
 
-        return result
+        f = "".join(parts)
+        return f.splitlines()
 
     def _define_islands(self):
         g = islands.Generator(self.num_places, self.seed)
 
-        first = True # we always want a port at the first location with high civ
+        first = True  # we always want a port at the first location with high civ
         for loc in self.places:
             if first:
                 loc.island = g.generate_island(loc.index, islands.ISLAND_CIV_CITY)
             else:
                 loc.island = g.generate_island(loc.index)
-            first=False
-
+            first = False
 
     # render local area which includes islands that are nearby even if not visited
-    def render_local(self, my_loc: tuple[int,int] ):
+    def render_local(self, my_loc: tuple[int, int], max_width: int):
         # get bounding area
-        xstart = max(my_loc[0]-LOCAL_VIEW_SIZE,0)
-        ystart = max(my_loc[1]-LOCAL_VIEW_SIZE,0)
-        xend = min(my_loc[0]+LOCAL_VIEW_SIZE, self.cols)
-        yend = min(my_loc[1]+LOCAL_VIEW_SIZE, self.rows)
+        xstart = max(my_loc[0] - LOCAL_VIEW_SIZE, 0)
+        ystart = max(my_loc[1] - LOCAL_VIEW_SIZE, 0)
+        xend = min(my_loc[0] + LOCAL_VIEW_SIZE, self.cols)
+        yend = min(my_loc[1] + LOCAL_VIEW_SIZE, self.rows)
 
         nearby = self.get_all_nearby_places(my_loc)
         legend = self._render_legend(nearby)
-        ret_map = self.render(xstart,ystart,xend,yend,my_loc)
-        return ret_map + legend
+        p = self._render(xstart, ystart, xend, yend, my_loc)
+        return self._finalize_render(p, legend, max_width)
 
     def _render_legend(self, nearby=None):
         if nearby is None:
             nearby = []
         leg = []
         for p in nearby:
-            s= f"{p.index}".rjust(PADDING)
+            s = f"{p.index}".rjust(PADDING)
             leg.append(f"{s}  {p.island.name}")
         leg.append(f"{'{ }'.rjust(PADDING)}  (your current location)")
         leg.append(f"{'.'.rjust(PADDING)}  Visited spaces")
-        return "\n".join(leg)
 
+        return leg
 
-    def render_all_visited(self, my_loc: tuple[int,int]):
+    def render_all_visited(self, my_loc: tuple[int, int], max_width: int):
         # this is to print the full world map with places visited being rendered.
         legend = self._render_legend()
-        return self.render(0, 0, self.cols, self.rows,
-                            my_loc, visited_only=True) + legend
+        p = self._render(0, 0, self.cols, self.rows,
+                           my_loc, visited_only=True)
+        return self._finalize_render(p, legend, max_width)
 
 
-if __name__ == "__main__":
-    world = Map(60, 25, 13)
-    print(world)
-    print(f"total places {world.num_places}")
-    sub = world.render(27, 16, 28, 17)
-    print(sub)
+    def _finalize_render(self, m:list, l:list, max_width: int):
+        # assume map items each have same len
+        wid = len(m[0])
+        # assume legend items each have same len
+        lwid = len(l[0])
+
+        if wid+lwid > max_width:
+            if wid > max_width:
+                for i, s in enumerate(m):
+                    m[i] = s[:max_width]
+                m.append('Map trimmed due to terminal width')
+            # put legend below
+            return '\n'.join(m+l)
+
+        if len(l) > len(m):
+            m.extend([' ' * wid] * (len(l)-len(m)))
+        elif len(m) > len(l):
+            l = ([''] * (len(m)-len(l))) + l
+
+        res = [f"{a}  {b}" for a, b in zip(m, l)]
+
+
+        return '\n'.join(res)
+
+

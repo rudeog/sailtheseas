@@ -10,9 +10,9 @@ def get_prompt():
     p = f"{hint}{fancy_time(gs.player.current_time())} of {fancy_date(gs.player.current_date())} "\
         f"at {coord_as_str(gs.ship.location)}: {gs.player.get_state_str()}"
 
-    if gs.debug_mode:
-        if gs.player.is_sailing():
-            p = p + gs.ship.debug_prompt()
+    #if gs.debug_mode:
+    #    if gs.player.is_sailing():
+    #        p = p + gs.ship.debug_prompt()
     return p
 
 def run_loop():

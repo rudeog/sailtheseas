@@ -23,7 +23,7 @@ def cmd_info(run_type: RunType, toks):
 
 
 def register_info_cmds():
-    gs.cmdsys.register(Command("read", "topic", cmd_info,
+    gs.cmdsys.register(Command("read", cmd_info,
                                                "Display information about the game. Optionally specify an info topic to "
                                                "display that topic."))
 

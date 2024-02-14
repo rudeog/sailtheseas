@@ -4,32 +4,30 @@ from state import gs
 from util import as_int
 
 def register_status_cmds():
-    gs.cmdsys.register(Command("status", "...", show_status, "Show status"))
-    gs.cmdsys.register(Command("cargo", "", show_cargo, "List cargo on vessel"))
-    gs.cmdsys.register(Command("describe", "...", describe_cmd, "Describe something, such as an island or ship"))
+    gs.cmdsys.register(Command("status",  show_status, "Show status"))
+    gs.cmdsys.register(Command("cargo",  show_cargo, "List cargo on vessel"))
+    gs.cmdsys.register(Command("describe",  describe_island_cmd, "Describe an island given it's ID."))
+    gs.cmdsys.register(Command("ship",  describe_ship_cmd, "Describe your ship"))
 
 
-def describe_cmd(rt: RunType, toks):
+def describe_ship_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
         return True
-    if rt == RunType.HELP or not toks or (toks[0] not in ['ship','island'] and as_int(toks[0])==-1):
-        gs.output(
-            "Possible things to describe:")
-        gs.output("ship - show information about your ship")
+    if rt == RunType.HELP:
+        gs.output("This gives more details about your ship.")
+        return
+
+    gs.ship.describe()
+
+
+def describe_island_cmd(rt: RunType, toks):
+    if rt == RunType.CHECK_AVAILABLE:
+        return True
+    if rt == RunType.HELP:
         gs.output("island <number> - show information about an island with the given number."
                   "If you omit the number and are nearby or on an island, that island is described.", sub_indented=True)
         return
 
-    if toks[0] == "ship":
-        gs.ship.describe()
-    elif toks[0] == "island":
-        describe_island_cmd(toks[1:])
-    i = as_int(toks[0])
-    if i >-1:
-        describe_island_cmd([i])
-
-
-def describe_island_cmd(toks):
     iid = None
     if toks:
         iid = toks[0]
@@ -44,7 +42,7 @@ def describe_island_cmd(toks):
 
     if iid is None:
         gs.gm_output("Unless you are near an island, you need to specify an island by it's number. "
-                     "For example: 'describe island 999'. Use the islands or map command to determine island numbers.")
+                     "For example: 'describe 999'. Use 'nearby', 'islands' or 'm' commands to determine island numbers.")
         return
 
     p = gs.map.get_place_by_index(iid)

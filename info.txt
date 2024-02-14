@@ -1,8 +1,20 @@
 todo:
 - Save/load
 - Bypass intro by supplying cmd line args
-- render world map shrank down and make map bigger
+- come up with a way to render the world map in chunks or something, this would allow us to make a bigger world
 - separate log output
+- nicer formatting on command list
+- get rid of nested commands if possible:
+  - combine map local with islands local
+  - islands will now list all visited and local islands
+  - describe should only apply to island
+  - ship command will replace describe ship
+- maybe do a describe island implicitly when entering its waters
+- ability to pawn off something you don't want at a lower price
+  - pawn command lists prices that will be paid
+  - pawn code will get rid of that item yielding the lower price
+
+
 
 
 
