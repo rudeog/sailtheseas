@@ -259,7 +259,18 @@ class TradingPost:
         # buying - qty represents amount willing to buy
         self.want: cargo.CargoCollection = cargo.CargoCollection()
 
-        self.update()
+    def get(self):
+        return {"have": self.on_hand.get(), "want": self.want.get() }
+
+    def set(self, d: dict) -> bool:
+        try:
+            have = d["have"]
+            want = d["want"]
+            self.on_hand.set(have)
+            self.want.set(want)
+        except KeyError:
+            return False
+        return True
 
     def update(self):
         '''

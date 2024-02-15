@@ -78,7 +78,7 @@ def direction_cmd(rt: RunType, toks):
         return
     old_dir = None
     if gs.ship.b.is_direction():
-        old_dir = gs.ship.b.get()
+        old_dir = gs.ship.b.as_target_or_direction()
     gs.ship.b.reset()  # not navigating
     new_dir = Direction(toks[0])
     gs.ship.b.set_direction(new_dir)

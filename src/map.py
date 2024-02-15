@@ -76,6 +76,11 @@ class Map:
             return None
         return self.places[index]
 
+    def all_locations(self):
+        for inner_list in self.map:
+            for item in inner_list:
+                yield item
+
     def get_location(self, coords: tuple[int, int]):
         """
         Return a location at given coordinates. if invalid return None
@@ -106,6 +111,10 @@ class Map:
     # get a random x,y within the map
     def _get_random_location(self):
         return random.randint(0, self.cols - 1), random.randint(0, self.rows - 1)
+
+    def is_nearby(self, location: tuple[int, int])->bool:
+        n = self.get_all_nearby_places(location)
+        return any(obj.location == location for obj in n)
 
     def get_all_nearby_places(self, location: tuple[int, int], count_only: bool = False,
                               dist: int = LOCAL_VIEW_SIZE, exclude_center: bool = False):

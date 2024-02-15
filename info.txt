@@ -1,15 +1,8 @@
 todo:
-- Save/load
+- Save/load should include random number info so we get proper generation
 - Bypass intro by supplying cmd line args
 - come up with a way to render the world map in chunks or something, this would allow us to make a bigger world
 - separate log output
-- nicer formatting on command list
-- get rid of nested commands if possible:
-  - combine map local with islands local
-  - islands will now list all visited and local islands
-  - describe should only apply to island
-  - ship command will replace describe ship
-- maybe do a describe island implicitly when entering its waters
 - ability to pawn off something you don't want at a lower price
   - pawn command lists prices that will be paid
   - pawn code will get rid of that item yielding the lower price
@@ -26,7 +19,18 @@ The largest merchant ships were the East Indiamen, in three broad classes, of 12
 This page has some info on ships:
 https://www.mq.edu.au/macquarie-archive/journeys/ships/vessels.html
 
-architecture
+roles:
+boatswain: equipment and supply stores, crew discipline
+carpenter: repairs upgrades on ship
+navigator: in charge of navigating
+surgeon: health of the crew
+first mate: managing cargo
+lookout: keeping a lookout for islands, other vessels etc
+cook: feeding the crew
+chaplain: religious figure
+able bodied seamen (100): regular crew
+
+game architecture
 
 travel:
 Moving between squares takes time. Each square represents a degree of lat/long and is 60 nautical miles in length.
@@ -34,3 +38,7 @@ When you are at an island you are always in the center of a square. When you ent
 to the center of that square before moving to another square.
 Therefore you are always moving toward center or away from center. If you change direction and you are moving toward
 center at the time, you will first complete your motion toward the center before moving away from center.
+
+save:
+save data is json and is loaded in 2 phases. first phase loads info that doesn't rely on the map. then the map
+is generated based on the saved seed, then the rest of the data (trade data, visited data) is loaded

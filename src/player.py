@@ -32,6 +32,30 @@ class Player:
         # whether docked or sailing or exploring, etc
         self._state = self._state_e.NONE
 
+    def set(self, d: dict) -> bool:
+        try:
+            self.name = d['n']
+            self.birthplace=d['bp']
+            self._doubloons=d['d']
+            self._state = self._state_e(d['s'])
+            self._days = d['days']
+            self._day_frags = d['frags']
+        except KeyError:
+            return False
+        return True
+
+
+    def get(self) -> dict:
+        return {
+            "n": self.name,
+            "bp": self.birthplace,
+            "d": self.doubloons,
+            "s": self._state.value,
+            "days": self._days,
+            "frags": self._day_frags,
+        }
+
+
     def num_days_elapsed(self):
         return self._days
 
@@ -63,9 +87,6 @@ class Player:
 
     def is_exploring(self):
         return self._state is self._state_e.EXPLORING
-
-    def has_state(self): # should always have state
-        return self._state is not self._state_e.NONE
 
     def set_state_sailing(self):
         self._state=self._state_e.SAILING

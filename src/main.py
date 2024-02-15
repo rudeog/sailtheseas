@@ -8,10 +8,10 @@ import setup
 import map
 from command import CommandSystem, RunType, Command
 from help import register_info_cmds
-from cargo import cargo_types, CARGO_GRAIN
-from save import save_file_exists, load_game, save_game
+from save import save_file_exists, load_game, save_game, load_trading_and_visited_data
 from player import Player
 from ship import Ship
+from crew import Crew
 
 
 # registered quit command
@@ -29,25 +29,37 @@ def cmd_quit(run_type, toks):
             if not gs.confirm("Do you want to quit anyway?"):
                 gs.quitting = False
 
+# todo move this somewhere
+def init_trading_data():
+    for loc in gs.map.places:
+        if loc.island and loc.island.port and loc.island.port.trader:
+            t = loc.island.port.trader
+            t.update()
+
+
+
+
 
 ##################################################################
 
 # initialize our global obj (due to circular refs issue)
 gs.player = Player()
 gs.ship = Ship()
+gs.crew = Crew()
 
 # see if a save game exists
 cont = True
 game_loaded = False
+loaded_game_info=None
 if save_file_exists():
     p = gs.confirm("Found a saved game. Do you want to load it?", True)
     if p is None:
         exit(0)
     if p:
-        err = load_game()
+        loaded_game_info, err = load_game()
         if err:
             gs.output(f"Error loading game: {err}")
-            cont = False
+            cont = gs.confirm("Start a new game instead?",True)
         else:
             game_loaded = True
 
@@ -75,12 +87,24 @@ if cont:
     register_port_cmds()
     register_nav_cmds()
 
-    # place player at 0 location
-    setup.set_player_start_location()
+    if game_loaded:
+        #load trading data now that map is present
+        cont = load_trading_and_visited_data(loaded_game_info)
 
+    else:
+        # place player at 0 location
+        setup.set_player_start_location()
+        # initialize trading data
+        init_trading_data()
+
+if cont:
     # show initial status
     show_status(RunType.RUN, [])
 
 
     # start the play loop
     run_loop()
+
+
+
+

@@ -8,6 +8,7 @@ def register_status_cmds():
     gs.cmdsys.register(Command("cargo",  show_cargo, "List cargo on vessel"))
     gs.cmdsys.register(Command("describe",  describe_island_cmd, "Describe an island given it's ID."))
     gs.cmdsys.register(Command("ship",  describe_ship_cmd, "Describe your ship"))
+    gs.cmdsys.register(Command("crew",  describe_crew_cmd, "Describe your crew"))
 
 
 def describe_ship_cmd(rt: RunType, toks):
@@ -18,6 +19,15 @@ def describe_ship_cmd(rt: RunType, toks):
         return
 
     gs.ship.describe()
+
+def describe_crew_cmd(rt: RunType, toks):
+    if rt == RunType.CHECK_AVAILABLE:
+        return True
+    if rt == RunType.HELP:
+        gs.output("This gives more details about your crew.")
+        return
+
+    gs.crew.describe()
 
 
 def describe_island_cmd(rt: RunType, toks):
@@ -48,9 +58,13 @@ def describe_island_cmd(rt: RunType, toks):
     p = gs.map.get_place_by_index(iid)
     if p and p.visited:
         gs.output(p.island.describe())
+    elif gs.map.is_nearby(gs.ship.location):
+        gs.gm_output(f"This is all I can tell you about {p.island.name}: {p.island.summary()}. If you get closer to it, you "
+                     "can get a more detailed description.")
+
     else:
         gs.gm_output(f"Sorry, {gs.player.name} but you can only describe islands that you are very close to, or islands "
-                     "that you have been close to at some point. ")
+                     "that you have been close to at some point.")
 
 
 def show_status(rt: RunType, toks):
@@ -87,9 +101,9 @@ def show_status(rt: RunType, toks):
         if gs.player.is_sailing():
 
             if gs.ship.b.is_direction():
-                gs.output(f"{gs.ship.name} is heading to the {gs.ship.b.get()}.")
+                gs.output(f"{gs.ship.name} is heading to the {gs.ship.b.as_target_or_direction()}.")
             elif gs.ship.b.is_target():
-                place = gs.map.get_place_at_location(gs.ship.b.get())
+                place = gs.map.get_place_at_location(gs.ship.b.as_target_or_direction())
                 if place:
                     gs.output(f"{gs.ship.name} is heading toward {place.island.name}.")
                 else:  # shouldnt happen

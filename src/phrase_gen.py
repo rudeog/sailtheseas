@@ -10,6 +10,12 @@ player_name_phrases = ["Ok (if that's your real name),",
                        "I had a pet monkey with that name,",
                        "That sounds French, or maybe Irish,",
                        "Very fancy!"]
+crew_name_phrases = ["An excellent hire!", "Looks a bit shifty, but ok.", "A pillar of our society!",
+                     "Will do I suppose.", "Better keep an eye on that one.", "Very experienced, I hear.",
+                     "Their references checked out.", "With a name like that, I hope we can trust them.",
+                     "Sounds foreign.", "Good choice."]
+
+
 ship_name_phrases = ["A ship with that name is bound to have good luck.",
                      "Well, I never heard of such a thing.",
                      "I'll get that stenciled on right away.",

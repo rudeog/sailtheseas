@@ -9,7 +9,7 @@ def register_port_cmds():
     gs.cmdsys.register(Command("dock",  dock_cmd,
                                "Dock your ship at a port. This will allow port activities."))
     gs.cmdsys.register(Command("depart",  depart_cmd,
-                               "Depart from a port."))
+                               "Depart from an island and return to the seas."))
     gs.cmdsys.register(Command("trade",  trade_list_cmd,
                                "List cargo for buying and selling."))
     gs.cmdsys.register(Command("buy",  trade_buy_cmd,

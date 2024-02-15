@@ -16,13 +16,33 @@ class Bearing:
 
     class _type_e(Enum):
         NONE = 0
-        DIRECTION = 1,
+        DIRECTION = 1
         TARGET = 2
 
     def __init__(self):
         self._type = self._type_e.NONE
         self._direction = None
         self._target = (-1, -1)
+
+    def set(self, d: dict) -> bool:
+        try:
+            self.type = self._type_e(d['t'])
+            if d['d']:
+                self._direction=Direction(d['d'])
+            else:
+                self._direction=None
+            self._target = tuple(d['targ'])
+        except KeyError:
+            return False
+        return True
+
+
+    def get(self) -> dict:
+        return {
+            "t": self._type.value,
+            "d": self._direction.short() if self._direction else None,
+            "targ": self._target,
+        }
 
     def reset(self):
         """
@@ -46,7 +66,7 @@ class Bearing:
     def is_target(self):
         return self._type is self._type_e.TARGET
 
-    def get(self):
+    def as_target_or_direction(self):
         if self._type is self._type_e.TARGET:
             return self._target
         if self._type is self._type_e.DIRECTION:
@@ -86,6 +106,35 @@ class Ship:
         # miles from center to edge, so we need to add the extra 12 miles when entering from a diagonal, so
         # if coming in from a diagonal it will be 54 miles
         self._diagonal_entry = False
+
+    def set(self, d: dict) -> bool:
+        try:
+            self.name = d['n']
+            self.cargo_capacity=d['cc']
+            self.miles_traveled = d['mt']
+            self._location = tuple(d['loc'])
+            self.b.set(d['b'])
+            self._toward_center = d['tc']
+            self._miles_traveled_in_square = d['mts']
+            if not self.cargo.set(d['cargo']):
+                return False
+        except KeyError:
+            return False
+        return True
+
+
+    def get(self) -> dict:
+        return {
+            "n": self.name,
+            "cc": self.cargo_capacity,
+            "mt": self.miles_traveled,
+            "loc": self._location,
+            "b": self.b.get(),
+            "tc": self._toward_center,
+            "mts": self._miles_traveled_in_square,
+            "cargo": self.cargo.get(),
+        }
+
 
     @property
     def location(self):
@@ -144,7 +193,7 @@ class Ship:
     SAIL_RESULT_EDGE_OF_WORLD = 2  # reached edge of world (bearing is reset)
     SAIL_RESULT_ENTERED_NEW_SQUARE = 3  # ended up in a new square from this sail action
 
-    def sail(self, miles_available) -> tuple[int, int]:
+    def sail(self, miles_available) -> tuple[int, int, any]:
         """
         Sail the ship
         :param miles_available: how many miles to allow sailing
@@ -160,10 +209,11 @@ class Ship:
         arrived = False  # will be set to true if we are navigating and reach our dest
         hit_edge = False  # will be set to true if we hit the edge of the world
         new_location = False  # we entered a new location
+        first_time_in_square = False
         orig_miles = miles_available
         # there is an edge case where we are moving away from center, but we are now navigating to that center.
         # eg we reached center, passed it, are on the same square and now have nav set to that square
-        if self.b.is_target() and self.b.get() == self._location and not self._toward_center:
+        if self.b.is_target() and self.b.as_target_or_direction() == self._location and not self._toward_center:
             # diagonal will be false here because we are moving away from center
             self._miles_traveled_in_square = _SHORT_RADIUS - self._miles_traveled_in_square
             self._toward_center = True
@@ -186,7 +236,7 @@ class Ship:
                     # reached center, so start moving away from center next
                     self._toward_center = False
                     self._diagonal_entry = False
-                    if self.b.is_target() and self._location == self.b.get():
+                    if self.b.is_target() and self._location == self.b.as_target_or_direction():
                         # throw away rest of miles we are done navigating to target
                         arrived = True
                         break
@@ -194,9 +244,9 @@ class Ship:
                     self._toward_center = True
                     # we move to a new square or hit the edge
                     if self.b.is_direction():
-                        coords = self.b.get().to_coords()
+                        coords = self.b.as_target_or_direction().to_coords()
                     else:
-                        coords = get_step_towards_destination(self._location, self.b.get())
+                        coords = get_step_towards_destination(self._location, self.b.as_target_or_direction())
                     # if both are either 1 or -1 we are entering on a diagonal and must travel further
                     # to get to center of the new square
                     is_diagonal = (coords[0] and coords[1])
@@ -205,18 +255,21 @@ class Ship:
                     loc = gs.map.get_location(new_coords)
                     if loc:
                         self._location = new_coords
+                        if not loc.visited:
+                            first_time_in_square = True
                         loc.visited = True
                         new_location = True
                     else:  # hit edge so throw away rest of miles
                         hit_edge = True
                         break
         if arrived:
-            return self.SAIL_RESULT_ARRIVED, orig_miles-miles_available
+            return self.SAIL_RESULT_ARRIVED, orig_miles-miles_available, None
         if hit_edge:
-            return self.SAIL_RESULT_EDGE_OF_WORLD, orig_miles-miles_available
+            return self.SAIL_RESULT_EDGE_OF_WORLD, orig_miles-miles_available, None
         if new_location:
-            return self.SAIL_RESULT_ENTERED_NEW_SQUARE, orig_miles-miles_available
-        return 0,orig_miles-miles_available
+            return self.SAIL_RESULT_ENTERED_NEW_SQUARE, orig_miles-miles_available, first_time_in_square
+
+        return 0, orig_miles-miles_available, None
 
     def describe(self):
         wt = int(self.cargo.total_weight()/2000)

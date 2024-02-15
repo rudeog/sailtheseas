@@ -33,6 +33,23 @@ def _save(data_to_write):
         return f"An unexpected error occurred: {e}"
 
 
+def _save_trading_data() -> dict:
+    ret = {}
+    for pl in gs.map.places:
+        if pl.island and pl.island.port and pl.island.port.trader:
+            t = pl.island.port.trader
+            ret[pl.index] = t.get()
+    return ret
+
+
+def _save_visited_data() -> list:
+    ret = []
+    for loc in gs.map.all_locations():
+        if loc.visited:
+            ret.append(loc.location)
+    return ret
+
+
 def _load():
     """
     return a pair of strings, the first is an error (empty if none),
@@ -51,27 +68,63 @@ def _load():
         return f"An unexpected error occurred: {e}", ""
     return "", content
 
+
 def save_game():
-    data = {
-        "seed": gs.seed,
-        "player_name": gs.player.name,
-        "player_birthplace": gs.player.birthplace,
-        "player_doubloons": gs.player.doubloons,
-        "ship_name": gs.ship.name,
-    }
+    data = {}
+    data["player"] = gs.player.get()
+    data["ship"] = gs.ship.get()
+    data["crew"] = gs.crew.get()
+    data["seed"] = gs.seed
+    data["trade"] = _save_trading_data()
+    data["visited"] = _save_visited_data()
+
     json_string = json.dumps(data)
     err = _save(json_string)
+
     return err
 
 
 def load_game():
+    # load the game, set initial data, return loaded object
     err, json_string = _load()
     if err:
-        return err
+        return None, err
     data = json.loads(json_string)
-    gs.seed = data["seed"]
-    gs.player.name = data["player_name"]
-    gs.player.birthplace = data["player_birthplace"]
-    gs.player.add_remove_doubloons(data["player_doubloons"])
-    gs.ship.name = data["ship_name"]
-    return ""
+    try:
+        gs.seed = data["seed"]
+        d=data['player']
+        if not gs.player.set(d):
+            raise KeyError
+        d=data["ship"]
+        if not gs.ship.set(d):
+            raise KeyError
+        d=data["crew"]
+        if not gs.crew.set(d):
+            raise KeyError
+
+    except KeyError:
+        return None, "Save file may be from an earlier version."
+    return data, ""
+
+
+def load_trading_and_visited_data(loaded: dict):
+    try:
+        trade_info = loaded["trade"]
+        for k, v in trade_info.items():
+            loc = gs.map.get_place_by_index(int(k))
+            if loc and loc.island and loc.island.port and loc.island.port.trader:
+                t = loc.island.port.trader
+                t.set(v)
+            else:
+                gs.output(f"load warning: failed to find trading post at island {k}")
+
+        # visited data
+        visited_info = loaded['visited']
+        for vis in visited_info:
+            loc = gs.map.get_location(vis)
+            loc.visited = True
+        return True
+
+    except Exception as e:
+        gs.output(f"Error loading game: invalid save file: {e}")
+        return False

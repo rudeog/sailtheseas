@@ -38,13 +38,26 @@ CARGO_GOLD = 7
 
 
 class CargoItem:
-    def __init__(self, ti: int, q: int):
+    def __init__(self, ti: int=0, q: int=0):
         self._type_idx = ti
         self._type: CargoType = cargo_types[ti]
         self._quantity: int = q
         # if selling this ends up being the price. if buying this ends up
         # being the amount paid per unit. if on ship, it is how much was paid for it(?)
         self._price_per = 0
+
+    def get(self):
+        return {"ti": self.type_idx, "q": self._quantity, "p": self._price_per}
+
+    def set(self, d: dict) -> bool:
+        try:
+            self._type_idx = d["ti"]
+            self._type: CargoType = cargo_types[self._type_idx]
+            self._quantity = d["q"]
+            self._price_per = d["p"]
+        except KeyError:
+            return False
+        return True
 
     @property
     def price_per(self):
@@ -61,7 +74,6 @@ class CargoItem:
     @property
     def type_idx(self):
         return self._type_idx
-
 
     def __str__(self):
         return f"{self.quantity} {self.type.units} of {self.type.name}"
@@ -87,9 +99,22 @@ class CargoCollection:
             raise TypeError("idx must be a cargo type index")
         return next((p for p in self.cargo if p.type_idx == idx), None)
 
+    def set(self, l: list):
+        self.cargo = [CargoItem() for _ in range(len(l))]
+        for i, v in enumerate(l):
+            if not self.cargo[i].set(v):
+                return False
+        return True
+
+    def get(self) -> list:
+        ret = []
+        for v in self.cargo:
+            ret.append(v.get())
+        return ret
+
     def total_weight(self):
         # total weight in pounds for the collection
-        w=0
+        w = 0
         for it in self.cargo:
             w = w + (it.quantity * it.type.weight_per_unit)
         return w

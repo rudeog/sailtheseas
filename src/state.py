@@ -25,6 +25,7 @@ class GlobalState:
         self.seed = DEFAULT_SEED
         self.player = None
         self.ship = None
+        self.crew = None
 
         self.world_name = None
 
@@ -44,7 +45,8 @@ class GlobalState:
     # output as though the gm is speaking
     def gm_output(self, output_text, newline: bool = True, nowrap: bool = False,
                   indented: bool = False, sub_indented: bool = False):
-        self.output(f"{self.game_master.first}:", newline=False)
+        if self.game_master:
+            self.output(f"{self.game_master.first}:", newline=False)
         self.output(" " + output_text, newline, nowrap, indented, sub_indented)
 
     def output(self, output_text, newline: bool = True, nowrap: bool = False,
@@ -56,13 +58,22 @@ class GlobalState:
         print(output_text, end="\n" if newline else "")
 
     def gm_input(self, prompt):
-        return self.input(f"{self.game_master.first}: {prompt}")
+        if self.game_master:
+            return self.input(f"{self.game_master.first}: {prompt}")
+        return self.input(prompt)
 
     def input(self, prompt):
-        return input(prompt)
+        while True:
+            r = input(prompt)
+            if r:
+                break
+            self.gm_output("You didn't enter anything!")
+        return r
 
     def gm_confirm(self, prompt="Are you sure?", cancel=False):
-        return self.confirm(f"{self.game_master.first}: {prompt}", cancel)
+        if self.game_master:
+            return self.confirm(f"{self.game_master.first}: {prompt}", cancel)
+        return self.confirm(prompt,cancel)
 
     def confirm(self, prompt="Are you sure?", cancel=False):
         valid = ['y', 'n']

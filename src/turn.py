@@ -14,7 +14,7 @@ def pass_time():
 def _sail():
     # figure out how many miles we will travel based on conditions, equipment and crew
     miles_available = 24  # assumes 4 knots
-    sail_result, miles_traveled = gs.ship.sail(miles_available)
+    sail_result, miles_traveled, other = gs.ship.sail(miles_available)
     if miles_traveled:
         gs.output(f"{gs.ship.name} sails {miles_traveled} miles at an average speed of 4 knots.")
     if sail_result == gs.ship.SAIL_RESULT_EDGE_OF_WORLD:
@@ -36,3 +36,6 @@ def _sail():
         if pl:
             dist = gs.ship.distance_to_location(gs.ship.location)
             gs.output(f"Your lookout has sighted the island of {pl.island.name}. The island is {dist} miles away.")
+            if other:  # first time here
+                gs.gm_output("Here is some more information I found about the island:")
+                gs.output(pl.island.describe())

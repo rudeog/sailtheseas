@@ -125,6 +125,8 @@ class Direction:
     def to_coords(self):
         return _dir_coords[self.dir]
 
+    def short(self):
+        return _valid_dirs[self.dir]
 
 def fancy_date(current_date):
     def ordinal_suffix(day):
