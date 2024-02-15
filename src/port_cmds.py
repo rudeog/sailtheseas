@@ -31,12 +31,14 @@ def dock_cmd(rt: RunType, toks):
         return
     if not toks:
         p = gs.map.get_place_at_location(gs.ship.location)
-        if gs.ship.distance_to_location(gs.ship.location) > 0:
-            gs.output("You are not close enough to the island to dock")
+        dist = gs.ship.distance_to_location(gs.ship.location)
+        if dist > 0:
+            gs.output(f"{gs.crew.boatswain}: We are {dist} miles away from the island, and can't dock until we are closer.")
+
             return
         if p and p.island.port:
             gs.player.set_state_docked()
-            gs.output(f"{gs.ship.name} is now docked at {p.island.port.name} on the island of {p.island.name}.")
+            gs.output(f"{gs.crew.boatswain}: {gs.ship.name} is now docked at {p.island.port.name} on the island of {p.island.name}.")
             gs.ship.b.reset()
 
 
@@ -52,7 +54,7 @@ def depart_cmd(rt: RunType, toks):
     if not toks:
         gs.player.set_state_sailing()
         p = gs.map.get_place_at_location(gs.ship.location)
-        gs.output(f"{gs.ship.name} has departed from {p.island.name}.")
+        gs.output(f"{gs.crew.boatswain}: {gs.ship.name} has departed from {p.island.name}.")
 
 
 def _show_bs_help():
@@ -162,7 +164,7 @@ def trade_buy(t: TradingPost, qty, type_idx, pm):
     if qty < 0:  # all
         qty = carg.quantity
     elif qty > carg.quantity or qty < 0:
-        gs.output(f"{pm.first}: That is more than I have available.")
+        gs.output(f"{gs.crew.firstmate}: That is more than we have available, captain.")
         return
 
     if qty * carg.price_per > gs.player.doubloons:
@@ -178,7 +180,7 @@ def trade_buy(t: TradingPost, qty, type_idx, pm):
             wt = f"{weight} pounds"
         else:
             wt = f"{int(weight / 2000)} tons"
-        gs.gm_output(f"Your ship has {avail} tons of remaining capacity, and "
+        gs.output(f"{gs.crew.firstmate}: We have {avail} tons of remaining capacity, and "
                      f"would be overburdened with the additional weight of {wt}.")
         return
 
@@ -204,7 +206,7 @@ def trade_buy(t: TradingPost, qty, type_idx, pm):
 def trade_sell(t: TradingPost, qty, type_idx, pm):
     my_cargo = gs.ship.cargo[type_idx]
     if not my_cargo:
-        gs.gm_output(f"You don't have any {cargo_types[type_idx].name} to sell.")
+        gs.output(f"{gs.crew.firstmate}: Captain, we don't have any {cargo_types[type_idx].name} to sell.")
         return
 
     want_carg = t.want[type_idx]

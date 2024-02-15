@@ -1,5 +1,5 @@
 from state import gs
-
+from util import to_proper_case
 NUM_ROLES = 8
 roles = ['boatswain', 'first mate', 'carpenter', 'navigator', 'surgeon', 'lookout', 'cook', 'chaplain']
 role_attrs = ['boatswain', 'firstmate', 'carpenter', 'navigator', 'surgeon', 'lookout', 'cook', 'chaplain']
@@ -23,7 +23,7 @@ class CrewMember:
         # at some point we might have skill level and abilities
 
     def __str__(self):
-        return roles[self.idx]
+        return f"{to_proper_case(roles[self.idx])} {self.name}"
 
     def description(self):
         return role_desc[self.idx]

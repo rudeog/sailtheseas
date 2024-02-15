@@ -40,28 +40,24 @@ def navigate_cmd(rt: RunType, toks):
 
     integer_number = as_int(toks[0])
     if integer_number < 0:
-        gs.output("Invalid location id. You must specify a number.")
+        gs.gm_output("Invalid location id. You must specify a number.")
         return
 
     place = gs.map.get_place_by_index(integer_number)
-    if not place or not place.visited:
-        place = None
-        # see if its within range (ie visible on short range map)
-        pl = gs.map.get_all_nearby_places(gs.ship.location)
-        for p in pl:
-            if p.index == integer_number:
-                place = p
+    if place and not place.visited:
+        if not gs.map.is_nearby(gs.ship.location, place.location):
+            place = None
 
     if not place:
-        gs.output("You have not visited there, and wouldn't know how to get there from here.")
+        gs.output(f"{gs.crew.navigator}: We have not visited there, and I have no knowledge of how to get there from here.")
         return
 
     # reset regardless at this point
     gs.ship.b.reset()
     if gs.ship.distance_to_location(place.location) == 0:
-        gs.output("You are already there.")
+        gs.output(f"{gs.crew.navigator}: We are already there, captain.")
         return
-    gs.output(f"{gs.ship.name} is set to sail to {place.island.name}")
+    gs.output(f"{gs.crew.navigator}: {gs.ship.name} is set to sail to {place.island.name}")
     gs.ship.b.set_target(place.location)
 
 
@@ -84,9 +80,9 @@ def direction_cmd(rt: RunType, toks):
     gs.ship.b.set_direction(new_dir)
 
     if old_dir and (old_dir != new_dir):
-        gs.output(f"{gs.ship.name} has changed direction from {old_dir} to {new_dir}")
+        gs.output(f"{gs.crew.navigator}: {gs.ship.name} has changed direction from {old_dir} to {new_dir}.")
     else:
-        gs.output(f"{gs.ship.name} is set to sail {new_dir}")
+        gs.output(f"{gs.crew.navigator}: {gs.ship.name} is set to sail {new_dir}!")
 
 
 def map_cmd(rt: RunType, toks):
@@ -124,7 +120,8 @@ def sail_cmd(rt: RunType, toks):
         return False
     if rt == RunType.HELP or not gs.ship.b.is_set():
         gs.output(
-            "To use this command, you must first set your direction, or navigate using the direction or navigate command.")
+            f"{gs.crew.boatswain}: Captain, I have not received any instructions from {gs.crew.navigator}.")
+        gs.gm_output("You must first set your direction, or navigate using the 'dir' or 'nav' command.")
         return
 
     # all we need to do is pass the time, it will take care of the rest
@@ -138,6 +135,7 @@ def list_islands_nearby_cmd(rt: RunType, toks):
     if rt == RunType.HELP:
         gs.output("This displays a list of nearby islands with their id, distance and direction")
         return
+    gs.output(f"{gs.crew.navigator}: Here are details about nearby islands.")
     _list_islands(True)
 
 def list_islands_cmd(rt: RunType, toks):
@@ -148,6 +146,7 @@ def list_islands_cmd(rt: RunType, toks):
     if rt == RunType.HELP:
         gs.output("This displays a list of all known islands in the world with their id, distance and direction")
         return
+    gs.output(f"{gs.crew.navigator}: Here are details about all the islands we know about in {gs.world_name}.")
     _list_islands(False)
 
 def _list_islands(local_only: bool):

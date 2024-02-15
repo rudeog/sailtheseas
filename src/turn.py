@@ -16,9 +16,10 @@ def _sail():
     miles_available = 24  # assumes 4 knots
     sail_result, miles_traveled, other = gs.ship.sail(miles_available)
     if miles_traveled:
-        gs.output(f"{gs.ship.name} sails {miles_traveled} miles at an average speed of 4 knots.")
+        gs.output(f"{gs.crew.boatswain}: {gs.ship.name} sails {miles_traveled} miles at an average speed of 4 knots.")
     if sail_result == gs.ship.SAIL_RESULT_EDGE_OF_WORLD:
-        gs.output("You have reached the edge of the world. Please choose a new direction or target.")
+        gs.output(f"{gs.crew.navigator}: I don't mean to put fear into you captain, but we have reached the "
+                  "edge of the world. Please choose a new direction or target.")
         gs.ship.b.reset()  # stop navigating, the player must determine what to do next
         # and they must move back to center of square before going anywhere else
 
@@ -29,13 +30,14 @@ def _sail():
             d = p.island.name
         else:
             d = "your destination"
-        gs.output(f"{gs.ship.name} has arrived at {d}.")
+        gs.output(f"{gs.crew.boatswain}: {gs.ship.name} has arrived at {d}.")
         gs.ship.b.reset()
     elif sail_result == gs.ship.SAIL_RESULT_ENTERED_NEW_SQUARE:
         pl = gs.map.get_place_at_location(gs.ship.location)
         if pl:
             dist = gs.ship.distance_to_location(gs.ship.location)
-            gs.output(f"Your lookout has sighted the island of {pl.island.name}. The island is {dist} miles away.")
+            gs.output(f"{gs.crew.lookout}: I have sighted the island of {pl.island.name}!")
+            gs.output(f"{gs.crew.navigator}: The island is {dist} miles away, captain.")
             if other:  # first time here
                 gs.gm_output("Here is some more information I found about the island:")
                 gs.output(pl.island.describe())

@@ -46,7 +46,7 @@ class GlobalState:
     def gm_output(self, output_text, newline: bool = True, nowrap: bool = False,
                   indented: bool = False, sub_indented: bool = False):
         if self.game_master:
-            self.output(f"{self.game_master.first}:", newline=False)
+            self.output(f"GM {self.game_master.first}:", newline=False)
         self.output(" " + output_text, newline, nowrap, indented, sub_indented)
 
     def output(self, output_text, newline: bool = True, nowrap: bool = False,
@@ -59,7 +59,7 @@ class GlobalState:
 
     def gm_input(self, prompt):
         if self.game_master:
-            return self.input(f"{self.game_master.first}: {prompt}")
+            return self.input(f"GM {self.game_master.first}: {prompt}")
         return self.input(prompt)
 
     def input(self, prompt):
@@ -72,7 +72,7 @@ class GlobalState:
 
     def gm_confirm(self, prompt="Are you sure?", cancel=False):
         if self.game_master:
-            return self.confirm(f"{self.game_master.first}: {prompt}", cancel)
+            return self.confirm(f"GM {self.game_master.first}: {prompt}", cancel)
         return self.confirm(prompt,cancel)
 
     def confirm(self, prompt="Are you sure?", cancel=False):

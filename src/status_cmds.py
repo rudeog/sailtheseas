@@ -58,7 +58,7 @@ def describe_island_cmd(rt: RunType, toks):
     p = gs.map.get_place_by_index(iid)
     if p and p.visited:
         gs.output(p.island.describe())
-    elif gs.map.is_nearby(gs.ship.location):
+    elif gs.map.is_nearby(gs.ship.location, p.location):
         gs.gm_output(f"This is all I can tell you about {p.island.name}: {p.island.summary()}. If you get closer to it, you "
                      "can get a more detailed description.")
 
@@ -123,9 +123,9 @@ def show_cargo(rt: RunType, toks):
         return
     if not toks:
         if len(gs.ship.cargo) == 0:
-            gs.output(f"{gs.ship.name} is not carrying any cargo at this time.")
+            gs.output(f"{gs.crew.firstmate}: {gs.ship.name} is not carrying any cargo at this time.")
         else:
-            gs.output(f"{gs.ship.name} is currently carrying the following cargo:")
+            gs.output(f"{gs.crew.firstmate}: {gs.ship.name} is currently carrying the following cargo:")
             for c in gs.ship.cargo:
                 gs.output(f"[{c.type.code}] {c} (paid {c.price_per}D per unit)")
 

@@ -112,9 +112,15 @@ class Map:
     def _get_random_location(self):
         return random.randint(0, self.cols - 1), random.randint(0, self.rows - 1)
 
-    def is_nearby(self, location: tuple[int, int])->bool:
+    def is_nearby(self, location: tuple[int, int], other: tuple[int,int])->bool:
+        '''
+        returns true if one location is nearby another
+        :param other: location to look for
+        :param location: location to look around
+        :return:
+        '''
         n = self.get_all_nearby_places(location)
-        return any(obj.location == location for obj in n)
+        return any(obj.location == other for obj in n)
 
     def get_all_nearby_places(self, location: tuple[int, int], count_only: bool = False,
                               dist: int = LOCAL_VIEW_SIZE, exclude_center: bool = False):
