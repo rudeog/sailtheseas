@@ -1,4 +1,6 @@
 # generate interesting phrases based on input supplied
+import random
+
 from util import custom_hash
 # in response to a player giving their name
 player_name_phrases = ["Ok (if that's your real name),",

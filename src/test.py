@@ -6,6 +6,7 @@ from state import gs
 from setup import base_setup
 from command import RunType
 import islands
+import map
 
 
 def initial_setup():
@@ -25,6 +26,9 @@ def dump_islands():
     print("Islands:")
     for isl in gs.map.places:
         print(f"{isl.island.name} - {isl.island.summary()}")
+
+def describe_island(i):
+    gs.output(gs.map.places[i].island.describe())
 
 def custom_island():
     g=islands.Generator(1,1)
@@ -53,9 +57,14 @@ initial_setup()
 #show_status(RunType.RUN, [])
 
 #dump_islands()
+'''
 i = custom_island()
 dump_trade_stuff_for_island(i)
 i.port.trader.update()
 dump_trade_stuff_for_island(i)
 i.port.trader.update()
 dump_trade_stuff_for_island(i)
+'''
+
+gs.map = map.Map(30, 30, gs.seed)
+describe_island(38)

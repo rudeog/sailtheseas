@@ -77,13 +77,17 @@ class ListSelector:
     """
 
     def __init__(self, rng, in_list):
+        self.in_list = in_list
+        if not len(in_list):
+            return
         self.rng = rng
         # need ptrs so we dont shuffle the original list
         self.list_ptr = list(range(len(in_list)))
-        self.in_list = in_list
         self.index = len(in_list)
 
     def select(self):
+        if not len(self.in_list):
+            return ""
         # If all words have been used, shuffle the list and reset the index
         if self.index == len(self.list_ptr):
             self.rng.shuffle(self.list_ptr)

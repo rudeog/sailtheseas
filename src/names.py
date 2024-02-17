@@ -35,7 +35,7 @@ names_compound = ["wen", "gu", "ru", "xa", "po", "kla", "pu", "jela", "to",
                   "ko", "zi", "ka", "wo", "bo", "the", "ze", "fea", "taa", "qu","spra","cke"]
 names_compound_suffixes = ["so","lo","ez", "la", "cla", "hla", "xy", "fi"]
 # places compound share prefix from above
-places_compound = ["fa", "gro","qua","bal","su","xin","cha","ka","kwa","wa","a","o"]
+places_compound = ["fa", "gro","qua","bal","su","xin","cha","ka","kwa","wa","cla","jo","nu"]
 
 
 western_places = ["Giles", "York", "Wales", "London", "Amsterdam", "Paris", "East", "North", "South", "West",

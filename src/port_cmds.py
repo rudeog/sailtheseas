@@ -6,15 +6,15 @@ from util import as_int, to_proper_case
 
 
 def register_port_cmds():
-    gs.cmdsys.register(Command("dock",  dock_cmd,
+    gs.cmdsys.register(Command("dock", dock_cmd,
                                "Dock your ship at a port. This will allow port activities."))
-    gs.cmdsys.register(Command("depart",  depart_cmd,
+    gs.cmdsys.register(Command("depart", depart_cmd,
                                "Depart from an island and return to the seas."))
-    gs.cmdsys.register(Command("trade",  trade_list_cmd,
+    gs.cmdsys.register(Command("trade", trade_list_cmd,
                                "List cargo for buying and selling."))
-    gs.cmdsys.register(Command("buy",  trade_buy_cmd,
+    gs.cmdsys.register(Command("buy", trade_buy_cmd,
                                "Buy cargo."))
-    gs.cmdsys.register(Command("sell",  trade_sell_cmd,
+    gs.cmdsys.register(Command("sell", trade_sell_cmd,
                                "Sell cargo."))
 
 
@@ -33,12 +33,14 @@ def dock_cmd(rt: RunType, toks):
         p = gs.map.get_place_at_location(gs.ship.location)
         dist = gs.ship.distance_to_location(gs.ship.location)
         if dist > 0:
-            gs.output(f"{gs.crew.boatswain}: We are {dist} miles away from the island, and can't dock until we are closer.")
+            gs.output(
+                f"{gs.crew.boatswain}: We are {dist} miles away from the island, and can't dock until we are closer.")
 
             return
         if p and p.island.port:
             gs.player.set_state_docked()
-            gs.output(f"{gs.crew.boatswain}: {gs.ship.name} is now docked at {p.island.port.name} on the island of {p.island.name}.")
+            gs.output(
+                f"{gs.crew.boatswain}: {gs.ship.name} is now docked at {p.island.port.name} on the island of {p.island.name}.")
             gs.ship.b.reset()
 
 
@@ -69,12 +71,18 @@ def _show_bs_help():
     gs.output("  'buy 10 gr' - buy 10 units of grain.")
     gs.output("  'sell all lu' - sell all lumber in cargo.")
 
+
 def trade_list_cmd(rt: RunType, toks):
     return trade_shared_cmd(rt, ['list'] + toks)
+
+
 def trade_buy_cmd(rt: RunType, toks):
     return trade_shared_cmd(rt, ['buy'] + toks)
+
+
 def trade_sell_cmd(rt: RunType, toks):
     return trade_shared_cmd(rt, ['sell'] + toks)
+
 
 def trade_shared_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
@@ -128,7 +136,8 @@ def trade_shared_cmd(rt: RunType, toks):
                 youhave = f" (you have {incargo.quantity} {wtb.type.units})"
             else:
                 youhave = ""
-            gs.output(f"[{wtb.type.code}] {wtb.type.name} {wtb.quantity} {wtb.type.units} - {wtb.price_per}D ea.{youhave}")
+            gs.output(
+                f"[{wtb.type.code}] {wtb.type.name} {wtb.quantity} {wtb.type.units} - {wtb.price_per}D ea.{youhave}")
         gs.output("")
         gs.gm_output(f"You have {gs.player.doubloons}D "
                      f"and {int((gs.ship.cargo_capacity - gs.ship.cargo.total_weight()) / 2000)} "
@@ -181,7 +190,7 @@ def trade_buy(t: TradingPost, qty, type_idx, pm):
         else:
             wt = f"{int(weight / 2000)} tons"
         gs.output(f"{gs.crew.firstmate}: We have {avail} tons of remaining capacity, and "
-                     f"would be overburdened with the additional weight of {wt}.")
+                  f"would be overburdened with the additional weight of {wt}.")
         return
 
     # its a go
@@ -190,7 +199,7 @@ def trade_buy(t: TradingPost, qty, type_idx, pm):
     # do we already have this type of cargo
     have_it = gs.ship.cargo[type_idx]
     if have_it:
-        current_basis = int((have_it.price_per+carg.price_per)/2)
+        current_basis = int((have_it.price_per + carg.price_per) / 2)
     else:
         current_basis = carg.price_per
 
@@ -217,7 +226,8 @@ def trade_sell(t: TradingPost, qty, type_idx, pm):
     if qty == -1:  # all
         qty = my_cargo.quantity
     elif qty > my_cargo.quantity or qty < 0:
-        gs.output(f"{pm.first}: You are trying to sell more than you have. You must not try to deal with me in a crooked manner!")
+        gs.output(
+            f"{pm.first}: You are trying to sell more than you have. You must not try to deal with me in a crooked manner!")
         return
 
     if qty > want_carg.quantity:

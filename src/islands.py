@@ -1,6 +1,7 @@
 import random
 from names import PlaceGenerator, NameGenerator
 import cargo
+from place_descriptions import DescGen, IslandModel
 from util import choices_ex
 
 # each island has a class of activities they do. They may have more than one
@@ -94,6 +95,7 @@ class Generator:
 
         self.pg = PlaceGenerator(name_seed)
         self.ng = NameGenerator(name_seed)
+        self.desc_gen = DescGen(name_seed, self.ng, self.pg)
 
     def _gen_type(self):
 
@@ -125,7 +127,10 @@ class Generator:
         elif sc is None:
             sc = ISLAND_CLASS_NONE
 
+
         island = Island(idx, civ_type, self.ng, self.pg, pc, sc)
+        model = IslandModel(island)
+        island.description = self.desc_gen.generate(model)
         return island
 
     def _assign_classes(self, civ_type):
@@ -193,7 +198,7 @@ class Island:
             port_name_ethnicity = "w"
 
         self.name = pg.name(place_ethnicity)
-
+        self.description = ""
         if civ_type != ISLAND_CIV_UNINHABITED:
             self.ruler = ng.name("m", ruler_ethnicity)
         else:
@@ -227,20 +232,21 @@ class Island:
     def describe(self):
         descript = f"The island of {self.name} {civ_descriptions_conv[self.civ_type]} "
         if self.ruler:
-            descript += f"which is ruled by {self.ruler}. "
+            descript += f"which is ruled by {self.ruler}."
         else:
-            descript += f"and has no ruler. "
+            descript += f"and has no ruler."
 
         if self.primary_class > ISLAND_CLASS_NONE:
             if self.secondary_class:
-                descript += f"It engages primarily in {class_descriptions[self.primary_class].lower()} and to a lesser " + \
-                            f"degree in {class_descriptions[self.secondary_class].lower()}. "
+                descript += f" It engages primarily in {class_descriptions[self.primary_class].lower()} and to a lesser " + \
+                            f"degree in {class_descriptions[self.secondary_class].lower()}."
             else:
-                descript += f"It engages in {class_descriptions[self.primary_class]}. "
+                descript += f" It engages in {class_descriptions[self.primary_class]}."
 
         if self.port:
-            descript += f"It has a port called {self.port.name} which is run by {self.port.port_master}."
+            descript += f" It has a port called {self.port.name} which is run by {self.port.port_master}."
 
+        descript += " " + self.description
         return descript
 
 
