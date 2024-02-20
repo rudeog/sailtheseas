@@ -13,9 +13,8 @@ STARTING_DATE = date_constant = datetime(1716, 6, 1)
 class Player:
     class _state_e(Enum):
         NONE = 0
-        DOCKED = 1
-        EXPLORING = 2
-        SAILING = 3
+        ONLAND = 1
+        ATSEA = 2
 
     def __init__(self):
         # player's personal info
@@ -80,27 +79,20 @@ class Player:
         return self._day_frags
 
     def is_sailing(self):
-        return self._state is self._state_e.SAILING
+        return self._state is self._state_e.ATSEA
 
-    def is_docked(self):
-        return self._state is self._state_e.DOCKED
-
-    def is_exploring(self):
-        return self._state is self._state_e.EXPLORING
+    def is_onland(self):
+        return self._state is self._state_e.ONLAND
 
     def set_state_sailing(self):
-        self._state=self._state_e.SAILING
-    def set_state_docked(self):
-        self._state=self._state_e.DOCKED
-    def set_state_exploring(self):
-        self._state=self._state_e.EXPLORING
+        self._state=self._state_e.ATSEA
+    def set_state_landed(self):
+        self._state=self._state_e.ONLAND
 
 
     def get_state_str(self):
-        if self.is_docked():
+        if self.is_onland():
             return "on land"
-        elif self.is_exploring():
-            return "exploring"
         elif self.is_sailing():
             return "aboard ship"
         else:

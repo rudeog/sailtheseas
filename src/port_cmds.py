@@ -2,12 +2,14 @@ from command import RunType, Command
 from islands import TradingPost
 from state import gs
 from cargo import cargo_types, cargo_type_lookup
+from explore import do_explore
 from util import as_int, to_proper_case
 
 
 def register_port_cmds():
-    gs.cmdsys.register(Command("dock", dock_cmd,
-                               "Dock your ship at a port. This will allow port activities."))
+    gs.cmdsys.register(Command("land", land_cmd,
+                               "Land on an island. If the island has a port you will dock at the "
+                               "port, otherwise you will drop anchor and disembark."))
     gs.cmdsys.register(Command("depart", depart_cmd,
                                "Depart from an island and return to the seas."))
     gs.cmdsys.register(Command("trade", trade_list_cmd,
@@ -16,37 +18,44 @@ def register_port_cmds():
                                "Buy cargo."))
     gs.cmdsys.register(Command("sell", trade_sell_cmd,
                                "Sell cargo."))
+    gs.cmdsys.register(Command("explore", explore_cmd,
+                               "Explore the island."))
 
 
-def dock_cmd(rt: RunType, toks):
+def land_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
         if gs.player.is_sailing():
+            # we will show the command even if unavailable to give the opportunity to explain that we still need to sail
             p = gs.map.get_place_at_location(gs.ship.location)
-            if p and p.island.port:
+            if p:
                 return True
         return False
     if rt == RunType.HELP:
         gs.output(
-            "If you are nearby an island with a port, you may dock your ship at that port.")
+            "If you are at an island, you may land your ship there. Landing at an island with "
+            "a port will dock you at that port. Landing at an island without a port will mean dropping anchor "
+            "and going ashore with your crew.")
         return
     if not toks:
-        p = gs.map.get_place_at_location(gs.ship.location)
+        p = gs.map.get_place_at_location(gs.ship.location) # should alway succeed due to above check
         dist = gs.ship.distance_to_location(gs.ship.location)
         if dist > 0:
             gs.output(
-                f"{gs.crew.boatswain}: We are {dist} miles away from the island, and can't dock until we are closer.")
+                f"{gs.crew.boatswain}: We are {dist} miles away from the island, and can't land until we are close to shore.")
 
             return
-        if p and p.island.port:
-            gs.player.set_state_docked()
+        gs.player.set_state_landed()
+        if p.island.port:
             gs.output(
                 f"{gs.crew.boatswain}: {gs.ship.name} is now docked at {p.island.port.name} on the island of {p.island.name}.")
-            gs.ship.b.reset()
+        else:
+            gs.output(f"{gs.crew.boatswain}: {gs.ship.name} has dropped anchor and the crew has gone ashore.")
+        gs.ship.b.reset() # reset bearing since we are not sailing
 
 
 def depart_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_exploring() or gs.player.is_docked():
+        if gs.player.is_onland():
             return True
         return False
     if rt == RunType.HELP:
@@ -86,7 +95,7 @@ def trade_sell_cmd(rt: RunType, toks):
 
 def trade_shared_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_docked():
+        if gs.player.is_onland():
             place = gs.map.get_place_at_location(gs.ship.location)
             if place and place.island and place.island.port:  # should be true
                 return True
@@ -251,3 +260,17 @@ def trade_sell(t: TradingPost, qty, type_idx, pm):
                  f"for a total price of {sale_price}D which yields a {pl} of {prof_loss}D. "
                  f"You now have {gs.player.doubloons}D.")
     gs.output(f"{pm.first}: Looking forward to doing more business with you.")
+
+def explore_cmd(rt: RunType, toks):
+    if rt == RunType.CHECK_AVAILABLE:
+        if gs.player.is_onland():
+            return True
+        return False
+    if rt == RunType.HELP:
+        gs.output(f"The islands of {gs.world_name} are fascinating places. You never know what you'll find when you "
+                  "explore them. Each time you run the 'explore' command you will explore a certain percentage of the "
+                  "island you are landed on. Once this reaches 100% then no further exploration is necessary.")
+
+    place = gs.map.get_place_at_location(gs.ship.location)
+    if place and place.island:  # should be true
+        do_explore(place.island)

@@ -1,5 +1,9 @@
 # this is for doing manual tests
+import base64
+import pickle
+
 from player import Player
+from quest import QuestGenerator
 from ship import Ship
 from status_cmds import show_status
 from state import gs
@@ -7,6 +11,7 @@ from setup import base_setup
 from command import RunType
 import islands
 import map
+import random
 
 
 def initial_setup():
@@ -68,3 +73,11 @@ dump_trade_stuff_for_island(i)
 
 gs.map = map.Map(30, 30, gs.seed)
 describe_island(38)
+
+qg = QuestGenerator(4444)
+q = qg.generate(gs.map,1,2)
+print(q)
+q = qg.generate(gs.map,2,2)
+print(q)
+q = qg.generate(gs.map,3,2)
+print(q)

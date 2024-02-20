@@ -162,4 +162,8 @@ def _list_islands(local_only: bool):
             dir = direction_from_two_coords(gs.ship.location, p.location)
             if dir is None:
                 dir = "away"
-            gs.output(f"{str(p.index).rjust(3)} {p.island.name} ({p.island.summary()}) - {dist} miles {dir}")
+            if p.island.explored:
+                exp = f" - {p.island.explored}% explored"
+            else:
+                exp = ""
+            gs.output(f"{str(p.index).rjust(3)} {p.island.name} ({p.island.summary()}) - {dist} miles {dir}{exp}")

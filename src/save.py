@@ -3,6 +3,8 @@ from pathlib import Path
 from state import gs
 import os
 
+from util import save_rng_state_to_string, load_rng_state_from_string
+
 SAVE_FILE_NAME = "savefile"
 SAVE_FILE_PATH = ".sailtheseas"
 
@@ -46,7 +48,10 @@ def _save_visited_data() -> list:
     ret = []
     for loc in gs.map.all_locations():
         if loc.visited:
-            ret.append(loc.location)
+            vd = {"l": loc.location}
+            if loc.island:
+                vd['e'] = loc.island.explored
+            ret.append(vd)
     return ret
 
 
@@ -75,6 +80,7 @@ def save_game():
     data["ship"] = gs.ship.get()
     data["crew"] = gs.crew.get()
     data["seed"] = gs.seed
+    data["rng"] = save_rng_state_to_string(gs.rng_play)
     data["trade"] = _save_trading_data()
     data["visited"] = _save_visited_data()
 
@@ -92,6 +98,7 @@ def load_game():
     data = json.loads(json_string)
     try:
         gs.seed = data["seed"]
+        load_rng_state_from_string(gs.rng_play, data["rng"])
         d=data['player']
         if not gs.player.set(d):
             raise KeyError
@@ -118,11 +125,15 @@ def load_trading_and_visited_data(loaded: dict):
             else:
                 gs.output(f"load warning: failed to find trading post at island {k}")
 
-        # visited data
+        # visited and explored data
         visited_info = loaded['visited']
         for vis in visited_info:
-            loc = gs.map.get_location(vis)
+            loc = gs.map.get_location(vis['l'])
             loc.visited = True
+            if loc.island:
+                loc.island.explored = vis['e']
+
+
         return True
 
     except Exception as e:

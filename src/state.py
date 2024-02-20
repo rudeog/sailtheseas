@@ -31,8 +31,14 @@ class GlobalState:
 
         self.map = None
         self.cmdsys = None
+        # these are for generating names and places in this world deterministically for a seed
         self.name_gen = None
         self.place_gen = None
+
+        # the play rng is used to determine random game events which may differ
+        # between games set in the same world, but should be the same if the player
+        # does identical things in the same world
+        self.rng_play = None
         self.game_master = None
         self.emperor = None
         self.num_commands = 0

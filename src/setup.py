@@ -1,6 +1,8 @@
 #
 # Do initial player setup. Ask player for info
 #
+import random
+
 from names import NameGenerator, PlaceGenerator
 from state import gs, GAME_NAME, MAP_WIDTH, MAP_HEIGHT
 from map import Map
@@ -14,6 +16,7 @@ from crew import NUM_ROLES
 def base_setup():
     gs.name_gen = NameGenerator(gs.seed)
     gs.place_gen = PlaceGenerator(gs.seed)
+    gs.rng_play = random.Random(gs.seed)
     # we should end up with the same name and place as was selected in determine seed
     gs.emperor = gs.name_gen.name("m", "e")
     gs.game_master = gs.name_gen.name("m", "w")
@@ -93,7 +96,7 @@ def set_player_start_location():
     start_loc = gs.map.places[0]
     gs.ship.set_location(start_loc.location)
     # we will be docked at the port
-    gs.player.set_state_docked()
+    gs.player.set_state_landed()
     gs.ship.b.reset()
     gs.map.places[0].visited = True
 

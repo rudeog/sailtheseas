@@ -1,3 +1,5 @@
+import base64
+import pickle
 import random
 
 def custom_hash(string):
@@ -182,3 +184,13 @@ def direction_from_two_coords(a: tuple[int, int], b: tuple[int, int]):
     ind = _dir_coords.index(diff)
     return Direction(_valid_dirs[ind])
 
+def save_rng_state_to_string(rng):
+    s = rng.getstate()
+    pickled_data = pickle.dumps(s)
+    encoded_data = base64.b64encode(pickled_data).decode('utf-8')
+    return encoded_data
+
+def load_rng_state_from_string(rng, state):
+    pickled_data = base64.b64decode(state)
+    s = pickle.loads(pickled_data)
+    rng.setstate(s)

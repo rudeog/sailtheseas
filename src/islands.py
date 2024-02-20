@@ -180,6 +180,13 @@ class Island:
         # this determines the ruler's ethnicity and possibly island name and port name and other personages
         self.primary_class=pc
         self.secondary_class=sc
+        self.explored = 0  # percentage explored
+        self.quest_item = None
+        self.quest_clue = None
+
+        # after generating the map, we come back in and add fixed encounters here.
+        # these will always be encountered when exploring this island
+        self.encounters = None
 
         place_ethnicity = "e"  # default to exotic
         ruler_ethnicity = "e"
@@ -247,6 +254,10 @@ class Island:
             descript += f" It has a port called {self.port.name} which is run by {self.port.port_master}."
 
         descript += " " + self.description
+        if self.explored:
+            descript += f" You and your crew have explored {self.explored}% of the island."
+        else:
+            descript += f" You have not explored this island."
         return descript
 
 

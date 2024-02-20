@@ -1,17 +1,20 @@
 from state import gs
 from util import to_proper_case
-NUM_ROLES = 8
-roles = ['boatswain', 'first mate', 'carpenter', 'navigator', 'surgeon', 'lookout', 'cook', 'chaplain']
-role_attrs = ['boatswain', 'firstmate', 'carpenter', 'navigator', 'surgeon', 'lookout', 'cook', 'chaplain']
+NUM_ROLES = 9
+# descriptive
+roles = ['boatswain', 'first mate', 'carpenter', 'navigator', 'surgeon', 'lookout', 'cook', 'chaplain', "gunner"]
+# matches to class attributes that are created on Crew
+role_attrs = ['boatswain', 'firstmate', 'carpenter', 'navigator', 'surgeon', 'lookout', 'cook', 'chaplain', "gunner"]
 role_desc = [
-    "In charge of equipment and supply stores as well as crew discipline",
-    "Manages all aspects of cargo",
+    "In charge of giving orders to crew as well as crew discipline",
+    "Manages all aspects of cargo, equipment and supply stores",
     "Responsible for repairs and enhancements on the ship",
     "In charge of maps and navigation",
     "Responsible for the health and well-being of the crew",
     "Keeps a lookout for land, other ships, sea creatures, etc.",
     "Responsible for providing food to the crew",
     "Provides spiritual guidance to the crew",
+    "In charge of battles at sea",
 ]
 dispositions = ['very miserable', 'sombre', 'satisfied', 'happy']
 disciplines = ['lawless', 'unruly', 'following orders', 'well disciplined']

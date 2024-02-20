@@ -78,28 +78,27 @@ def show_status(rt: RunType, toks):
         gs.output(f"You are captain {gs.player.name} who hails from {gs.player.birthplace}. "
                   f"You are in the world of {gs.world_name} which is ruled by emperor {gs.emperor.last} and "
                   f"are on day {gs.player.num_days_elapsed() + 1} of your voyage. You "
-                  f"have {gs.player.doubloons} doubloons.")
+                  f"have {gs.player.doubloons} doubloons.", False)
 
         # see if we are at a place
         place = gs.map.get_place_at_location(gs.ship.location)
+        dist = gs.ship.distance_to_location(gs.ship.location)
         if place:
+            if dist > 0:
+                prox = "close to the shores of"
+            else:
+                prox = "at"
+
             # there should always be an island at a place
-            gs.output(f"You are at {place.island.name}", False)
-            if gs.player.is_docked():
-                if place.island.port:  # should always be true in this case
-                    port_name = " " + place.island.port.name
+            gs.output(f" You are {prox} {place.island.name}", False)
+            if gs.player.is_onland():
+                if place.island.port:
+                    gs.output(f" and {gs.ship.name} is docked at {place.island.port.name}.")
                 else:
-                    port_name = ""
-                gs.output(f" and {gs.ship.name} is docked at{port_name}.")
-            elif gs.player.is_exploring():
-                gs.output(f" and you are exploring the island.")
-            elif gs.player.is_sailing():
-                gs.output(f" and {gs.ship.name} is close to shore.")
+                    gs.output(f". You and your crew have disembarked, and are on shore.")
             else:
                 gs.output(".")
-
         if gs.player.is_sailing():
-
             if gs.ship.b.is_direction():
                 gs.output(f"{gs.ship.name} is heading to the {gs.ship.b.as_target_or_direction()}.")
             elif gs.ship.b.is_target():
