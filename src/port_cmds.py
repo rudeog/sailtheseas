@@ -97,8 +97,8 @@ def trade_shared_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
         if gs.player.is_onland():
             place = gs.map.get_place_at_location(gs.ship.location)
-            if place and place.island and place.island.port:  # should be true
-                return True
+            if place:  # should be true
+                return True # we'll let it succeed even if no trading to let them know that fact
         return False
 
     help = False
@@ -116,11 +116,11 @@ def trade_shared_cmd(rt: RunType, toks):
 
     t = None
     place = gs.map.get_place_at_location(gs.ship.location)
-    if place and place.island.port:  # should be true
+    if place and place.island and place.island.port:  # should be true
         t = place.island.port.trader
 
     if not t:
-        gs.gm_output("There is no trading available here.")
+        gs.gm_output(f"There is no trading available on {place.island.name}.")
         return
     pm = place.island.port.port_master
     if toks[0] == 'list':

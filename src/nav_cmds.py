@@ -87,9 +87,8 @@ def direction_cmd(rt: RunType, toks):
 
 def map_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_sailing():
-            return True
-        return False
+        return True
+
     if rt == RunType.HELP:
         gs.output("This map shows the area around your ship. If that area includes islands, "
                   "they are displayed with their name.")
@@ -101,9 +100,8 @@ def map_cmd(rt: RunType, toks):
 
 def world_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_sailing():
-            return True
-        return False
+        return True
+
     if rt == RunType.HELP:
         gs.output("This displays a map of the entire world. The map will includes islands which "
                   "you have knowledge of (they are in coordinates you have visited.) It will "
@@ -129,9 +127,8 @@ def sail_cmd(rt: RunType, toks):
 
 def list_islands_nearby_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_sailing():
-            return True
-        return False
+        return True
+
     if rt == RunType.HELP:
         gs.output("This displays a list of nearby islands with their id, distance and direction")
         return
@@ -140,9 +137,7 @@ def list_islands_nearby_cmd(rt: RunType, toks):
 
 def list_islands_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_sailing():
-            return True
-        return False
+        return True
     if rt == RunType.HELP:
         gs.output("This displays a list of all known islands in the world with their id, distance and direction")
         return

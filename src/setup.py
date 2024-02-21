@@ -3,6 +3,8 @@
 #
 import random
 
+import crew
+import state
 from names import NameGenerator, PlaceGenerator
 from state import gs, GAME_NAME, MAP_WIDTH, MAP_HEIGHT
 from map import Map
@@ -103,22 +105,22 @@ def set_player_start_location():
 
 def setup_crew() -> bool:
     gs.output("")
-    gs.crew.seamen_count=100 # temporary?
-    gs.gm_output("It's time to hire your crew. Enter a crew number to hire that member. "
-                 "As your game master, I can also find good candidates if you are lazy or "
-                 "you only want to hire a few yourself. "
-                 "If you'd like me to do so, enter 'auto' and I will fill any unfilled positions. Enter "
-                 "'done' when you are satisfied with your crew.")
+    gs.crew.seamen_count = state.DEFAULT_ABS_COUNT
+    gs.gm_output(f"It's time to hire your {NUM_ROLES} main crew members. You may hire whomever you like: "
+                 "friends, family members, etc.")
+    for i in range(NUM_ROLES):
+        if not hire_crewmember(i):
+            return False
+
+    gs.gm_output("This is what your main crew looks like.")
 
     while True:
         gs.output("")
         gs.crew.describe_named(True)
 
-        v = gs.input(f"Enter a number from 1 to {NUM_ROLES}, 'auto' or 'done'. Enter ! to quit the game: ")
+        v = gs.input(f"To change an entry, enter a number from 1 to {NUM_ROLES}. When done, enter 'done'. Enter ! to quit the game: ")
         gs.output("")
-        if v.lower() == 'auto':
-            do_crew_assign()
-        elif v.lower() == 'done':
+        if v.lower() == 'done':
             cc = 0
             for ii in range(NUM_ROLES):
                 if gs.crew.get_by_idx(ii).name:
@@ -127,7 +129,7 @@ def setup_crew() -> bool:
                 return True
             else:
                 gs.gm_output(
-                    "You have not yet assigned all the roles. Please do so, or enter 'auto' and I'll do it myself.")
+                    "You have not yet assigned all the roles. Please do so.")
         elif v == '!':
             return False
         else:
@@ -136,13 +138,21 @@ def setup_crew() -> bool:
                 gs.gm_output(f"Really, {gs.player.name}, is it that hard to enter a number between 1 and {NUM_ROLES}?")
             else:
                 i -= 1
-                cr = gs.crew.get_by_idx(i)
-                n = gs.gm_input(f"Who are you hiring as {cr}: ")
-                if n == '!':
+
+                if not hire_crewmember(i):
                     return False
-                if n.strip() != '':
-                    gs.gm_output(phrase_gen.get_phrase(n, phrase_gen.crew_name_phrases))
-                    cr.name = n
+
+
+def hire_crewmember(i):
+    cr = gs.crew.get_by_idx(i)
+    gs.output(f"The {crew.roles[i]} - {crew.role_desc[i]}")
+    n = gs.gm_input(f"Who are you hiring as {crew.roles[i]}: ")
+    if n == '!':
+        return False
+    if n.strip() != '':
+        gs.gm_output(phrase_gen.get_phrase(n, phrase_gen.crew_name_phrases))
+        cr.name = n
+    return True
 
 
 def do_crew_assign():

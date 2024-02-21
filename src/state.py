@@ -15,6 +15,7 @@ MAP_HEIGHT = 15
 # "The largest merchant ships were the East Indiamen, in three broad classes, of 1200 tons, 800 tons, or 500 tons."
 # 300 tons in pounds
 DEFAULT_CARGO_CAPACITY = 300 * 2000
+DEFAULT_ABS_COUNT = 100
 
 class GlobalState:
     """

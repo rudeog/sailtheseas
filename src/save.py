@@ -98,7 +98,6 @@ def load_game():
     data = json.loads(json_string)
     try:
         gs.seed = data["seed"]
-        load_rng_state_from_string(gs.rng_play, data["rng"])
         d=data['player']
         if not gs.player.set(d):
             raise KeyError
@@ -116,6 +115,9 @@ def load_game():
 
 def load_trading_and_visited_data(loaded: dict):
     try:
+        # this can only be loaded once the rng_play is initialized in base_setup
+        load_rng_state_from_string(gs.rng_play, loaded["rng"])
+
         trade_info = loaded["trade"]
         for k, v in trade_info.items():
             loc = gs.map.get_place_by_index(int(k))
