@@ -3,7 +3,8 @@ from port_cmds import register_port_cmds
 from names import NameGenerator, PlaceGenerator
 from status_cmds import register_status_cmds, show_status
 from nav_cmds import register_nav_cmds
-from state import gs, MAP_WIDTH, MAP_HEIGHT
+from crew_cmds import register_crew_cmds
+from state import gs, MAP_WIDTH, MAP_HEIGHT, GAME_VERSION, GAME_NAME
 import setup
 import map
 from command import CommandSystem, RunType, Command
@@ -42,10 +43,14 @@ def init_trading_data():
 
 ##################################################################
 
+
+
 # initialize our global obj (due to circular refs issue)
 gs.player = Player()
 gs.ship = Ship()
 gs.crew = Crew()
+
+gs.output(f"{GAME_NAME} v{GAME_VERSION}")
 
 # see if a save game exists
 cont = True
@@ -86,6 +91,7 @@ if cont:
     register_status_cmds()
     register_port_cmds()
     register_nav_cmds()
+    register_crew_cmds()
 
     if game_loaded:
         #load trading data now that map is present

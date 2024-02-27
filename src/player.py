@@ -3,11 +3,9 @@ from datetime import datetime, timedelta
 
 from cargo import CargoCollection
 from enum import Enum
-
+from state import STARTING_DATE
 from util import Direction
 
-# when our game starts
-STARTING_DATE = date_constant = datetime(1716, 6, 1)
 
 
 class Player:
@@ -54,7 +52,7 @@ class Player:
             "frags": self._day_frags,
         }
 
-
+    @property
     def num_days_elapsed(self):
         return self._days
 

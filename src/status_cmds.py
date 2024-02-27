@@ -8,7 +8,7 @@ def register_status_cmds():
     gs.cmdsys.register(Command("cargo",  show_cargo, "List cargo on vessel"))
     gs.cmdsys.register(Command("describe",  describe_island_cmd, "Describe an island given it's ID."))
     gs.cmdsys.register(Command("ship",  describe_ship_cmd, "Describe your ship"))
-    gs.cmdsys.register(Command("crew",  describe_crew_cmd, "Describe your crew"))
+
 
 
 def describe_ship_cmd(rt: RunType, toks):
@@ -19,15 +19,6 @@ def describe_ship_cmd(rt: RunType, toks):
         return
 
     gs.ship.describe()
-
-def describe_crew_cmd(rt: RunType, toks):
-    if rt == RunType.CHECK_AVAILABLE:
-        return True
-    if rt == RunType.HELP:
-        gs.output("This gives more details about your crew.")
-        return
-
-    gs.crew.describe()
 
 
 def describe_island_cmd(rt: RunType, toks):
@@ -77,7 +68,7 @@ def show_status(rt: RunType, toks):
     if not toks:
         gs.output(f"You are captain {gs.player.name} who hails from {gs.player.birthplace}. "
                   f"You are in the world of {gs.world_name} which is ruled by emperor {gs.emperor.last} and "
-                  f"are on day {gs.player.num_days_elapsed() + 1} of your voyage. You "
+                  f"are on day {gs.player.num_days_elapsed + 1} of your voyage. You "
                   f"have {gs.player.doubloons} doubloons.", False)
 
         # see if we are at a place

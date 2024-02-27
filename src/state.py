@@ -2,20 +2,38 @@
 # also handles IO
 import textwrap
 import shutil
+from datetime import datetime
 
 #
 # Game level defaults
 #
 DEBUGGING = True
 GAME_NAME = "Sail The Seas"
+GAME_VERSION = "0.1"
 DEFAULT_SEED = 51047
 MAP_WIDTH = 15
 MAP_HEIGHT = 15
+# when our game starts
+STARTING_DATE = date_constant = datetime(1716, 6, 1)
+
 
 # "The largest merchant ships were the East Indiamen, in three broad classes, of 1200 tons, 800 tons, or 500 tons."
 # 300 tons in pounds
 DEFAULT_CARGO_CAPACITY = 300 * 2000
-DEFAULT_ABS_COUNT = 100
+# full ship of able bodied seamen
+ABS_COUNT_MAX = 100
+# this number or lower and ship function is reduced
+ABS_COUNT_REDUCED = 69
+# this number or lower and ship function is impaired
+ABS_COUNT_IMPAIRED = 39
+# this or lower than this and the ship cant sail
+ABS_COUNT_NONFUNCTIONAL = 9
+# ABS monthly pay
+ABS_PAY=5
+# pay period in days
+ABS_PAY_PERIOD=30
+
+DEFAULT_STARTING_DOUBLOONS = 10000
 
 class GlobalState:
     """
@@ -42,6 +60,7 @@ class GlobalState:
         self.rng_play = None
         self.game_master = None
         self.emperor = None
+        # number of commands issued
         self.num_commands = 0
         self.quitting = False
         self.debug_mode = DEBUGGING

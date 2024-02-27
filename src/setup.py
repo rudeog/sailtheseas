@@ -6,11 +6,11 @@ import random
 import crew
 import state
 from names import NameGenerator, PlaceGenerator
-from state import gs, GAME_NAME, MAP_WIDTH, MAP_HEIGHT
+from state import gs
 from map import Map
 import phrase_gen
 from util import as_int
-from crew import NUM_ROLES
+from crew import NUM_ROLES, pay_description
 
 
 # this should generate the map, set up the rng's and the game master
@@ -77,7 +77,7 @@ def player_setup() -> bool:
     gs.player.birthplace = n
     gs.output("")
     gs.gm_output(phrase_gen.get_phrase(gs.player.birthplace, phrase_gen.places_phrases))
-    n = gs.input("What you want to name your ship? ")
+    n = gs.input("What do you want to name your ship? ")
 
     if n == '!':
         return False
@@ -85,11 +85,16 @@ def player_setup() -> bool:
     gs.output("")
     gs.gm_output(phrase_gen.get_phrase(gs.ship.name, phrase_gen.ship_name_phrases))
 
+
+    gs.player.add_remove_doubloons(state.DEFAULT_STARTING_DOUBLOONS)
+    gs.gm_output(f"You will start the game with {state.DEFAULT_STARTING_DOUBLOONS} doubloons (D).")
+
     if not setup_crew():
         return False
+    if not setup_abs():
+        return False
 
-    gs.player.add_remove_doubloons(10000)  # temporary
-    gs.output("You are ready to start your adventures! Best of luck to you.")
+
 
     return True
 
@@ -105,8 +110,7 @@ def set_player_start_location():
 
 def setup_crew() -> bool:
     gs.output("")
-    gs.crew.seamen_count = state.DEFAULT_ABS_COUNT
-    gs.gm_output(f"It's time to hire your {NUM_ROLES} main crew members. You may hire whomever you like: "
+    gs.gm_output(f"It's time to fill the positions of the {NUM_ROLES} main crew members. You may choose whomever you like: "
                  "friends, family members, etc.")
     for i in range(NUM_ROLES):
         if not hire_crewmember(i):
@@ -118,7 +122,8 @@ def setup_crew() -> bool:
         gs.output("")
         gs.crew.describe_named(True)
 
-        v = gs.input(f"To change an entry, enter a number from 1 to {NUM_ROLES}. When done, enter 'done'. Enter ! to quit the game: ")
+        v = gs.input(f"To change an entry, enter a number from 1 to {NUM_ROLES}. When done, enter 'done'. Enter ! to "
+                     f"quit the game: ")
         gs.output("")
         if v.lower() == 'done':
             cc = 0
@@ -166,3 +171,23 @@ def do_crew_assign():
 
     if not named:
         gs.gm_output("It looks like you already have all positions filled. Just enter 'done' if you are satisfied.")
+
+def setup_abs():
+    gs.output(f"{gs.crew.boatswain}: As boatswain of this ship, the crew is my responsibility. The ship needs a crew "
+              f"of able-bodied seamen (ABS) to keep it sailing and in good working order. {crew.pay_description()} "
+              f"You currently have {gs.player.doubloons}D. "
+              "How many ABS will you hire?")
+    while True:
+        inp = gs.gm_input(f"Enter a number between {state.ABS_COUNT_NONFUNCTIONAL+1} and {state.ABS_COUNT_MAX}: ")
+        if inp=="!":
+            return False
+
+        i = as_int(inp, -1)
+        if i <= state.ABS_COUNT_NONFUNCTIONAL or i > state.ABS_COUNT_MAX:
+            gs.gm_output(f"{gs.player.name}, please pay attention...")
+        else:
+            gs.crew.set_seamen_count(i)
+            gs.crew.update_pay_due()
+            pd = gs.crew.pay_crew()
+            gs.output(f"{gs.crew.boatswain}: We hired {i} ABS and paid them up-front for {state.ABS_PAY_PERIOD} days at an amount of {pd}D.")
+            return True

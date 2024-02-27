@@ -6,7 +6,7 @@ from names import NameGenerator, PlaceGenerator
 from state import gs
 from util import ListSelector, fancy_date
 import islands
-from player import STARTING_DATE
+from state import STARTING_DATE
 from datetime import timedelta
 
 # These are the different main outlines for an island

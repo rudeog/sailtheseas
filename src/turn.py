@@ -6,6 +6,13 @@ from state import gs
 
 def pass_time():
     gs.player.time_increment()
+
+    # see if the crew needs to be paid (every n days)
+    pd = gs.crew.update_pay_due()
+    if pd:
+        gs.output(f"{gs.crew.boatswain}: Our crew of able-bodied seamen needs to be paid for their services. You will not be able to "
+                  f"purchase anything or hire anyone until they are paid. Amount owed {gs.crew.amt_due()}D.")
+
     # if we are sailing we need to move if possible
     if gs.player.is_sailing() and gs.ship.b.is_set():
         _sail()
