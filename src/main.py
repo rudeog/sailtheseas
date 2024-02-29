@@ -13,6 +13,7 @@ from save import save_file_exists, load_game, save_game, load_trading_and_visite
 from player import Player
 from ship import Ship
 from crew import Crew
+from stock import Stock
 
 
 # registered quit command
@@ -49,6 +50,7 @@ def init_trading_data():
 gs.player = Player()
 gs.ship = Ship()
 gs.crew = Crew()
+gs.stock = Stock()
 
 gs.output(f"{GAME_NAME} v{GAME_VERSION}")
 

@@ -34,7 +34,8 @@ def _save(data_to_write):
     except Exception as e:
         return f"An unexpected error occurred: {e}"
 
-
+# TODO add get and set to island which should also pull trader stuff then we can
+#  just call get and set on island for trading and visited
 def _save_trading_data() -> dict:
     ret = {}
     for pl in gs.map.places:
@@ -75,14 +76,15 @@ def _load():
 
 
 def save_game():
-    data = {}
-    data["player"] = gs.player.get()
-    data["ship"] = gs.ship.get()
-    data["crew"] = gs.crew.get()
-    data["seed"] = gs.seed
-    data["rng"] = save_rng_state_to_string(gs.rng_play)
-    data["trade"] = _save_trading_data()
-    data["visited"] = _save_visited_data()
+    data = {"player": gs.player.get(),
+            "ship": gs.ship.get(),
+            "stock": gs.stock.get(),
+            "crew": gs.crew.get(),
+            "seed": gs.seed,
+            "rng": save_rng_state_to_string(gs.rng_play),
+            "trade": _save_trading_data(),
+            "visited": _save_visited_data()
+            }
 
     json_string = json.dumps(data)
     err = _save(json_string)
@@ -98,18 +100,13 @@ def load_game():
     data = json.loads(json_string)
     try:
         gs.seed = data["seed"]
-        d=data['player']
-        if not gs.player.set(d):
-            raise KeyError
-        d=data["ship"]
-        if not gs.ship.set(d):
-            raise KeyError
-        d=data["crew"]
-        if not gs.crew.set(d):
-            raise KeyError
+        gs.player.set(data['player'])
+        gs.ship.set(data['ship'])
+        gs.stock.set(data['stock'])
+        gs.crew.set(data['crew'])
 
-    except KeyError:
-        return None, "Save file may be from an earlier version."
+    except KeyError as e:
+        return None, f"Save file may be from an earlier version: {e}"
     return data, ""
 
 
@@ -138,6 +135,6 @@ def load_trading_and_visited_data(loaded: dict):
 
         return True
 
-    except Exception as e:
+    except KeyError as e:
         gs.output(f"Error loading game: invalid save file: {e}")
         return False

@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 
 from cargo import CargoCollection
 from enum import Enum
-from state import STARTING_DATE
-from util import Direction
+from state import STARTING_DATE, gs
+from util import Direction, serialize_obj, deserialize_obj
 
 
 
@@ -14,6 +14,9 @@ class Player:
         ONLAND = 1
         ATSEA = 2
 
+    # this handles simpler serialized types
+    _serialized_attrs = ['name','birthplace','_days','_day_frags','_days_at_sea','_days_since_port', '_doubloons']
+
     def __init__(self):
         # player's personal info
         self.name: str = ""
@@ -22,44 +25,43 @@ class Player:
         # number of days sailing the seas
         self._days = 0
         self._day_frags = 0  # morning, afternoon, evening, night
-
+        self._days_at_sea = 0  # how many days since left land
+        self._days_since_port = 0 # how many days since landed at a port
         # personal property
         self._doubloons = 0
 
         # whether docked or sailing or exploring, etc
         self._state = self._state_e.NONE
 
-    def set(self, d: dict) -> bool:
-        try:
-            self.name = d['n']
-            self.birthplace=d['bp']
-            self._doubloons=d['d']
-            self._state = self._state_e(d['s'])
-            self._days = d['days']
-            self._day_frags = d['frags']
-        except KeyError:
-            return False
-        return True
+    def get(self):
+        ret = serialize_obj(self)
+        ret["s"] = self._state.value
+        return ret
 
-
-    def get(self) -> dict:
-        return {
-            "n": self.name,
-            "bp": self.birthplace,
-            "d": self.doubloons,
-            "s": self._state.value,
-            "days": self._days,
-            "frags": self._day_frags,
-        }
+    def set(self, d: dict):
+        self._state = self._state_e(d['s'])
+        deserialize_obj(self, d)
 
     @property
     def num_days_elapsed(self):
         return self._days
 
+    @property
+    def num_days_at_sea(self):
+        return self._days_at_sea
+
+    @property
+    def num_days_since_port(self):
+        return self._days_since_port
+
     def time_increment(self):
         if self._day_frags == 3:
             self._days = self._days + 1
             self._day_frags = 0 # morning of the next day
+
+            if self.is_sailing():
+                self._days_at_sea += 1
+                self._days_since_port += 1
         else:
             self._day_frags = self._day_frags + 1
 
@@ -84,8 +86,13 @@ class Player:
 
     def set_state_sailing(self):
         self._state=self._state_e.ATSEA
+
     def set_state_landed(self):
         self._state=self._state_e.ONLAND
+        self._days_at_sea = 0
+        p = gs.map.get_place_at_location(gs.ship.location)
+        if p.island.port:
+            self._days_since_port = 0
 
 
     def get_state_str(self):

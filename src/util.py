@@ -2,6 +2,7 @@ import base64
 import pickle
 import random
 
+
 def custom_hash(string):
     """
     Stable hash function so we can get same hash between runs
@@ -15,6 +16,7 @@ def custom_hash(string):
         result = (result * prime + ord(char)) & 0xFFFFFFFF
 
     return result
+
 
 def as_int(v, def_val: int = -1):
     '''
@@ -134,6 +136,7 @@ class Direction:
     def short(self):
         return _valid_dirs[self.dir]
 
+
 def fancy_date(current_date):
     def ordinal_suffix(day):
         if 10 <= day % 100 <= 20:
@@ -158,6 +161,7 @@ def fancy_time(current_time):
 def coord_as_str(coord: tuple[int, int]):
     return f"{coord[0]}E {coord[1]}S"
 
+
 def direction_from_two_coords(a: tuple[int, int], b: tuple[int, int]):
     """
     Return the direction that b lies from a
@@ -165,14 +169,14 @@ def direction_from_two_coords(a: tuple[int, int], b: tuple[int, int]):
     :param b:
     :return:
     """
-    x = b[0]-a[0]
-    y = b[1]-a[1]
+    x = b[0] - a[0]
+    y = b[1] - a[1]
     if not x and not y:
         return None
     # normalize: if one direction is 3x greater than other, eliminate other
-    if abs(x) > abs(y)*3:
+    if abs(x) > abs(y) * 3:
         y = 0
-    elif abs(y) > abs(x)*3:
+    elif abs(y) > abs(x) * 3:
         x = 0
 
     if x:
@@ -180,9 +184,10 @@ def direction_from_two_coords(a: tuple[int, int], b: tuple[int, int]):
     if y:
         y = -1 if y < 0 else 1
 
-    diff = (x,y)
+    diff = (x, y)
     ind = _dir_coords.index(diff)
     return Direction(_valid_dirs[ind])
+
 
 def save_rng_state_to_string(rng):
     s = rng.getstate()
@@ -190,7 +195,21 @@ def save_rng_state_to_string(rng):
     encoded_data = base64.b64encode(pickled_data).decode('utf-8')
     return encoded_data
 
+
 def load_rng_state_from_string(rng, state):
     pickled_data = base64.b64decode(state)
     s = pickle.loads(pickled_data)
     rng.setstate(s)
+
+
+def deserialize_obj(obj, data):
+    for s in obj._serialized_attrs:
+        v = data[s]
+        setattr(obj, s, v)
+
+
+def serialize_obj(obj):
+    r = {}
+    for s in obj._serialized_attrs:
+        r[s] = getattr(obj, s)
+    return r

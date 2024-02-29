@@ -97,11 +97,12 @@ def show_status(rt: RunType, toks):
                 if place:
                     gs.output(f"{gs.ship.name} is heading toward {place.island.name}.")
                 else:  # shouldnt happen
-                    gs.output(f"{gs.ship.name} is heading to an undisclosed location.")
+                    gs.output("{gs.ship.name} is heading to an undisclosed location.")
+
+            if gs.player.num_days_at_sea > 0:
+                gs.output(f"You have been at sea for {gs.player.num_days_at_sea} days.")
 
         return
-
-    gs.gm_output("That type of status is not available at this time.")
 
 
 def show_cargo(rt: RunType, toks):

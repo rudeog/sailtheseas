@@ -1,7 +1,9 @@
+import util
 from cargo import CargoCollection
 from enum import Enum
 
 from state import gs, DEFAULT_CARGO_CAPACITY
+from stock import Stock
 from util import Direction, add_pair
 
 _SHORT_RADIUS = 30  # distance from left, right, top or bottom edge to center of square
@@ -24,18 +26,13 @@ class Bearing:
         self._direction = None
         self._target = (-1, -1)
 
-    def set(self, d: dict) -> bool:
-        try:
-            self.type = self._type_e(d['t'])
-            if d['d']:
-                self._direction=Direction(d['d'])
-            else:
-                self._direction=None
-            self._target = tuple(d['targ'])
-        except KeyError:
-            return False
-        return True
-
+    def set(self, d: dict):
+        self.type = self._type_e(d['t'])
+        if d['d']:
+            self._direction=Direction(d['d'])
+        else:
+            self._direction=None
+        self._target = tuple(d['targ'])
 
     def get(self) -> dict:
         return {
@@ -85,6 +82,8 @@ class Bearing:
 
 
 class Ship:
+    _serialized_attrs = ['name','cargo_capacity','miles_traveled','_toward_center',
+                         '_miles_traveled_in_square','_diagonal_entry']
     def __init__(self):
         self.name = ""
         self.cargo_capacity = DEFAULT_CARGO_CAPACITY
@@ -107,33 +106,22 @@ class Ship:
         # if coming in from a diagonal it will be 54 miles
         self._diagonal_entry = False
 
-    def set(self, d: dict) -> bool:
-        try:
-            self.name = d['n']
-            self.cargo_capacity=d['cc']
-            self.miles_traveled = d['mt']
-            self._location = tuple(d['loc'])
-            self.b.set(d['b'])
-            self._toward_center = d['tc']
-            self._miles_traveled_in_square = d['mts']
-            if not self.cargo.set(d['cargo']):
-                return False
-        except KeyError:
-            return False
-        return True
+    def set(self, d: dict):
+        util.deserialize_obj(self,d)
+        self._location = tuple(d['loc'])
+        self.b.set(d['b'])
+        self.cargo.set(d['cargo'])
+
 
 
     def get(self) -> dict:
-        return {
-            "n": self.name,
-            "cc": self.cargo_capacity,
-            "mt": self.miles_traveled,
+        r = util.serialize_obj(self)
+        r.update( {
             "loc": self._location,
             "b": self.b.get(),
-            "tc": self._toward_center,
-            "mts": self._miles_traveled_in_square,
             "cargo": self.cargo.get(),
-        }
+        })
+        return r
 
 
     @property

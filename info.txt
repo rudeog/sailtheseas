@@ -100,16 +100,20 @@ food - each crewmember consumes a qty of food per day. Depending on ration level
   full ration 100% - crew will remain healthy and happy
   reduced ration 60% - crew will be healthy but will start being dissatisfied. lower performance
   meager ration 40% - crew will start having health issues. lower performance
+
 grog - given daily to crew to keep their spirits up
   full ration - crew will have increased happiness
   half ration - crew will have neither increase nor decrease of happiness
   no ration - crew will start getting dissatisfied
+
 water - given in a fixed amount per day
   if the ship runs out of water, big health problems will arise
   even uninhabited islands can yield water
+
 medical supplies - can be used to treat sick or injured crew
   only consumed when there is sickness or injury
   sickness can occur randomly, due to battle, due to reduced rations
+
 ship supplies - used to keep ship repaired and seaworthy - ropes, lumber, pitch, sails
   Things will wear out on ship. In battles, things can get broken, bad weather can cause things to break
 ordnance - used during sea battles

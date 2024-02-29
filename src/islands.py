@@ -279,15 +279,12 @@ class TradingPost:
     def get(self):
         return {"have": self.on_hand.get(), "want": self.want.get() }
 
-    def set(self, d: dict) -> bool:
-        try:
-            have = d["have"]
-            want = d["want"]
-            self.on_hand.set(have)
-            self.want.set(want)
-        except KeyError:
-            return False
-        return True
+    def set(self, d: dict):
+        have = d["have"]
+        want = d["want"]
+        self.on_hand.set(have)
+        self.want.set(want)
+
 
     def update(self):
         '''
@@ -389,3 +386,6 @@ class Port:
         self.primary_class = primary_class
         self.secondary_class = secondary_class
         self.trader: TradingPost = TradingPost(civ_type, primary_class, secondary_class)
+
+        # note - port doesnt have any save data right now as its generated.
+        # be aware if adding save data

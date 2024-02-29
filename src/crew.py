@@ -26,11 +26,18 @@ disciplines = ['lawless', 'unruly', 'following orders', 'well disciplined']
 
 
 class CrewMember:
+    _serialized_attrs = ['name','role','idx']
     def __init__(self, role, idx):
         self.name = ''
         self.role = role
         self.idx = idx
 
+    def set(self, d):
+        util.deserialize_obj(self, d)
+
+    def get(self):
+        ret = util.serialize_obj(self)
+        return ret
         # at some point we might have skill level and abilities
 
     def __str__(self):
@@ -39,29 +46,13 @@ class CrewMember:
     def description(self):
         return role_desc[self.idx]
 
-    def set(self, d) -> bool:
-        try:
-            self.name = d['n']
-            self.role = d['r']
-            self.idx = d['i']
-        except KeyError:
-            return False
-        return True
-
-    def get(self):
-        ret = {}
-        ret['n'] = self.name
-        ret['r'] = self.role
-        ret['i'] = self.idx
-        return ret
-
 
 # General ABS Crew plus the special CrewMembers
 class Crew:
+    _serialized_attrs = ['_seamen_count','disposition','discipline','_next_payday','_amt_due']
     def __init__(self):
         # general seamen and their mood, discipline, health
         self._seamen_count = 0
-        self.health = 100
         # a value from 0 to 3 indicating happiness level
         # 0=very miserable, 1=unhappy, 2=neutral, 3=happy
         self.disposition = 2
@@ -75,6 +66,20 @@ class Crew:
         # specific crew
         for i, c in enumerate(role_attrs):
             setattr(self, c, CrewMember(roles[i], i))
+
+
+    def get(self):
+        ret = util.serialize_obj(self)
+        for i, c in enumerate(role_attrs):
+            ret[c] = getattr(self, c).get()
+        return ret
+
+    def set(self, d: dict):
+        util.deserialize_obj(self, d)
+        for i, c in enumerate(role_attrs):
+            v = d[c]
+            getattr(self, c).set(v)
+
 
     @property
     def seamen_count(self):
@@ -148,13 +153,18 @@ class Crew:
             gs.output("The ship currently has no able-bodied seamen.")
         else:
             gs.output(f"The general crew currently consists of {self._seamen_count} {disciplines[self.discipline]} "
-                      f"able-bodied seamen who have "
-                      f"{self.health}% health. They are currently {dispositions[self.disposition]}.")
+                      f"able-bodied seamen who are currently {dispositions[self.disposition]}.")
+
         if self.amt_due():
-            gs.output(f"The crew are currently owed {self.amt_due()}D for their services.")
+            gs.output(f"You currently owe {self.amt_due()}D to the crew for their services.")
         else:
             d = self.next_payday - gs.player.num_days_elapsed
-            gs.output(f"The crew's next pay day is in {d} days.")
+            gs.output(f"The next crew pay day is in {d} days.")
+
+        rats, _ = gs.stock.get_rations()
+        grog, _ = gs.stock.get_grog_portion()
+        gs.output(f"The crew is on {rats} rations and {grog}.")
+        gs.output("")
         gs.output("Other positions on the ship:")
         self.describe_named(False)
 
@@ -170,37 +180,6 @@ class Crew:
 
     def get_by_idx(self, idx):
         return getattr(self, role_attrs[idx])
-
-    def get(self):
-        ret = {}
-        for i, c in enumerate(role_attrs):
-            ret[c] = getattr(self, c).get()
-
-        ret['sc'] = self._seamen_count
-        ret['h'] = self.health
-        ret['disp'] = self.disposition
-        ret['disc'] = self.discipline
-        ret['npd'] = self._next_payday
-        ret['pd'] = self._amt_due
-
-        return ret
-
-    def set(self, d: dict) -> bool:
-        try:
-            self._seamen_count = d['sc']
-            self.health = d['h']
-            self.disposition = d['disp']
-            self.discipline = d['disc']
-            self._next_payday = d['npd']
-            self._amt_due = d['pd']
-            for i, c in enumerate(role_attrs):
-                v = d[c]
-                if not getattr(self, c).set(v):
-                    return False
-            return True
-        except KeyError:
-            return False
-
 
 def pay_description():
     return f"Your ship can support {state.ABS_COUNT_MAX} ABS. It takes a minimum " \

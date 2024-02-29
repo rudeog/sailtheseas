@@ -1,3 +1,6 @@
+import util
+
+
 class CargoType:
     def __init__(self, name, units, weight_per_unit, price_coeff, prod_coeff, code):
         self.name: str = name
@@ -38,6 +41,7 @@ CARGO_GOLD = 7
 
 
 class CargoItem:
+    _serialized_attrs = ['_type_idx','_quantity','_price_per']
     def __init__(self, ti: int=0, q: int=0):
         self._type_idx = ti
         self._type: CargoType = cargo_types[ti]
@@ -47,17 +51,11 @@ class CargoItem:
         self._price_per = 0
 
     def get(self):
-        return {"ti": self.type_idx, "q": self._quantity, "p": self._price_per}
+        return util.serialize_obj(self)
 
-    def set(self, d: dict) -> bool:
-        try:
-            self._type_idx = d["ti"]
-            self._type: CargoType = cargo_types[self._type_idx]
-            self._quantity = d["q"]
-            self._price_per = d["p"]
-        except KeyError:
-            return False
-        return True
+    def set(self, d: dict):
+        util.deserialize_obj(self, d)
+        self._type: CargoType = cargo_types[self._type_idx]
 
     @property
     def price_per(self):
@@ -102,9 +100,8 @@ class CargoCollection:
     def set(self, l: list):
         self.cargo = [CargoItem() for _ in range(len(l))]
         for i, v in enumerate(l):
-            if not self.cargo[i].set(v):
-                return False
-        return True
+            self.cargo[i].set(v)
+
 
     def get(self) -> list:
         ret = []
