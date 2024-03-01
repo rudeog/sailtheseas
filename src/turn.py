@@ -5,13 +5,20 @@ from state import gs
 
 
 def pass_time():
-    gs.player.time_increment()
+    day_at_sea = gs.player.time_increment()
+
+    # feed and water the crew if we are sailing and a day has elapsed
+    if day_at_sea:
+        _feed_crew()
 
     # see if the crew needs to be paid (every n days)
     pd = gs.crew.update_pay_due()
     if pd:
         gs.output(f"{gs.crew.boatswain}: Our crew of able-bodied seamen needs to be paid for their services. You will not be able to "
                   f"purchase anything or hire anyone until they are paid. Amount owed {gs.crew.amt_due()}D.")
+
+
+
 
     # if we are sailing we need to move if possible
     if gs.player.is_sailing() and gs.ship.b.is_set():
@@ -48,3 +55,28 @@ def _sail():
             if other:  # first time here
                 gs.gm_output("Here is some more information I found about the island:")
                 gs.output(pl.island.describe())
+
+
+def _feed_crew():
+    hits = 0
+    f = gs.stock.consume_fluids()
+    if f == -1:
+        hits = 2
+        gs.output(f"{gs.crew.firstmate}: Captain, we have run out of water! The crew is thirsty!")
+    elif f==0:
+        gs.output("crew member: How do they expect us to sail this ship with no grog!")
+
+    rats = gs.stock.consume_rations()
+    if not rats:
+        hits = max(hits, 1)
+        gs.output(f"{gs.crew.cook}: We have run out of food, captain!")
+
+    # if we had no hits then our health can go up
+    if not hits:
+        gs.crew.increase_health()
+    else:
+        gs.crew.decrease_health(hits)
+
+    if f==2 and hits==0:
+        # the crew had extra grog and enough food
+        gs.output("crew member: Health to the captain!")

@@ -45,6 +45,7 @@ class GlobalState:
         self.player = None
         self.ship = None
         self.crew = None
+        self.stock = None
 
         self.world_name = None
 

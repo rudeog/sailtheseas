@@ -54,7 +54,11 @@ class Player:
     def num_days_since_port(self):
         return self._days_since_port
 
-    def time_increment(self):
+    def time_increment(self) -> bool:
+        """
+
+        :return: true if one day at sea has elapsed since last time increment
+        """
         if self._day_frags == 3:
             self._days = self._days + 1
             self._day_frags = 0 # morning of the next day
@@ -62,6 +66,7 @@ class Player:
             if self.is_sailing():
                 self._days_at_sea += 1
                 self._days_since_port += 1
+                return True
         else:
             self._day_frags = self._day_frags + 1
 
@@ -71,6 +76,8 @@ class Player:
 
     def add_remove_doubloons(self, qty):
         self._doubloons += qty
+        if self._doubloons < 0:
+            self._doubloons = 0
         return self._doubloons
 
     def current_date(self):

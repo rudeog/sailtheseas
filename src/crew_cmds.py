@@ -34,7 +34,7 @@ def rations_cmd(rt: RunType, toks):
         return
 
     if toks[0] not in ['full','meager','reduced']:
-        gs.gm_output("Please enter a valid ration amount for rations!")
+        gs.gm_output("Please enter a valid ration amount!")
         return
 
     _, orig = gs.stock.get_rations()
@@ -69,7 +69,7 @@ def grog_cmd(rt: RunType, toks):
         return
 
     if toks[0] not in ['extra','normal','none']:
-        gs.gm_output("Please enter a valid ration amount for grog!")
+        gs.gm_output("Please enter a valid grog allotment!")
         return
 
     _, orig = gs.stock.get_grog_portion()
@@ -79,7 +79,7 @@ def grog_cmd(rt: RunType, toks):
     elif toks[0]=='normal':
         gs.stock.set_grog_portion(STOCK_GROG_LOW)
     elif toks[0]=='none':
-        gs.stock.set_rations(STOCK_GROG_NONE)
+        gs.stock.set_grog_portion(STOCK_GROG_NONE)
 
     grog, cur = gs.stock.get_grog_portion()
     if cur == orig:

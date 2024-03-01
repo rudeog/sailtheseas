@@ -1,4 +1,5 @@
 import util
+import stock
 
 
 class CargoType:
@@ -41,8 +42,9 @@ CARGO_GOLD = 7
 
 
 class CargoItem:
-    _serialized_attrs = ['_type_idx','_quantity','_price_per']
-    def __init__(self, ti: int=0, q: int=0):
+    _serialized_attrs = ['_type_idx', '_quantity', '_price_per']
+
+    def __init__(self, ti: int = 0, q: int = 0):
         self._type_idx = ti
         self._type: CargoType = cargo_types[ti]
         self._quantity: int = q
@@ -102,7 +104,6 @@ class CargoCollection:
         for i, v in enumerate(l):
             self.cargo[i].set(v)
 
-
     def get(self) -> list:
         ret = []
         for v in self.cargo:
@@ -146,3 +147,28 @@ class CargoCollection:
         item = self[cargo_type_idx]
         if item:
             item._price_per = price_per
+
+    def get_restock(self) -> dict[int, tuple[CargoItem, int]]:
+        """
+        :return: a dict of items that can be restocked from the current collection
+        which is keyed by STOCK IDX type. The dict values are tuples:
+          First: what we have in cargo (the cargo item)
+          Second: how many stock units the cargo unit can provide.
+        eg livestock unit is 1 head of cattle, this can provide 250 full day meals, so
+        therefore it provides 250 units of STOCK_FOOD
+
+        """
+        r = {}
+        for c in self.cargo:
+            if c.type_idx == CARGO_FOOD:
+                r[stock.STOCK_FOOD_IDX] = (c, 340)
+            elif c.type_idx == CARGO_GRAIN:
+                r[stock.STOCK_FOOD_IDX] = (c, 15)
+            elif c.type_idx == CARGO_LIVESTOCK:
+                r[stock.STOCK_FOOD_IDX] = (c, 250)
+            elif c.type_idx == CARGO_RUM:
+                r[stock.STOCK_GROG_IDX] = (c, 100)
+            elif c.type_idx == CARGO_LUMBER:
+                r[stock.STOCK_MATERIALS_IDX] = (c, 20)
+
+        return r

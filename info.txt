@@ -83,6 +83,7 @@ on town and city islands, crew can always be hired, so the number will always re
 9 - 0 - ship can't sail
 
 
+
 roles:
 boatswain: giving orders to crew, crew discipline
 carpenter: repairs upgrades on ship

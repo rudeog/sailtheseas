@@ -23,7 +23,7 @@ role_desc = [
 ]
 dispositions = ['very miserable', 'sombre', 'satisfied', 'happy']
 disciplines = ['lawless', 'unruly', 'following orders', 'well disciplined']
-
+healths = ['dying','in very ill health', 'not well', 'healthy']
 
 class CrewMember:
     _serialized_attrs = ['name','role','idx']
@@ -49,7 +49,7 @@ class CrewMember:
 
 # General ABS Crew plus the special CrewMembers
 class Crew:
-    _serialized_attrs = ['_seamen_count','disposition','discipline','_next_payday','_amt_due']
+    _serialized_attrs = ['_seamen_count','disposition','discipline','_next_payday','_amt_due', '_health']
     def __init__(self):
         # general seamen and their mood, discipline, health
         self._seamen_count = 0
@@ -59,6 +59,10 @@ class Crew:
         # level of discipline
         # 0=lawless, 1=unruly, 2=neutral, 3=obedient
         self.discipline = 3
+        # level of health
+        # 3 = In good health , 2 = not well, 1=in very ill health, 0 = dying
+        # lose 2 points for each day without water, 1 point for each day without food
+        self._health = 3
         # next pay day for ABS
         self._next_payday = 0
         self._amt_due = 0
@@ -80,6 +84,44 @@ class Crew:
             v = d[c]
             getattr(self, c).set(v)
 
+    def decrease_health(self, n=1):
+        """
+        decrease health by n points
+        if we were already at 0, kill off some crew
+        """
+        if n < 1:
+            raise ValueError
+
+        # if we took any hits and we have 0 health, we must kill off some crew
+        # we will kill off 20% for now
+        if self._health == 0:
+            sc = self.seamen_count
+            newsc = int(sc * .8)
+            self.set_seamen_count(newsc)
+            if sc-newsc:
+                gs.output(f"{gs.crew.boatswain}: {sc-newsc} able-bodied seamen have died!")
+                gs.output(f"{gs.crew.chaplain}: May they rest in peace.")
+        else:
+            self._health -= n
+            if self._health <= 0:
+                gs.output(f"{gs.crew.boatswain}: Our crew is in very poor condition!")
+                self._health = 0
+
+    def increase_health(self):
+        """
+        restore a point of health
+        """
+        if self._health < 3:
+            self._health += 1
+            if self._health == 3:
+                gs.output(f"{gs.crew.boatswain}: Our crew are feeling healthy again.")
+
+    def restore_health(self):
+        """
+        restore full health
+        :return:
+        """
+        self._health = 3
 
     @property
     def seamen_count(self):
@@ -153,7 +195,7 @@ class Crew:
             gs.output("The ship currently has no able-bodied seamen.")
         else:
             gs.output(f"The general crew currently consists of {self._seamen_count} {disciplines[self.discipline]} "
-                      f"able-bodied seamen who are currently {dispositions[self.disposition]}.")
+                      f"able-bodied seamen who are currently {healths[self._health]} and {dispositions[self.disposition]}.")
 
         if self.amt_due():
             gs.output(f"You currently owe {self.amt_due()}D to the crew for their services.")

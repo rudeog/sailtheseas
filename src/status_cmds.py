@@ -8,8 +8,17 @@ def register_status_cmds():
     gs.cmdsys.register(Command("cargo",  show_cargo, "List cargo on vessel"))
     gs.cmdsys.register(Command("describe",  describe_island_cmd, "Describe an island given it's ID."))
     gs.cmdsys.register(Command("ship",  describe_ship_cmd, "Describe your ship"))
+    gs.cmdsys.register(Command("stock",  describe_stock_cmd, "Show the stock of supplies that you are carrying: food, water, etc."))
 
 
+def describe_stock_cmd(rt: RunType, toks):
+    if rt == RunType.CHECK_AVAILABLE:
+        return True
+    if rt == RunType.HELP:
+        gs.output("This gives more details about what supplies you are carrying. "
+                  "You may use the restock command to refresh these supplies.")
+        return
+    gs.stock.describe()
 
 def describe_ship_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:

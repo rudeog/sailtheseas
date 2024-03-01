@@ -20,7 +20,7 @@ STOCK_GROG_HIGH = 2
 STOCK_GROG_LOW = 1
 STOCK_GROG_NONE = 0
 
-stock_name = ['Food', 'Water', 'Grog', 'Medicine', 'Ship Materials', 'Ordnance']
+stock_name = ['food', 'water', 'grog', 'medicine', 'ship materials', 'ordnance']
 
 
 class StockItem:
@@ -49,7 +49,7 @@ class Stock:
 
     def __init__(self):
         self.items = [
-            # food is in units.
+            # food is in units. each abs consumes one unit per day
             # a full complement of food should feed a full staffing of ABS for 7 days
             # 7 * 5 * 100 = 3500
             # can restock from preserved foods, grain, livestock
@@ -69,7 +69,7 @@ class Stock:
 
             # medical supplies are consumed at 1 per day. after calamities, they are consumed more.
             # they may only be available at higher level islands
-            StockItem(STOCK_MEDICINE_IDX, 1, 14, 100),
+            StockItem(STOCK_MEDICINE_IDX, 1, 28, 100),
 
             # materials to fix the ship. the ship can become damaged due to storm, animals, battles.
             # it also has a natural wear and tear. 1 unit gets consumed normally per day.
