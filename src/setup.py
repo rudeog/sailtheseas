@@ -122,10 +122,9 @@ def setup_crew() -> bool:
         gs.output("")
         gs.crew.describe_named(True)
 
-        v = gs.input(f"To change an entry, enter a number from 1 to {NUM_ROLES}. When done, enter 'done'. Enter ! to "
-                     f"quit the game: ")
+        v = gs.input(f"To change an entry, enter a number from 1 to {NUM_ROLES}. When finished, enter 'f'. ")
         gs.output("")
-        if v.lower() == 'done':
+        if v.lower() == 'f':
             cc = 0
             for ii in range(NUM_ROLES):
                 if gs.crew.get_by_idx(ii).name:

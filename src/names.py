@@ -45,7 +45,7 @@ western_places = ["Giles", "York", "Wales", "London", "Amsterdam", "Paris", "Eas
                   "Albert", "William", "Wags", "Chups", "Mumps"]
 place_suffixes = ["gate", "ton", "town", " Forest", " Farms", " Patch", "-on-Avon", "-on-James", "thorpe", "thwaite",
                   " in-the-Fields", "wich", "-Row", "burg", "borough", " Hollow", " Fort", "ville", "port", " Colony",
-                  "'s-Knee", "'s-Armpit", "'s-Elbow", "'s-Folly", "-End"]
+                  "'s-Knee", "'s-Armpit", "'s-Elbow", "'s-Folly", "-End", "water"]
 
 place_prefixes = ["Holy ", "New ", "Olde ", "Righteous ", "Far ", "The ",
                   "Mc", "Van", "The ", "Green ", "White ", "St. ", "Upper ", "Lower "]

@@ -92,6 +92,23 @@ class Stock:
             ret.append(v.get())
         return ret
 
+    def check_stock(self):
+        '''
+        This will check to see whether any important items of stock are less than 50% and report that.
+        :return: True if any important items are less than 50%
+        '''
+
+        said = False
+        for v in self.items:
+            pctage = int(100 * v.qty / v.max_qty)
+            if pctage <= 50:
+                if not said:
+                    gs.output(f"{gs.crew.firstmate}: Captain, {gs.ship.name} is low on "
+                              "the following supplies:")
+                    said = True
+                gs.output(f"  {stock_name[v.idx]} - {pctage}%")
+        return said
+
     def describe(self):
         gs.output(f"{gs.crew.firstmate}: I've taken stock of what we have on board {gs.ship.name} and we have "
                   "the following supplies:")

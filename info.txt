@@ -6,8 +6,13 @@ todo:
 - ability to pawn off something you don't want at a lower price
   - pawn command lists prices that will be paid
   - pawn code will get rid of that item yielding the lower price
-
-
+- better partial restock options
+- warn if sailing with low stock
+- restock at beginning of game
+- add other cargo types for items gotten at sea and on land exploring:
+  - oil - comes from sea creatures
+  - fish - caught at sea
+- quests integrate
 
 
 

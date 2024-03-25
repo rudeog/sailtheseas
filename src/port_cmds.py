@@ -61,6 +61,7 @@ def restock_cmd(rt: RunType, toks):
 
 
         avail_in_cargo = gs.ship.cargo.get_restock()
+
         need_items = False
         for stock_item in gs.stock.items:
             if stock_item.qty < stock_item.max_qty:
@@ -210,6 +211,8 @@ def depart_cmd(rt: RunType, toks):
             "This command allows you to embark.")
         return
     if not toks:
+        if gs.stock.check_stock() and not gs.gm_confirm("Do you want to depart anyway without restocking?"):
+            return
         gs.player.set_state_sailing()
         p = gs.map.get_place_at_location(gs.ship.location)
         gs.output(f"{gs.crew.boatswain}: {gs.ship.name} has departed from {p.island.name}.")
