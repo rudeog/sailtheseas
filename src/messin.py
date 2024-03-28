@@ -1,3 +1,3 @@
-a = {'a':  1}
-b=a['b']
-print(b)
+a=int(11)
+b=int(20)
+print(a/b)

@@ -235,21 +235,21 @@ class Island:
             # town - adds ship materials, ordnance
             # city - medicine
         """
-        ret = {STOCK_WATER_IDX: f"refill {stock.stock_name[STOCK_WATER_IDX]} from natural springs on the island" }
+        ret = {STOCK_WATER_IDX: f"Refill {stock.stock_name[STOCK_WATER_IDX]} from natural springs on the island" }
         if self.civ_type >= ISLAND_CIV_TRIBAL:
-            ret[STOCK_FOOD_IDX] = f"restock {stock.stock_name[STOCK_FOOD_IDX]} by buying from one of the local tribes"
+            ret[STOCK_FOOD_IDX] = f"Restock {stock.stock_name[STOCK_FOOD_IDX]} by buying from one of the local tribes"
         if self.civ_type >= ISLAND_CIV_OUTPOST:
-            ret[STOCK_GROG_IDX] = f"restock {stock.stock_name[STOCK_GROG_IDX]} from the locals residents"
-            ret[STOCK_FOOD_IDX] = f"restock {stock.stock_name[STOCK_FOOD_IDX]} from the local residents"
-            ret[STOCK_WATER_IDX] = f"refill {stock.stock_name[STOCK_WATER_IDX]} from one of the wells"
+            ret[STOCK_GROG_IDX] = f"Restock {stock.stock_name[STOCK_GROG_IDX]} from the locals residents"
+            ret[STOCK_FOOD_IDX] = f"Restock {stock.stock_name[STOCK_FOOD_IDX]} from the local residents"
+            ret[STOCK_WATER_IDX] = f"Refill {stock.stock_name[STOCK_WATER_IDX]} from one of the wells"
         if self.civ_type >= ISLAND_CIV_TOWN:
-            ret[STOCK_GROG_IDX] = f"restock {stock.stock_name[STOCK_GROG_IDX]} from the port"
-            ret[STOCK_FOOD_IDX] = f"restock {stock.stock_name[STOCK_FOOD_IDX]} from the port"
-            ret[STOCK_WATER_IDX] = f"refill {stock.stock_name[STOCK_WATER_IDX]} at the port"
-            ret[STOCK_MATERIALS_IDX] = f"resupply {stock.stock_name[STOCK_MATERIALS_IDX]} at the port"
-            ret[STOCK_ORDNANCE_IDX] = f"resupply {stock.stock_name[STOCK_ORDNANCE_IDX]} at the port"
+            ret[STOCK_GROG_IDX] = f"Restock {stock.stock_name[STOCK_GROG_IDX]} from the port"
+            ret[STOCK_FOOD_IDX] = f"Restock {stock.stock_name[STOCK_FOOD_IDX]} from the port"
+            ret[STOCK_WATER_IDX] = f"Refill {stock.stock_name[STOCK_WATER_IDX]} at the port"
+            ret[STOCK_MATERIALS_IDX] = f"Resupply {stock.stock_name[STOCK_MATERIALS_IDX]} at the port"
+            ret[STOCK_ORDNANCE_IDX] = f"Resupply {stock.stock_name[STOCK_ORDNANCE_IDX]} at the port"
         if self.civ_type >= ISLAND_CIV_CITY:
-            ret[STOCK_MEDICINE_IDX]= f"restock {stock.stock_name[STOCK_MEDICINE_IDX]} at the port"
+            ret[STOCK_MEDICINE_IDX]= f"Restock {stock.stock_name[STOCK_MEDICINE_IDX]} at the port"
         return ret
 
     def summary(self):

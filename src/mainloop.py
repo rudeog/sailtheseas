@@ -16,7 +16,12 @@ def get_prompt():
     return p
 
 def run_loop():
-    while not gs.quitting:
+    while True:
+        if gs.quitting:
+            if gs.gm_confirm("Are you sure you want to quit the game?"):
+                break
+            gs.quitting=False
+
         inp = gs.input(f"{get_prompt()}> ")
         gs.num_commands = gs.num_commands + 1
         gs.output("")

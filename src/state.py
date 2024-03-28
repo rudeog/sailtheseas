@@ -4,6 +4,8 @@ import textwrap
 import shutil
 from datetime import datetime
 
+from util import as_int
+
 #
 # Game level defaults
 #
@@ -15,7 +17,6 @@ MAP_WIDTH = 15
 MAP_HEIGHT = 15
 # when our game starts
 STARTING_DATE = date_constant = datetime(1716, 6, 1)
-
 
 # "The largest merchant ships were the East Indiamen, in three broad classes, of 1200 tons, 800 tons, or 500 tons."
 # 300 tons in pounds
@@ -29,16 +30,18 @@ ABS_COUNT_IMPAIRED = 39
 # this or lower than this and the ship cant sail
 ABS_COUNT_NONFUNCTIONAL = 9
 # ABS monthly pay
-ABS_PAY=5
+ABS_PAY = 5
 # pay period in days
-ABS_PAY_PERIOD=30
+ABS_PAY_PERIOD = 30
 
 DEFAULT_STARTING_DOUBLOONS = 10000
+
 
 class GlobalState:
     """
     Represents the top level global object
     """
+
     def __init__(self):
         # this will be overriden to DEFAULT_SEED + n when the player selects a world
         self.seed = DEFAULT_SEED
@@ -78,11 +81,16 @@ class GlobalState:
 
     def output(self, output_text, newline: bool = True, nowrap: bool = False,
                indented: bool = False, sub_indented: bool = False):
+
         if not nowrap:
-            output_text = textwrap.fill(output_text, width=self.wrap_width,
-                                        initial_indent='  ' if indented else '',
-                                        subsequent_indent='  ' if sub_indented else '')
-        print(output_text, end="\n" if newline else "")
+            lines = output_text.split("\n")
+            for line in lines:
+                output_text = textwrap.fill(line, width=self.wrap_width,
+                                            initial_indent='  ' if indented else '',
+                                            subsequent_indent='  ' if sub_indented else '')
+                print(output_text, end="\n" if newline else "")
+        else:
+            print(output_text, end="\n" if newline else "")
 
     def gm_input(self, prompt):
         if self.game_master:
@@ -97,23 +105,75 @@ class GlobalState:
             self.gm_output("You didn't enter anything!")
         return r
 
+    def input_num(self, min_val, max_val, prompt="", nocancel=False, done_token='$', noquit=False):
+        '''
+        Prompts for integer input. Validates that its within range
+        :param prompt: optional text before prompt
+        :param min_val: min allowed value
+        :param max_val: max allowed value
+        :param nocancel: disallow exiting without choosing a number
+        :param done_token: $ is always allowed, this is an alternative synonym
+        :param noquit: the ! to quit option is not available here
+        :return: the number entered or min_val-1 if canceled or quitting. if quitting, gs.quitting will be True
+        '''
+
+        if min_val > max_val:
+            raise ValueError
+        if prompt == "":
+            prompt = "Enter a value"
+
+        suff = f"[{int(min_val)}..{int(max_val)}"
+        if not nocancel:
+            if done_token=='$':
+                suff += '/$=cancel'
+            else:
+                suff += "/"+done_token
+        suff += "]"
+
+        ctr=0
+        reprimands = [
+            f"{gs.player.name}, please pay attention.",
+            f"Really, {gs.player.name}, is it that hard to follow instructions?",
+        ]
+
+        while True:
+            sel = self.input(f"{prompt} {suff}: ")
+            self.output("")
+            if (sel in ('$', done_token)) and not nocancel:
+                return min_val - 1
+            if sel == '!' and not noquit:
+                gs.quitting = True
+                return min_val - 1
+
+            nsel = as_int(sel, min_val - 1)
+            if nsel < min_val or nsel > max_val:
+                rep_idx = (ctr) % len(reprimands)
+                self.gm_output(reprimands[rep_idx])
+                gs.output("")
+            else:
+                return nsel
+            ctr += 1
+
     def gm_confirm(self, prompt="Are you sure?", cancel=False):
         if self.game_master:
             return self.confirm(f"GM {self.game_master.first}: {prompt}", cancel)
-        return self.confirm(prompt,cancel)
+        return self.confirm(prompt, cancel)
 
     def confirm(self, prompt="Are you sure?", cancel=False):
         valid = ['y', 'n']
+        suff = ""
         if cancel:
-            valid.append('cancel')
+            valid.append('$')
+            suff = "/$=cancel"
         r = ''
         while r not in valid:
-            r = self.input(f"{prompt} [{'/'.join(valid)}] ").lower()
+            r = self.input(f"{prompt} [y/n{suff}] ").lower()
         if r == 'y':
             return True
         if r == 'n':
             return False
         return None  # cancel
+
 
 # a single global instance
 gs = GlobalState()

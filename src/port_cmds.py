@@ -1,5 +1,6 @@
 from command import RunType, Command
 from islands import TradingPost
+from save import save_game
 from state import gs
 from cargo import cargo_types, cargo_type_lookup, CargoItem
 from explore import do_explore
@@ -23,6 +24,8 @@ def register_port_cmds():
                                "Explore the island."))
     gs.cmdsys.register(Command("restock",  restock_cmd,
                                "Restock your ship with supplies."))
+    gs.cmdsys.register(Command("save",  cmd_save,
+                               "Save game."))
 
 
 def restock_cmd(rt: RunType, toks):
@@ -33,140 +36,7 @@ def restock_cmd(rt: RunType, toks):
                   "restock some of your supplies from cargo that you are carrying.")
         return
 
-
-    class _restock:
-        def __init__(self, stock_idx, description, from_island:bool, price,
-                     qty_to_fill, partial:bool,
-                     carg_item=None, carg_qty=None):
-            self.stock_idx = stock_idx
-            self.description = description
-            self.from_island = from_island
-            self.price = price  # total price to be paid
-            self.partial = partial  # true if partial fill
-            self.qty_to_fill = qty_to_fill
-            self.carg_item: CargoItem = carg_item
-            self.carg_qty = carg_qty
-
-
-    first_time=True
-    cash_strapped=False
-    while True:
-        restock_options: list[_restock] = []
-        # a dict keyed off stock idx. value is description
-        if gs.player.is_onland():
-            place = gs.map.get_place_at_location(gs.ship.location)
-            avail_at_island = place.island.available_stock()
-        else:
-            avail_at_island = {}
-
-
-        avail_in_cargo = gs.ship.cargo.get_restock()
-
-        need_items = False
-        for stock_item in gs.stock.items:
-            if stock_item.qty < stock_item.max_qty:
-                need_items = True
-                name = stock.stock_name[stock_item.idx]
-                qty_needed = stock_item.max_qty - stock_item.qty
-
-                # see if this stock item can be restocked from island
-                if stock_item.idx in avail_at_island:
-                    partial = False
-                    price_to_fill = stock_item.price_coeff * qty_needed
-                    qty_to_fill = qty_needed
-                    if price_to_fill > gs.player.doubloons:
-                        # player doesn't have enough money to do a full refill. calc what they can afford
-                        cash_strapped = True
-                        qty_to_fill = int(gs.player.doubloons / stock_item.price_coeff)
-                        price_to_fill = qty_to_fill * stock_item.price_coeff
-                        partial = True
-
-                    if qty_to_fill: # if we can actually afford anything
-                        desc = avail_at_island[stock_item.idx]
-                        desc = ("Partially " if partial else "Fully ") + desc
-                        desc += f" (cost {price_to_fill}D)"
-                        restock_options.append(_restock(stock_item.idx,desc, True,
-                                                        price_to_fill, qty_to_fill, partial))
-
-                # see if this stock item can be restocked from ship's cargo
-                if stock_item.idx in avail_in_cargo:
-                    # this is a tuple of CargoItem and how many stock units each cargo unit can provide
-                    x = avail_in_cargo[stock_item.idx]
-                    carg: CargoItem = x[0]
-                    stock_per_carg = x[1]
-
-                    cargo_units_needed = max(1,int(qty_needed / stock_per_carg))
-                    partial = False
-                    qty_to_fill = qty_needed
-                    if cargo_units_needed > carg.quantity:
-                        # don't have enough cargo to fill the stock, so see how much we can fill
-                        cargo_units_needed = carg.quantity
-                        qty_to_fill = cargo_units_needed * stock_per_carg
-                        partial = True
-
-                    desc = (f"restock {name} "
-                            f"using {cargo_units_needed} {cargo_types[carg.type_idx].units} of"
-                            f" {carg.type.name} from ship's cargo")
-                    desc = ("Partially " if partial else "Fully ") + desc
-                    restock_options.append(_restock(stock_item.idx, desc, False, None,
-                                                    qty_to_fill, partial, carg, cargo_units_needed ))
-
-        if not need_items:
-            if first_time:
-                gs.output(f"{gs.crew.firstmate}: Captain, we are fully supplied with everything we need.")
-            return
-
-        if not len(restock_options):
-            if first_time:
-                if cash_strapped:
-                    gs.output(f"{gs.crew.firstmate}: Captain, we don't currently have necessary funds for items we need.")
-                else:
-                    gs.output(f"{gs.crew.firstmate}: Captain, we don't currently have access to items we need.")
-            return
-
-        if first_time:
-            gs.output(f"{gs.crew.firstmate}: Captain, these are our current options for restocking {gs.ship.name}:")
-
-        first_time=False
-        while True:
-            for idx, option in enumerate(restock_options):
-                gs.output(f"{idx+1} - {option.description}")
-
-
-            sel = gs.input("Enter a number or $ to cancel: ")
-            gs.output("")
-            if sel == '$':
-                return
-            if sel == '!':
-                gs.quitting = True
-                return
-
-            nsel = as_int(sel)
-            if nsel < 1 or nsel > len(restock_options):
-                gs.gm_output(f"Please enter one of the available options, {gs.player.name}.")
-                gs.output("")
-            else:
-                break
-
-        ro = restock_options[nsel-1]
-        if ro.price is not None:
-            gs.player.add_remove_doubloons(-ro.price)
-            gs.stock.items[ro.stock_idx].qty += ro.qty_to_fill
-            if ro.price:
-                txt = f"We paid {ro.price}D to restock"
-            else:
-                txt = f"We restocked"
-            gs.output(f"{gs.crew.firstmate}: {txt} {stock.stock_name[ro.stock_idx]}. "
-                      f"We are now at {int(100*gs.stock.items[ro.stock_idx].qty/gs.stock.items[ro.stock_idx].max_qty)}%.")
-        elif ro.carg_item:
-            gs.ship.cargo.add_remove(ro.carg_item.type_idx, -ro.carg_qty)
-            gs.output(f"{gs.crew.firstmate}: We restocked {stock.stock_name[ro.stock_idx]} using cargo. "
-                      f"We are now at {int(100*gs.stock.items[ro.stock_idx].qty/gs.stock.items[ro.stock_idx].max_qty)}%.")
-        else:
-            raise ValueError
-        gs.output("")
-
-
+    stock.do_interactive_restock()
 
 
 
@@ -199,6 +69,24 @@ def land_cmd(rt: RunType, toks):
         else:
             gs.output(f"{gs.crew.boatswain}: {gs.ship.name} has dropped anchor and the crew has gone ashore.")
         gs.ship.b.reset() # reset bearing since we are not sailing
+
+
+def cmd_save(rt, toks):
+    if rt == RunType.CHECK_AVAILABLE:
+        if gs.player.is_onland():
+            return True
+        return False
+    if rt == RunType.HELP:
+        gs.output(
+            "This command allows you to save your game. You may save your game when on land.")
+        return
+
+    err = save_game()
+    if err:
+        gs.gm_output(f"Error saving game: {err}")
+    else:
+        gs.gm_output(f"I have recorded your adventures.")
+
 
 
 def depart_cmd(rt: RunType, toks):
@@ -337,7 +225,7 @@ def trade_buy(t: TradingPost, qty, type_idx, pm):
 
     if qty * carg.price_per > gs.player.doubloons:
         gs.gm_output(f"You don't have sufficient funds to make a purchase of {qty * carg.price_per}D. "
-                     "You only have {gs.player.doubloons}D.")
+                     f"You only have {gs.player.doubloons}D.")
         return
 
     ct = cargo_types[type_idx]

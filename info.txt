@@ -13,6 +13,9 @@ todo:
   - oil - comes from sea creatures
   - fish - caught at sea
 - quests integrate
+- consumption
+  - consume medical at a fixed rate. if crew is unhealthy its consumed at a higher rate
+    maybe after battle, an even higher rate?
 
 
 

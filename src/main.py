@@ -21,15 +21,9 @@ def cmd_quit(run_type, toks):
     if run_type is RunType.CHECK_AVAILABLE:
         return True
     if run_type is RunType.HELP:
-        gs.output("Sometimes you gotta quit. When you quit, your progress will be saved for next time.")
+        gs.output("Sometimes you gotta quit. Be sure to save your game at an island before quitting.")
         return
-    gs.quitting = gs.gm_confirm()
-    if gs.quitting:
-        err = save_game()
-        if err:
-            gs.gm_output(f"Error saving game: {err}")
-            if not gs.confirm("Do you want to quit anyway?"):
-                gs.quitting = False
+    gs.quitting = True
 
 # todo move this somewhere
 def init_trading_data():

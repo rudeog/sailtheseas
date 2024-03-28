@@ -9,6 +9,7 @@ from names import NameGenerator, PlaceGenerator
 from state import gs
 from map import Map
 import phrase_gen
+from stock import do_full_restock
 from util import as_int
 from crew import NUM_ROLES, pay_description
 
@@ -85,7 +86,6 @@ def player_setup() -> bool:
     gs.output("")
     gs.gm_output(phrase_gen.get_phrase(gs.ship.name, phrase_gen.ship_name_phrases))
 
-
     gs.player.add_remove_doubloons(state.DEFAULT_STARTING_DOUBLOONS)
     gs.gm_output(f"You will start the game with {state.DEFAULT_STARTING_DOUBLOONS} doubloons (D).")
 
@@ -93,8 +93,14 @@ def player_setup() -> bool:
         return False
     if not setup_abs():
         return False
-
-
+    gs.output(f"{gs.crew.firstmate}: We need to stock our ship with necessary supplies for sailing.")
+    if gs.gm_confirm(f"You may fully stock your ship now, or you may customize how it is stocked using "
+                     f"the 'restock' command. Do you want to fully stock {gs.ship.name} now?", cancel=False):
+        spent = do_full_restock()
+        if spent:
+            gs.gm_output(f"You spent {spent}D to fully stock {gs.ship.name}.")
+        else:
+            gs.gm_output(f"Well it looks like you don't have enough doubloons to fully stock the ship.")
 
     return True
 
@@ -110,8 +116,9 @@ def set_player_start_location():
 
 def setup_crew() -> bool:
     gs.output("")
-    gs.gm_output(f"It's time to fill the positions of the {NUM_ROLES} main crew members. You may choose whomever you like: "
-                 "friends, family members, etc.")
+    gs.gm_output(
+        f"It's time to fill the positions of the {NUM_ROLES} main crew members. You may choose whomever you like: "
+        "friends, family members, etc.")
     for i in range(NUM_ROLES):
         if not hire_crewmember(i):
             return False
@@ -122,29 +129,15 @@ def setup_crew() -> bool:
         gs.output("")
         gs.crew.describe_named(True)
 
-        v = gs.input(f"To change an entry, enter a number from 1 to {NUM_ROLES}. When finished, enter 'f'. ")
+        i = gs.input_num(1, NUM_ROLES, "Enter a number modify an entry, or 'f' when finished", done_token='f')
         gs.output("")
-        if v.lower() == 'f':
-            cc = 0
-            for ii in range(NUM_ROLES):
-                if gs.crew.get_by_idx(ii).name:
-                    cc += 1
-            if cc == NUM_ROLES:
-                return True
-            else:
-                gs.gm_output(
-                    "You have not yet assigned all the roles. Please do so.")
-        elif v == '!':
-            return False
-        else:
-            i = as_int(v, 0)
-            if i < 1 or i > NUM_ROLES:
-                gs.gm_output(f"Really, {gs.player.name}, is it that hard to enter a number between 1 and {NUM_ROLES}?")
-            else:
-                i -= 1
+        if i < 1:
+            if gs.quitting:
+                return False
+            return True
 
-                if not hire_crewmember(i):
-                    return False
+        if not hire_crewmember(i - 1):
+            return False
 
 
 def hire_crewmember(i):
@@ -171,22 +164,20 @@ def do_crew_assign():
     if not named:
         gs.gm_output("It looks like you already have all positions filled. Just enter 'done' if you are satisfied.")
 
+
 def setup_abs():
     gs.output(f"{gs.crew.boatswain}: As boatswain of this ship, the crew is my responsibility. The ship needs a crew "
               f"of able-bodied seamen (ABS) to keep it sailing and in good working order. {crew.pay_description()} "
               f"You currently have {gs.player.doubloons}D. "
               "How many ABS will you hire?")
     while True:
-        inp = gs.gm_input(f"Enter a number between {state.ABS_COUNT_NONFUNCTIONAL+1} and {state.ABS_COUNT_MAX}: ")
-        if inp=="!":
+        nc = gs.input_num(state.ABS_COUNT_NONFUNCTIONAL + 1, state.ABS_COUNT_MAX, nocancel=True)
+        if gs.quitting:
             return False
 
-        i = as_int(inp, -1)
-        if i <= state.ABS_COUNT_NONFUNCTIONAL or i > state.ABS_COUNT_MAX:
-            gs.gm_output(f"{gs.player.name}, please pay attention...")
-        else:
-            gs.crew.set_seamen_count(i)
-            gs.crew.update_pay_due()
-            pd = gs.crew.pay_crew()
-            gs.output(f"{gs.crew.boatswain}: We hired {i} ABS and paid them up-front for {state.ABS_PAY_PERIOD} days at an amount of {pd}D.")
-            return True
+        gs.crew.set_seamen_count(nc)
+        gs.crew.update_pay_due()
+        pd = gs.crew.pay_crew()
+        gs.output(f"{gs.crew.boatswain}: We hired {nc} ABS and paid them "
+                  f"up-front for {state.ABS_PAY_PERIOD} days at an amount of {pd}D.")
+        return True

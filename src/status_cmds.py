@@ -18,7 +18,9 @@ def describe_stock_cmd(rt: RunType, toks):
         gs.output("This gives more details about what supplies you are carrying. "
                   "You may use the restock command to refresh these supplies.")
         return
-    gs.stock.describe()
+    gs.output(f"{gs.crew.firstmate}: I've taken stock of what we have on board {gs.ship.name} and we have "
+              "the following supplies:")
+    gs.output(gs.stock.describe())
 
 def describe_ship_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
