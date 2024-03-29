@@ -49,13 +49,13 @@ class CrewMember:
 
 # General ABS Crew plus the special CrewMembers
 class Crew:
-    _serialized_attrs = ['_seamen_count','disposition','discipline','_next_payday','_amt_due', '_health']
+    _serialized_attrs = ['_seamen_count','_disposition','discipline','_next_payday','_amt_due', '_health']
     def __init__(self):
         # general seamen and their mood, discipline, health
         self._seamen_count = 0
         # a value from 0 to 3 indicating happiness level
-        # 0=very miserable, 1=unhappy, 2=neutral, 3=happy
-        self.disposition = 2
+        # 0..4=very miserable, 5..9=unhappy, 10..14=neutral, 15..19=happy
+        self._disposition = 14
         # level of discipline
         # 0=lawless, 1=unruly, 2=neutral, 3=obedient
         self.discipline = 3
@@ -115,6 +115,32 @@ class Crew:
             self._health += 1
             if self._health == 3:
                 gs.output(f"{gs.crew.boatswain}: Our crew are feeling healthy again.")
+
+    def _disp_desc(self):
+        return dispositions[int(self._disposition/5)]
+
+    @property
+    def disposition(self):
+        return self._disposition
+
+    def change_disposition(self, diff):
+        '''
+        increase or decrease disposition
+        :param diff: probably +1 or -1
+        :return:
+        '''
+        curr = self._disp_desc()
+        if 0 <= self._disposition + diff <= 19:
+            self._disposition += diff
+        else:
+            if diff < 0:
+                self._disposition = 0
+            elif diff > 0:
+                self._disposition = 19
+        new_desc = self._disp_desc()
+        if curr != new_desc:
+            gs.output(f"{gs.crew.boatswain}: Our crew are {new_desc}.")
+
 
     def restore_health(self):
         """
@@ -195,7 +221,8 @@ class Crew:
             gs.output("The ship currently has no able-bodied seamen.")
         else:
             gs.output(f"The general crew currently consists of {self._seamen_count} {disciplines[self.discipline]} "
-                      f"able-bodied seamen who are currently {healths[self._health]} and {dispositions[self.disposition]}.")
+                      f"able-bodied seamen who are currently {healths[self._health]} and "
+                      f"{self._disp_desc()}.")
 
         if self.amt_due():
             gs.output(f"You currently owe {self.amt_due()}D to the crew for their services.")

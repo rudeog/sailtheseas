@@ -73,12 +73,14 @@ def land_cmd(rt: RunType, toks):
 
 def cmd_save(rt, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_onland():
-            return True
-        return False
+        return True  # we want to be able to tell the player when its available
     if rt == RunType.HELP:
         gs.output(
             "This command allows you to save your game. You may save your game when on land.")
+        return
+
+    if not gs.player.is_onland():
+        gs.gm_output(f"Sorry, {gs.player.name}, but you can only save your progress when you are on land.")
         return
 
     err = save_game()

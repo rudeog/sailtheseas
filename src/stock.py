@@ -66,16 +66,16 @@ class Stock:
             # can gain happiness. if withheld, crew becomes dissatisfied
             # if grog is set at 0, water is consumed at 1 per day
             # can restock from rum and water
-            StockItem(STOCK_GROG_IDX, 1, 700, 4),
+            StockItem(STOCK_GROG_IDX, 1, 700, 2),
 
             # medical supplies are consumed at 1 per day. after calamities, they are consumed more.
             # they may only be available at higher level islands
-            StockItem(STOCK_MEDICINE_IDX, 1, 28, 100),
+            StockItem(STOCK_MEDICINE_IDX, 1, 28, 50),
 
             # materials to fix the ship. the ship can become damaged due to storm, animals, battles.
             # it also has a natural wear and tear. 1 unit gets consumed normally per day.
             # generally available
-            StockItem(STOCK_MATERIALS_IDX, 1, 20, 50),
+            StockItem(STOCK_MATERIALS_IDX, 1, 20, 30),
 
             # cannon balls and powder. consumed during battles. each battle round consumes 1
             # unit.
@@ -101,6 +101,8 @@ class Stock:
 
         said = False
         for v in self.items:
+            if v.idx in (STOCK_GROG_IDX, STOCK_ORDNANCE_IDX):
+                continue  # these are considered non-essential
             pctage = int(100 * v.qty / v.max_qty)
             if pctage <= 50:
                 if not said:
@@ -160,30 +162,37 @@ class Stock:
                  1 - low level grog consumed
                  2 - high level grog was consumed
         """
-
+        grog_offset=0
         item = self.items[STOCK_GROG_IDX]
-        to_consume = item.consumption_rate * gs.crew.seamen_count
-        if to_consume <= item.qty:
-            item.qty -= to_consume
-            return item.consumption_rate
-        if item.consumption_rate > STOCK_GROG_LOW:
-            # see if we can consume a lower level
-            to_consume = STOCK_GROG_LOW * gs.crew.seamen_count
+        if item.consumption_rate > STOCK_GROG_NONE:
+            to_consume = item.consumption_rate * gs.crew.seamen_count
             if to_consume <= item.qty:
                 item.qty -= to_consume
-                return STOCK_GROG_LOW
+                return item.consumption_rate
+
+            if item.consumption_rate > STOCK_GROG_LOW:
+                # see if we can consume a lower level
+                to_consume = STOCK_GROG_LOW * gs.crew.seamen_count
+                if to_consume <= item.qty:
+                    item.qty -= to_consume
+                    return STOCK_GROG_LOW
+            # consume the rest of the grog as an offset to water
+            grog_offset = item.qty
+            item.qty = 0
 
         # fall back to water (use any remaining grog)
-        grog_remainder = item.qty
         item = self.items[STOCK_WATER_IDX]
-        to_consume = item.consumption_rate * gs.crew.seamen_count
-        if to_consume <= item.qty+grog_remainder:
-            to_consume -= grog_remainder
-            item.qty -= to_consume
-            return 0
+        to_consume = (item.consumption_rate * gs.crew.seamen_count) - grog_offset
+        if to_consume > 0:  # and it should be
+            if to_consume <= item.qty:
+                item.qty -= to_consume
+                return 0
 
-        item.qty = 0
-        return -1
+            # failed to satisfy the need
+            item.qty = 0
+            return -1
+        else:
+            return 0 # probably wouldnt get here
 
     def set_grog_portion(self, i: int):
         """
@@ -206,6 +215,22 @@ class Stock:
         if rate >= STOCK_GROG_LOW:
             return "a normal portion of grog", STOCK_GROG_LOW
         return "water only", STOCK_GROG_NONE
+
+    def consume_medicine(self):
+        '''
+        Consume units of medicine.
+        Normally a single unit is consumed per day.
+        Possibly the consumption rate gets increased in certain circumstances
+        :return: True if able to consume
+        '''
+        item = self.items[STOCK_MEDICINE_IDX]
+        to_consume = item.consumption_rate
+        item.qty -= to_consume
+        if item.qty < 0:
+            item.qty = 0
+            return False
+
+        return True
 
 def do_interactive_restock():
 
@@ -342,6 +367,7 @@ def do_interactive_restock():
                       f"We are now at {int(100*gs.stock.items[ro.stock_idx].qty/gs.stock.items[ro.stock_idx].max_qty)}%.")
         elif ro.carg_item:  # from cargo
             gs.ship.cargo.add_remove(ro.carg_item.type_idx, -ro.carg_qty)
+            gs.stock.items[ro.stock_idx].qty += ro.qty_to_fill
             gs.output(f"{gs.crew.firstmate}: We restocked {stock_name[ro.stock_idx]} using cargo. "
                       f"We are now at {int(100*gs.stock.items[ro.stock_idx].qty/gs.stock.items[ro.stock_idx].max_qty)}%.")
         else:
@@ -349,6 +375,11 @@ def do_interactive_restock():
         gs.output("")
 
 def do_full_restock():
+    '''
+    Note that this should only be used during setup phase as no checks are made as to the
+    availability of items
+    :return:
+    '''
     total_d = 0
     for stock_item in gs.stock.items:
         if stock_item.qty < stock_item.max_qty:

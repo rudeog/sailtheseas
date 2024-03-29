@@ -58,17 +58,28 @@ def _sail():
 
 
 def _feed_crew():
-    hits = 0
+    '''
+    Feed crew, this includes water and medicine
+    :return:
+    '''
+    hits = 0  # these are applied against the health of the crew
     f = gs.stock.consume_fluids()
-    if f == -1:
+    if f == -1: # no water or grog
         hits = 2
         gs.output(f"{gs.crew.firstmate}: Captain, we have run out of water! The crew is thirsty!")
-    elif f==0:
+    elif f==0:  # had water, no grog, crew becomes sadder
         gs.output("crew member: How do they expect us to sail this ship with no grog!")
+        gs.crew.change_disposition(-1)
+    elif f==2: # 2 = high level grog, crew becomes happier
+        gs.crew.change_disposition(1)
+
+    if not gs.stock.consume_medicine():
+        gs.output(f"Surgeon {gs.crew.surgeon}: Captain, I am informing you that we are out of medical supplies.")
+        hits = max(hits, 1) # take a hit unless we already have some
 
     rats = gs.stock.consume_rations()
-    if not rats:
-        hits = max(hits, 1)
+    if not rats: # no food available
+        hits = max(hits, 1) # take a hit unless we already have some
         gs.output(f"{gs.crew.cook}: We have run out of food, captain!")
 
     # if we had no hits then our health can go up
@@ -77,6 +88,22 @@ def _feed_crew():
     else:
         gs.crew.decrease_health(hits)
 
-    if f==2 and hits==0:
-        # the crew had extra grog and enough food
-        gs.output("crew member: Health to the captain!")
+    if f==2 and hits==0 and gs.crew.disposition >= 10:
+        # the crew had extra grog and enough food and are not in a negative attitude
+        cheer_the_captain()
+
+cheer_idx=0
+def cheer_the_captain():
+    global cheer_idx
+    cheers = [
+        f"Three cheers for captain {gs.player.name}!",
+        f"Captain {gs.player.name} is a jolly good fellow!",
+        f"I'm proud to serve aboard {gs.ship.name}!",
+        f"I wonder if all folks from {gs.player.birthplace} are as fine as captain {gs.player.name}.",
+        f"Here's a toast to captain {gs.player.name}!",
+        f"Another great day aboard {gs.ship.name}!"
+    ]
+    gs.output(f"crew member: {cheers[cheer_idx]}")
+    cheer_idx += 1
+    if cheer_idx >= len(cheers):
+        cheer_idx=0

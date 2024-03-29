@@ -93,14 +93,17 @@ def player_setup() -> bool:
         return False
     if not setup_abs():
         return False
-    gs.output(f"{gs.crew.firstmate}: We need to stock our ship with necessary supplies for sailing.")
+    gs.output(f"{gs.crew.firstmate}: We need to stock our ship with necessary supplies for sailing. The crew needs "
+              f"to be fed and watered. If we have grog on hand, it can be rationed. Medical supplies help to keep "
+              f"the crew healthy. Materials are needed to do routine maintenance on the ship as well as repairs in "
+              f"the event of damage. Ordnance is necessary if {gs.ship.name} gets into a battle at sea.")
     if gs.gm_confirm(f"You may fully stock your ship now, or you may customize how it is stocked using "
                      f"the 'restock' command. Do you want to fully stock {gs.ship.name} now?", cancel=False):
         spent = do_full_restock()
         if spent:
             gs.gm_output(f"You spent {spent}D to fully stock {gs.ship.name}.")
         else:
-            gs.gm_output(f"Well it looks like you don't have enough doubloons to fully stock the ship.")
+            gs.gm_output(f"Well, it looks like you don't have enough doubloons to fully stock the ship.")
 
     return True
 
