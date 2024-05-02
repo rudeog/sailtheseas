@@ -55,9 +55,11 @@ class Map:
         if width < 10 or height < 10:
             raise Exception("invalid size. min is 10x10")
 
+        self.rng = random.Random(seed)
         self.cols: int = width
         self.rows: int = height
         self.seed: int = seed
+
         # this determines how many islands exist
         self.num_places: int = (width * height) // DENSITY_COEFF
 
@@ -102,7 +104,6 @@ class Map:
         self.places.append(self.map[y][x])
 
         # scatter the rest randomly
-        random.seed(self.seed)
         for i in range(0, self.num_places - 1):
             x, y = self._get_validated_location()
             self.map[y][x].set_place(i + 1)
@@ -110,7 +111,7 @@ class Map:
 
     # get a random x,y within the map
     def _get_random_location(self):
-        return random.randint(0, self.cols - 1), random.randint(0, self.rows - 1)
+        return self.rng.randint(0, self.cols - 1), self.rng.randint(0, self.rows - 1)
 
     def is_nearby(self, location: tuple[int, int], other: tuple[int,int])->bool:
         '''
@@ -251,7 +252,7 @@ class Map:
         return f.splitlines()
 
     def _define_islands(self):
-        g = islands.Generator(self.num_places, self.seed)
+        g = islands.Generator(self.num_places, self.seed, self.rng)
 
         first = True  # we always want a port at the first location with high civ
         for loc in self.places:

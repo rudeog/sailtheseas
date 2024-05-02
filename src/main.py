@@ -1,6 +1,7 @@
 from mainloop import run_loop
 from port_cmds import register_port_cmds
 from names import NameGenerator, PlaceGenerator
+from wind import Wind
 from status_cmds import register_status_cmds, show_status
 from nav_cmds import register_nav_cmds
 from crew_cmds import register_crew_cmds
@@ -45,6 +46,7 @@ gs.player = Player()
 gs.ship = Ship()
 gs.crew = Crew()
 gs.stock = Stock()
+gs.wind = Wind()
 
 gs.output(f"{GAME_NAME} v{GAME_VERSION}")
 
@@ -98,11 +100,20 @@ if cont:
         setup.set_player_start_location()
         # initialize trading data
         init_trading_data()
+        # init wind
+        gs.wind.init_random()
 
 if cont:
+
+
     # show initial status
     show_status(RunType.RUN, [])
 
+    # if we are at an island, describe it
+    # give the initial island description
+    p = gs.map.get_place_at_location(gs.ship.location)
+    if p:
+        gs.output(p.island.describe())
 
     # start the play loop
     run_loop()

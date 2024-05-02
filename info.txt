@@ -1,5 +1,6 @@
 todo:
-- Save/load should include random number info so we get proper generation
+- consume grog when run out of water (test this)
+- Save/load should include random number info so we get proper generation (check)
 - Bypass intro by supplying cmd line args
 - come up with a way to render the world map in chunks or something, this would allow us to make a bigger world
 - separate log output
@@ -16,6 +17,30 @@ todo:
 - consumption
   - consume medical at a fixed rate. if crew is unhealthy its consumed at a higher rate
     maybe after battle, an even higher rate?
+- wind
+  - wind may be blowing from one of the 8 directions and may be one of these strengths (and likelihoods):
+    - none (not blowing) 5%
+    - light breeze 30%
+    - steady wind 50%
+    - strong wind 15%
+  - change wind direction randomly once per day. wind direction will change either one directional degree in either
+    direction or will stay the same direction. eg if coming from NE may change to N or E or stay NE
+  - change strength once per day
+  - wind affects ship speed:
+    - direction interacts with sailing direction
+      - same direction as wind is blowing = 1.5
+      - opposite direction as wind = 0.5
+      - one point off same dir = 1.25
+      - two points off same dir = 1.0 (will be same as 2 pts off opposite)
+      - one point off opposite = 0.75
+    - wind strength is a multiplier for directional value
+      - none - no progress is made
+      - light = 0.8
+      - steady = 1.0
+      - strong = 1.2
+    - example: one point off same dir with strong wind = 1.25 * 1.2 = 1.5
+      therefore 24 knots * 1.5 = 36 knots
+
 
 
 

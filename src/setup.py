@@ -12,7 +12,7 @@ import phrase_gen
 from stock import do_full_restock
 from util import as_int
 from crew import NUM_ROLES, pay_description
-
+from wind import Wind
 
 # this should generate the map, set up the rng's and the game master
 # based on info we have either gotten from user or from save file
@@ -115,6 +115,7 @@ def set_player_start_location():
     gs.player.set_state_landed()
     gs.ship.b.reset()
     gs.map.places[0].visited = True
+    gs.map.places[0].island.visit_count = 1
 
 
 def setup_crew() -> bool:

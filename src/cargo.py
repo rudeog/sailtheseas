@@ -1,5 +1,4 @@
 import util
-import stock
 
 
 class CargoType:
@@ -158,6 +157,7 @@ class CargoCollection:
         therefore it provides 250 units of STOCK_FOOD
 
         """
+        import stock
         r = {}
         for c in self.cargo:
             if c.type_idx == CARGO_FOOD:

@@ -64,9 +64,11 @@ class GlobalState:
         self.rng_play = None
         self.game_master = None
         self.emperor = None
+        self.wind = None
         # number of commands issued
         self.num_commands = 0
         self.quitting = False
+
         self.debug_mode = DEBUGGING
 
         terminal_size = shutil.get_terminal_size(fallback=(120, 24))

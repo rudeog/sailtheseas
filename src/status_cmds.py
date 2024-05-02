@@ -95,24 +95,25 @@ def show_status(rt: RunType, toks):
             gs.output(f" You are {prox} {place.island.name}", False)
             if gs.player.is_onland():
                 if place.island.port:
-                    gs.output(f" and {gs.ship.name} is docked at {place.island.port.name}.")
+                    gs.output(f" and {gs.ship.name} is docked at {place.island.port.name}.", False)
                 else:
-                    gs.output(f". You and your crew have disembarked, and are on shore.")
+                    gs.output(f". You and your crew have disembarked, and are on shore.", False)
             else:
-                gs.output(".")
+                gs.output(".", False)
         if gs.player.is_sailing():
             if gs.ship.b.is_direction():
-                gs.output(f"{gs.ship.name} is heading to the {gs.ship.b.as_target_or_direction()}.")
+                gs.output(f" {gs.ship.name} is heading to the {gs.ship.b.as_target_or_direction()}.", False)
             elif gs.ship.b.is_target():
                 place = gs.map.get_place_at_location(gs.ship.b.as_target_or_direction())
                 if place:
-                    gs.output(f"{gs.ship.name} is heading toward {place.island.name}.")
+                    gs.output(f" {gs.ship.name} is heading toward {place.island.name}.", False)
                 else:  # shouldnt happen
-                    gs.output("{gs.ship.name} is heading to an undisclosed location.")
+                    gs.output(" {gs.ship.name} is heading to an undisclosed location.", False)
 
             if gs.player.num_days_at_sea > 0:
-                gs.output(f"You have been at sea for {gs.player.num_days_at_sea} days.")
-
+                gs.output(f" You have been at sea for {gs.player.num_days_at_sea} days.", False)
+            gs.output(f" The wind is {gs.wind}.", False)
+        gs.output("")
         return
 
 

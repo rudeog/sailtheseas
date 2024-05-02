@@ -93,24 +93,29 @@ class Stock:
             ret.append(v.get())
         return ret
 
-    def check_stock(self):
-        '''
+    def check_important_stock(self):
+        """
         This will check to see whether any important items of stock are less than 50% and report that.
         :return: True if any important items are less than 50%
-        '''
-
-        said = False
+        """
+        s = []
         for v in self.items:
             if v.idx in (STOCK_GROG_IDX, STOCK_ORDNANCE_IDX):
                 continue  # these are considered non-essential
             pctage = int(100 * v.qty / v.max_qty)
             if pctage <= 50:
-                if not said:
-                    gs.output(f"{gs.crew.firstmate}: Captain, {gs.ship.name} is low on "
-                              "the following supplies:")
-                    said = True
-                gs.output(f"{stock_name[v.idx]} - {pctage}%")
-        return said
+                s.append((stock_name[v.idx], pctage))
+
+        if len(s) == 1:
+            gs.output(f"{gs.crew.firstmate}: Captain, {gs.ship.name} only has {s[0][1]}% of {s[0][0]} remaining.")
+            return True
+
+        if len(s):
+            gs.output(f"{gs.crew.firstmate}: Captain, {gs.ship.name} is low on the following supplies:")
+            for ss in s:
+                gs.output(f"{ss[0]} - {ss[1]}%")
+            return True
+        return False
 
     def describe(self):
         ret = ""
@@ -162,7 +167,7 @@ class Stock:
                  1 - low level grog consumed
                  2 - high level grog was consumed
         """
-        grog_offset=0
+        grog_offset = 0
         item = self.items[STOCK_GROG_IDX]
         if item.consumption_rate > STOCK_GROG_NONE:
             to_consume = item.consumption_rate * gs.crew.seamen_count
@@ -180,7 +185,7 @@ class Stock:
             grog_offset = item.qty
             item.qty = 0
 
-        # fall back to water (use any remaining grog)
+        # fall back to water (use any remaining grog if we were consuming it)
         item = self.items[STOCK_WATER_IDX]
         to_consume = (item.consumption_rate * gs.crew.seamen_count) - grog_offset
         if to_consume > 0:  # and it should be
@@ -188,11 +193,18 @@ class Stock:
                 item.qty -= to_consume
                 return 0
 
-            # failed to satisfy the need
+            # failed to satisfy the need, see if grog remains
+            to_consume -= item.qty  # drink remaining water
+            item.qty = 0
+            item = self.items[STOCK_GROG_IDX]
+            if item.qty >= to_consume:
+                item.qty -= to_consume
+                return 0
+
             item.qty = 0
             return -1
         else:
-            return 0 # probably wouldnt get here
+            return 0  # probably wouldnt get here
 
     def set_grog_portion(self, i: int):
         """
@@ -232,11 +244,11 @@ class Stock:
 
         return True
 
-def do_interactive_restock():
 
+def do_interactive_restock():
     class _restock:
-        def __init__(self, stock_idx, description, from_island:bool, price,
-                     qty_to_fill, partial:bool,
+        def __init__(self, stock_idx, description, from_island: bool, price,
+                     qty_to_fill, partial: bool,
                      carg_item=None, carg_qty=None):
             self.stock_idx = stock_idx
             self.description = description
@@ -247,9 +259,8 @@ def do_interactive_restock():
             self.carg_item: CargoItem = carg_item
             self.carg_qty = carg_qty
 
-
-    first_time=True
-    cash_strapped=False
+    first_time = True
+    cash_strapped = False
     while True:
         restock_options: list[_restock] = []
         # a dict keyed off stock idx. value is description
@@ -258,7 +269,6 @@ def do_interactive_restock():
             avail_at_island = place.island.available_stock()
         else:
             avail_at_island = {}
-
 
         avail_in_cargo = gs.ship.cargo.get_restock()
 
@@ -281,9 +291,9 @@ def do_interactive_restock():
                         price_to_fill = int(qty_to_fill * stock_item.price_coeff)
                         partial = True
 
-                    if qty_to_fill: # if we can actually afford anything
+                    if qty_to_fill:  # if we can actually afford anything
                         desc = avail_at_island[stock_item.idx]
-                        restock_options.append(_restock(stock_item.idx,desc, True,
+                        restock_options.append(_restock(stock_item.idx, desc, True,
                                                         price_to_fill, qty_to_fill, partial))
 
                 # see if this stock item can be restocked from ship's cargo
@@ -293,7 +303,7 @@ def do_interactive_restock():
                     carg: CargoItem = x[0]
                     stock_per_carg = x[1]
 
-                    cargo_units_needed = max(1,int(qty_needed / stock_per_carg))
+                    cargo_units_needed = max(1, int(qty_needed / stock_per_carg))
                     partial = False
                     qty_to_fill = qty_needed
                     if cargo_units_needed > carg.quantity:
@@ -306,7 +316,7 @@ def do_interactive_restock():
                             f"using {cargo_units_needed} {cargo_types[carg.type_idx].units} of"
                             f" {carg.type.name} from ship's cargo")
                     restock_options.append(_restock(stock_item.idx, desc, False, None,
-                                                    qty_to_fill, partial, carg, cargo_units_needed ))
+                                                    qty_to_fill, partial, carg, cargo_units_needed))
 
         if not need_items:
             if first_time:
@@ -316,7 +326,8 @@ def do_interactive_restock():
         if not len(restock_options):
             if first_time:
                 if cash_strapped:
-                    gs.output(f"{gs.crew.firstmate}: Captain, we don't currently have necessary funds for items we need.")
+                    gs.output(
+                        f"{gs.crew.firstmate}: Captain, we don't currently have necessary funds for items we need.")
                 else:
                     gs.output(f"{gs.crew.firstmate}: Captain, we don't currently have access to items we need.")
             return
@@ -326,15 +337,15 @@ def do_interactive_restock():
             first_time = False
 
         for idx, option in enumerate(restock_options):
-            si=gs.stock.items[option.stock_idx]
-            have = int(si.qty*100/si.max_qty)
-            gs.output(f"{idx+1} - {option.description} (currently {have}%)")
+            si = gs.stock.items[option.stock_idx]
+            have = int(si.qty * 100 / si.max_qty)
+            gs.output(f"{idx + 1} - {option.description} (currently {have}%)")
 
-        sel = gs.input_num(1, len(restock_options), "Enter an option or 'f' when finished",done_token='f')
+        sel = gs.input_num(1, len(restock_options), "Enter an option or 'f' when finished", done_token='f')
         if sel < 1:
             return
 
-        ro = restock_options[sel-1]
+        ro = restock_options[sel - 1]
         if ro.price is not None:  # from island
             if not ro.price:
                 tofill = ro.qty_to_fill
@@ -354,7 +365,7 @@ def do_interactive_restock():
                         if gs.quitting:
                             return
                         continue
-                    pctage = spend/ro.price
+                    pctage = spend / ro.price
                     tofill = int(ro.qty_to_fill * pctage)
 
             gs.player.add_remove_doubloons(-spend)
@@ -364,15 +375,16 @@ def do_interactive_restock():
             else:
                 txt = f"We restocked"
             gs.output(f"{gs.crew.firstmate}: {txt} {stock_name[ro.stock_idx]}. "
-                      f"We are now at {int(100*gs.stock.items[ro.stock_idx].qty/gs.stock.items[ro.stock_idx].max_qty)}%.")
+                      f"We are now at {int(100 * gs.stock.items[ro.stock_idx].qty / gs.stock.items[ro.stock_idx].max_qty)}%.")
         elif ro.carg_item:  # from cargo
             gs.ship.cargo.add_remove(ro.carg_item.type_idx, -ro.carg_qty)
             gs.stock.items[ro.stock_idx].qty += ro.qty_to_fill
             gs.output(f"{gs.crew.firstmate}: We restocked {stock_name[ro.stock_idx]} using cargo. "
-                      f"We are now at {int(100*gs.stock.items[ro.stock_idx].qty/gs.stock.items[ro.stock_idx].max_qty)}%.")
+                      f"We are now at {int(100 * gs.stock.items[ro.stock_idx].qty / gs.stock.items[ro.stock_idx].max_qty)}%.")
         else:
             raise ValueError
         gs.output("")
+
 
 def do_full_restock():
     '''

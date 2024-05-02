@@ -72,10 +72,10 @@ class Player:
 
     @property
     def doubloons(self):
-        return self._doubloons
+        return int(self._doubloons)
 
     def add_remove_doubloons(self, qty):
-        self._doubloons += qty
+        self._doubloons += int(qty)
         if self._doubloons < 0:
             self._doubloons = 0
         return self._doubloons

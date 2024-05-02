@@ -52,6 +52,7 @@ def _save_visited_data() -> list:
             vd = {"l": loc.location}
             if loc.island:
                 vd['e'] = loc.island.explored
+                vd['vc'] = loc.island.visit_count
             ret.append(vd)
     return ret
 
@@ -83,7 +84,8 @@ def save_game():
             "seed": gs.seed,
             "rng": save_rng_state_to_string(gs.rng_play),
             "trade": _save_trading_data(),
-            "visited": _save_visited_data()
+            "visited": _save_visited_data(),
+            "wind": gs.wind.get()
             }
 
     json_string = json.dumps(data)
@@ -104,6 +106,7 @@ def load_game():
         gs.ship.set(data['ship'])
         gs.stock.set(data['stock'])
         gs.crew.set(data['crew'])
+        gs.wind.set(data['wind'])
 
     except KeyError as e:
         return None, f"Save file may be from an earlier version: {e}"
@@ -131,6 +134,7 @@ def load_trading_and_visited_data(loaded: dict):
             loc.visited = True
             if loc.island:
                 loc.island.explored = vis['e']
+                loc.island.visit_count = vis['vc']
 
 
         return True

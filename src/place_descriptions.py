@@ -9,12 +9,29 @@ import islands
 from state import STARTING_DATE
 from datetime import timedelta
 
+# square brackets surround functions that have a directive letter followed by comma and args.
+# items are processed recursively
+# Key:
+#  l - lookup - lookup from list
+#  p - pick - pick an item from the args at random
+#  m - item from model (see ru_model_item)
+#  person - args are gender (m=male,f=female,o=other) class (w=western,e=exotic)
+#  place - args are w=western,e=exotic,f=fancy
+#  date - historical date, if arg is year then its just the year
+#  word - a single exotic word
+
+
 # These are the different main outlines for an island
+#        cls - island class specific text
+#        geog - geographic features
+#        civ - civilization specific
 outlines = [
     "The island of [m,name] which was discovered [date] by [l,discoverer], [l,geog] [l,civ] [l,cls]",
-    "Discovered in [date,year] by [l,discoverer], [m,name] [l,geog] [l,cls]",
+    "Discovered in [date,year] by [l,discoverer], [m,name] [l,geog] [l,cls] [l,civ]",
     "[m,name] was discovered in [date,year] and [l,geog] [l,civ] [l,cls]",
     "Visitors to [m,name] will be surprised to find out that it [l,geog] [l,civ] [l,cls]",
+    "This [p,unusually shaped,somewhat mysterious,possibly haunted,geologically notable] island [l,geog] "
+    "[person,m,w] [p,claimed,gushed,noted,wrote,explained] in his [p,best-selling,acclaimed,poorly-worded,brief,obscure] travel book, that '[l,civ]' [l,cls]"
 ]
 
 # these lists can be looked up with sel (be careful of recursion)
@@ -31,14 +48,17 @@ geog = [ # geographic features following island or place name
 discoverer = [
     "[m,emperor]'s [p,great,great-great] [p,ancestors,uncle,aunt,grandfather,grandmother]",
     "the reformed pirate captain [person,m,w]",
-    "the widow [person,f,w] on her first solo voyage",
+    "the [p,widow,spinster,duchess] [person,f,w] on her first [p,solo,celebrated,successful] voyage",
     "the [p,notorious,lengthy,tedious,well-documented] [person,m,w] and [person,m,w] expedition",
+    "the [p,storied,controversial,much-touted,lesser-known,nearly disastrous] [person,m,w] expedition"
 ]
-animals=["Guinea pig", "[p,long tailed,tailless,black-faced] monkey","boar", "lion","[word] antelope", "armadillo", "squirrel", "spider", "[p,flightless,wingless,tropical] bird",]
+animals=["Guinea pig", "[p,long tailed,tailless,black-faced] monkey","boar", "lion","[word] antelope",
+         "armadillo", "squirrel", "spider", "[p,flightless,wingless,tropical] bird",
+         "[p,carnivorous,short-eared,sightless] rabbit", "[word] cat"]
 directions=["North","East","South","West"]
 look_adj=["pretty", "ugly", "bland", "somewhat boring", "stunning", "interesting", "notable"]
 plants = ["flowers", "berry bushes", "ferns","orchids","hemp"]
-sports = ["tennis","cricket","bowling","ball","chess"]
+sports = ["tennis","cricket","bowling","ball","chess","hide-and-seek"]
 fruit = ["mango","banana","avocado","pineapple","breadfruit"]
 livestock = ["goats","sheep","cows","bulls","horses","pigs","poultry"]
 
@@ -119,10 +139,11 @@ class_meatdairy = [
 ]
 # these are selected with sel,cls
 class_ag = [
-    "Fields of [p,oats,wheat,barley,corn] cover the [l,dir] side of the island.",
+    "Fields of [p,oats,wheat,barley,corn,rye] cover the [l,dir] side of the island.",
     "The island is [p,famous,renowned,noted] for their [p,hybrid,plump,bitter,sour,sweet,dried,fermented] [l,color] [p,soybeans,beans,peas].",
     "The island is [p,famous,well known] for its [p,annual,weekly,winter] [word] [p,bean,pea,corn,wheat] festival.",
-    "Local farmers have [p,an annual,a monthly,a summer] [p,festival,fair,competition] in which they compete to see who can grow the [p,largest,roundest,smallest,juiciest] [word] [p,squash,fruit,potato].",
+    "Local farmers have [p,an annual,a monthly,a summer] [p,festival,fair,competition] in which they compete to "
+    "see who can grow the [p,largest,roundest,smallest,juiciest,tastiest] [word] [p,squash,fruit,potato].",
 ]
 
 class_forest = [
@@ -363,15 +384,15 @@ class DescGen:
 
 
 if __name__ == "__main__":
-    dg = DescGen(6654546, NameGenerator(109), PlaceGenerator(91))
+    dg = DescGen(54586, NameGenerator(109), PlaceGenerator(91))
     isl = IslandModel()
     isl.name = "Franklin"
-    isl.primary_class = 3
-    isl.secondary_class = 0
-    isl.civ_type = 1
-    isl.ruler = "John Johns"
+    isl.primary_class = 7
+    isl.secondary_class = 2
+    isl.civ_type = 3
+    isl.ruler = "Johnny Johns"
     isl.port_name = "OCharlesPort"
-    isl.port_master = "Portmaster"
+    isl.port_master = "Porty McMaster"
     gs.world_name = "Gnaphisthasia"
     gs.emperor = "Trought"
 

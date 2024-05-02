@@ -70,18 +70,19 @@ consumption_table = {ISLAND_CLASS_NONE: [],
 
 # generate actual islands in populated locations of the map
 class Generator:
-    def __init__(self, num_islands, name_seed):
-        '''
+    def __init__(self, num_islands, name_seed, map_rng):
+        """
         Create an island generator
         :param num_islands: Only used to determine distribution
         :param name_seed:
-        '''
+        """
         # figure our spread of island civilizations
         # 20 % uninhabited
         # 15 % tribal
         # 10 % outpost
         # 40 % town
         # 15 % city
+        self.map_rng = map_rng
         self.civ_distribution = [0] * 5
         self.num_islands = num_islands
         self.desired_distribution = [int(.20 * float(num_islands)), int(.15 * float(num_islands)),
@@ -108,7 +109,7 @@ class Generator:
             return ISLAND_CIV_UNINHABITED
 
         while True:
-            t = random.randint(0, 4)
+            t = self.map_rng.randint(0, 4)
             if self.civ_distribution[t] < self.desired_distribution[t]:
                 self.civ_distribution[t] += 1
                 return t
@@ -132,7 +133,7 @@ class Generator:
             sc = ISLAND_CLASS_NONE
 
 
-        island = Island(idx, civ_type, self.ng, self.pg, pc, sc)
+        island = Island(idx, civ_type, self.ng, self.pg, pc, sc, self.map_rng)
         model = IslandModel(island)
         island.description = self.desc_gen.generate(model)
         return island
@@ -143,30 +144,30 @@ class Generator:
         secondary_class = ISLAND_CLASS_NONE
 
         if civ_type == ISLAND_CIV_OUTPOST:
-            primary_class = choices_ex(
+            primary_class = choices_ex(self.map_rng,
                 [ISLAND_CLASS_TROPICAL, ISLAND_CLASS_FARMING, ISLAND_CLASS_AGRI, ISLAND_CLASS_FOREST],
                 [1, 2, 1, 1])
-            secondary_class = choices_ex([ISLAND_CLASS_NONE, ISLAND_CLASS_TROPICAL, ISLAND_CLASS_FARMING,
+            secondary_class = choices_ex(self.map_rng,[ISLAND_CLASS_NONE, ISLAND_CLASS_TROPICAL, ISLAND_CLASS_FARMING,
                                                ISLAND_CLASS_AGRI, ISLAND_CLASS_FOREST],
                                               [3, 2, 1, 1, 1], [primary_class])
         elif civ_type == ISLAND_CIV_TOWN:
-            primary_class = choices_ex(
+            primary_class = choices_ex(self.map_rng,
                 [ISLAND_CLASS_TROPICAL, ISLAND_CLASS_FARMING, ISLAND_CLASS_AGRI,
                  ISLAND_CLASS_FOREST, ISLAND_CLASS_MINING, ISLAND_CLASS_MFG],
                 [1, 1, 1, 1, 3, 3])
-            secondary_class = choices_ex(
+            secondary_class = choices_ex(self.map_rng,
                 [ISLAND_CLASS_NONE, ISLAND_CLASS_TROPICAL, ISLAND_CLASS_FARMING, ISLAND_CLASS_AGRI,
                  ISLAND_CLASS_FOREST, ISLAND_CLASS_MINING, ISLAND_CLASS_MFG],
                 [2, 2, 2, 2, 2, 1, 1], [primary_class])
         elif civ_type == ISLAND_CIV_CITY:
-            primary_class = choices_ex(
+            primary_class = choices_ex(self.map_rng,
                 [ISLAND_CLASS_MINING, ISLAND_CLASS_MFG, ISLAND_CLASS_COMMERCE],
                 [1, 1, 3])
             if primary_class != ISLAND_CLASS_COMMERCE:
                 # city will always have at least one commerce class
                 secondary_class = ISLAND_CLASS_COMMERCE
             else:
-                secondary_class = choices_ex(
+                secondary_class = choices_ex(self.map_rng,
                     [ISLAND_CLASS_AGRI, ISLAND_CLASS_FOREST, ISLAND_CLASS_MINING, ISLAND_CLASS_MFG],
                     [2, 2, 1, 1], [primary_class])
 
@@ -174,7 +175,7 @@ class Generator:
 
 
 class Island:
-    def __init__(self, index, civ_type, ng: NameGenerator, pg: PlaceGenerator, pc, sc):
+    def __init__(self, index, civ_type, ng: NameGenerator, pg: PlaceGenerator, pc, sc, map_rng):
 
         # determine class based on civ type, and randomness
         # uninhabited islands and tribal obviously have no activity.
@@ -185,6 +186,7 @@ class Island:
         self.primary_class=pc
         self.secondary_class=sc
         self.explored = 0  # percentage explored
+        self.visit_count = 0 # number of arrivals at island
         self.quest_item = None
         self.quest_clue = None
 
@@ -197,11 +199,11 @@ class Island:
         port_name_ethnicity = "e"
 
         if civ_type == ISLAND_CIV_OUTPOST:
-            ruler_ethnicity = choices_ex(["e", "w"], [1, 1])
-            place_ethnicity = choices_ex(['e', 'w'], [1, 1])
+            ruler_ethnicity = choices_ex(map_rng,["e", "w"], [1, 1])
+            place_ethnicity = choices_ex(map_rng,['e', 'w'], [1, 1])
         elif civ_type == ISLAND_CIV_TOWN:
-            ruler_ethnicity = choices_ex(["e", "w"], [1, 1])
-            place_ethnicity = choices_ex(['e', 'w'], [1, 1])
+            ruler_ethnicity = choices_ex(map_rng,["e", "w"], [1, 1])
+            place_ethnicity = choices_ex(map_rng,['e', 'w'], [1, 1])
             port_name_ethnicity = "w"
         elif civ_type == ISLAND_CIV_CITY:
             ruler_ethnicity = "w"
@@ -222,7 +224,7 @@ class Island:
 
         # anything except uninhabited and tribal get a port
         if civ_type >= ISLAND_CIV_OUTPOST:
-            self.port = Port(civ_type, self.primary_class, self.secondary_class, ng, pg, port_name_ethnicity)
+            self.port = Port(civ_type, self.primary_class, self.secondary_class, ng, pg, port_name_ethnicity, map_rng)
         else:
             self.port = None
 
@@ -283,10 +285,22 @@ class Island:
             descript += f" It has a port called {self.port.name} which is run by {self.port.port_master}."
 
         descript += " " + self.description
-        if self.explored:
-            descript += f" You and your crew have explored {self.explored}% of the island."
+
+        if self.visit_count:
+            if self.visit_count > 1:
+                visit_desc = f"You and your crew have visited {self.visit_count} times"
+            else:
+                visit_desc = "This is your first visit"
+
+            if self.explored:
+                explore_desc = f"You have explored {self.explored}% of the island."
+            else:
+                explore_desc = "You have not explored this island."
+
+            descript += f" {visit_desc}. {explore_desc}"
+
         else:
-            descript += f" You have not explored this island."
+            descript += f" You have not visited this island."
         return descript
 
 
@@ -402,9 +416,9 @@ class TradingPost:
 
 
 class Port:
-    def __init__(self, civ_type, primary_class, secondary_class, ng: NameGenerator, pg: PlaceGenerator, ethnicity):
+    def __init__(self, civ_type, primary_class, secondary_class, ng: NameGenerator, pg: PlaceGenerator, ethnicity, map_rng):
 
-        if random.random() < .4:
+        if map_rng.random() < .4:
             # use a name rather than a place
             port_name = "Port " + ng.name("", ethnicity).last
         else:

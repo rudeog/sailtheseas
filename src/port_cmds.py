@@ -101,7 +101,7 @@ def depart_cmd(rt: RunType, toks):
             "This command allows you to embark.")
         return
     if not toks:
-        if gs.stock.check_stock() and not gs.gm_confirm("Do you want to depart anyway without restocking?"):
+        if gs.stock.check_important_stock() and not gs.gm_confirm("Do you want to depart anyway without restocking?"):
             return
         gs.player.set_state_sailing()
         p = gs.map.get_place_at_location(gs.ship.location)

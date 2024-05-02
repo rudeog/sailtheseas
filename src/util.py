@@ -38,9 +38,10 @@ def clamp(value, minimum, maximum):
     return max(minimum, min(value, maximum))
 
 
-def choices_ex(distribution, weights, exclude=None):
+def choices_ex(rng, distribution, weights, exclude=None):
     '''
     Like random.choices but excludes items in exclude
+    :param rng: which rng to use
     :param dist:
     :param wght:
     :param exclude:
@@ -58,7 +59,7 @@ def choices_ex(distribution, weights, exclude=None):
             wght.pop(index_to_remove)
 
     # Use random.choices to select a random element from dist with corresponding weights from wght
-    selected_value = random.choices(dist, weights=wght, k=1)[0]
+    selected_value = rng.choices(dist, weights=wght, k=1)[0]
 
     return selected_value
 
@@ -115,12 +116,21 @@ def is_direction_valid(dir):
 def list_valid_directions():
     return ", ".join(_valid_dirs)
 
-
 class Direction:
     def __init__(self, dir):
-        if dir not in _valid_dirs:
-            raise Exception("invalid direction")
-        self.dir = _valid_dirs.index(dir)
+        if isinstance(dir, str):
+            if dir not in _valid_dirs:
+                raise Exception("invalid direction")
+            self.dir = _valid_dirs.index(dir)
+        elif isinstance(dir, int):
+            if 0 <= dir <= 7:
+                self.dir = dir
+            else:
+                raise Exception("Invalid direction")
+        else:
+            raise Exception("Invalid direction")
+
+
 
     def __str__(self):
         return _dir_names[self.dir]
@@ -136,6 +146,26 @@ class Direction:
     def short(self):
         return _valid_dirs[self.dir]
 
+    def add(self, points):
+        """
+        Add a number of points on the compass. Positive values move clockwise, negative values are ccw.
+        Example dir is N, points is 1, new dir is NE. Points is -1, new dir is NW
+        :param points: integer value
+        :return:
+        """
+        new_dir = self.dir + points
+        new_dir %= 8
+        self.dir=new_dir
+
+    def distance(self, other_dir):
+        """
+        returns the number of compass points to get from one point to another.
+        eg nw and se would yield 4 as they are 4 points apart.
+        :param other_dir:
+        :return:
+        """
+        diff = abs(self.dir - other_dir.dir)
+        return min(diff, 8 - diff)
 
 def fancy_date(current_date):
     def ordinal_suffix(day):
@@ -213,3 +243,6 @@ def serialize_obj(obj):
     for s in obj._serialized_attrs:
         r[s] = getattr(obj, s)
     return r
+
+if __name__ == "__main__":
+    print("")

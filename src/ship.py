@@ -80,6 +80,20 @@ class Bearing:
         self._direction = None
         self._type = self._type_e.TARGET
 
+    def direction(self, from_loc: tuple[int,int]):
+        """
+        Given a specific location, returns the direction we are moving if
+        we are at that location, regardless of whether navigating or just moving in a direction
+        :return:
+        """
+        if self.is_direction():
+            return self._direction
+        elif self.is_target():
+            return util.direction_from_two_coords(from_loc, self._target )
+        else:
+            return None
+
+
 
 class Ship:
     _serialized_attrs = ['name','cargo_capacity','miles_traveled','_toward_center',
@@ -123,6 +137,12 @@ class Ship:
         })
         return r
 
+    def direction_moving(self):
+        """
+        If a direction or navigation is set, this returns the direction we are headed
+        :return: None if none of those conditions
+        """
+        return self.b.direction(self._location)
 
     @property
     def location(self):
@@ -181,11 +201,11 @@ class Ship:
     SAIL_RESULT_EDGE_OF_WORLD = 2  # reached edge of world (bearing is reset)
     SAIL_RESULT_ENTERED_NEW_SQUARE = 3  # ended up in a new square from this sail action
 
-    def sail(self, miles_available) -> tuple[int, int, any]:
+    def sail(self, miles_available) -> tuple[int, int]:
         """
         Sail the ship
         :param miles_available: how many miles to allow sailing
-        :return: one of the SAIL_RESULT codes and number of miles that were travelled
+        :return: one of the SAIL_RESULT codes and number of miles that were travelled.
         """
         # 60 miles is the distance of one square horizontal or vertical.
         # 85 miles is the diagonal distance
@@ -243,21 +263,18 @@ class Ship:
                     loc = gs.map.get_location(new_coords)
                     if loc:
                         self._location = new_coords
-                        if not loc.visited:
-                            first_time_in_square = True
-                        loc.visited = True
                         new_location = True
                     else:  # hit edge so throw away rest of miles
                         hit_edge = True
                         break
         if arrived:
-            return self.SAIL_RESULT_ARRIVED, orig_miles-miles_available, None
+            return self.SAIL_RESULT_ARRIVED, orig_miles-miles_available
         if hit_edge:
-            return self.SAIL_RESULT_EDGE_OF_WORLD, orig_miles-miles_available, None
+            return self.SAIL_RESULT_EDGE_OF_WORLD, orig_miles-miles_available
         if new_location:
-            return self.SAIL_RESULT_ENTERED_NEW_SQUARE, orig_miles-miles_available, first_time_in_square
+            return self.SAIL_RESULT_ENTERED_NEW_SQUARE, orig_miles-miles_available
 
-        return 0, orig_miles-miles_available, None
+        return 0, orig_miles-miles_available
 
     def describe(self):
         wt = int(self.cargo.total_weight()/2000)

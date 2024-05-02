@@ -1,15 +1,23 @@
 # this deals with commands that cause time to flow.
 # The commands that cause time to move are sailing, resting and exploring.
 # other encounters such as trading, battling, etc do not.
+import ship
 from state import gs
 
 
 def pass_time():
     day_at_sea = gs.player.time_increment()
 
-    # feed and water the crew if we are sailing and a day has elapsed
+    # if we are sailing and a day has elapsed
     if day_at_sea:
+        # possibly change wind direction
+        gs.wind.change_random()
+        gs.output(f"{gs.crew.lookout}: The wind is {gs.wind}, captain.")
+        if gs.wind.speed==0:
+            gs.output(f"{gs.crew.navigator}: We need wind to sail our ship!")
+        # feed and water the crew
         _feed_crew()
+        gs.stock.check_important_stock()
 
     # see if the crew needs to be paid (every n days)
     pd = gs.crew.update_pay_due()
@@ -27,10 +35,24 @@ def pass_time():
 
 def _sail():
     # figure out how many miles we will travel based on conditions, equipment and crew
-    miles_available = 24  # assumes 4 knots
-    sail_result, miles_traveled, other = gs.ship.sail(miles_available)
+    knots = 4
+    dir_moving = gs.ship.direction_moving()
+    # its possible that the above will return None if we are navigating and in the target square. no way right now to
+    # determine direction
+    sc = gs.wind.calc_speed_coeff(dir_moving)
+    knots = knots * sc
+    miles_available = round(6 * knots) # assumes 6 miles per knot
+    knots = round(knots,1)
+    sail_result, miles_traveled = gs.ship.sail(miles_available)
     if miles_traveled:
-        gs.output(f"{gs.crew.boatswain}: {gs.ship.name} sails {miles_traveled} miles at an average speed of 4 knots.")
+        if dir_moving:
+            w = f"toward the {dir_moving} "
+        else:
+            w = ""
+        gs.output(f"{gs.crew.boatswain}: {gs.ship.name} sails {miles_traveled} miles {w}at an average speed of {knots} knots.")
+    else:
+        gs.output(f"{gs.crew.navigator}: Captain, despite our best efforts, we made no progress.")
+
     if sail_result == gs.ship.SAIL_RESULT_EDGE_OF_WORLD:
         gs.output(f"{gs.crew.navigator}: I don't mean to put fear into you captain, but we have reached the "
                   "edge of the world. Please choose a new direction or target.")
@@ -45,16 +67,23 @@ def _sail():
         else:
             d = "your destination"
         gs.output(f"{gs.crew.boatswain}: {gs.ship.name} has arrived at {d}.")
+        p.island.visit_count += 1
+        if p.island.visit_count == 1:
+            gs.gm_output("Here is some more information I found about the island:")
+            gs.output(p.island.describe())
+
         gs.ship.b.reset()
     elif sail_result == gs.ship.SAIL_RESULT_ENTERED_NEW_SQUARE:
+        loc = gs.map.get_location(gs.ship.location)
+        if not loc.visited:
+            loc.visited = True
+
         pl = gs.map.get_place_at_location(gs.ship.location)
         if pl:
             dist = gs.ship.distance_to_location(gs.ship.location)
             gs.output(f"{gs.crew.lookout}: I have sighted the island of {pl.island.name}!")
             gs.output(f"{gs.crew.navigator}: The island is {dist} miles away, captain.")
-            if other:  # first time here
-                gs.gm_output("Here is some more information I found about the island:")
-                gs.output(pl.island.describe())
+
 
 
 def _feed_crew():

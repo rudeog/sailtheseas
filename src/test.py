@@ -12,6 +12,7 @@ from command import RunType
 import islands
 import map
 import random
+import wind
 
 
 def initial_setup():
@@ -72,12 +73,37 @@ dump_trade_stuff_for_island(i)
 '''
 
 gs.map = map.Map(30, 30, gs.seed)
-describe_island(38)
+# describe_island(38)
+#
+# qg = QuestGenerator(4444)
+# q = qg.generate(gs.map,1,2)
+# print(q)
+# q = qg.generate(gs.map,2,2)
+# print(q)
+# q = qg.generate(gs.map,3,2)
+# print(q)
 
-qg = QuestGenerator(4444)
-q = qg.generate(gs.map,1,2)
-print(q)
-q = qg.generate(gs.map,2,2)
-print(q)
-q = qg.generate(gs.map,3,2)
-print(q)
+w = wind.Wind()
+print(w)
+w.init_random()
+print(w)
+w.init_random()
+print(w)
+w.init_random()
+print(w)
+w.init_random()
+print(w)
+
+print("changing...")
+dist = {}
+for c in range(0,40):
+    w.change_random()
+    s = f"{w}"
+    print(s)
+
+# if s in dist:
+#     dist[s] = dist[s]+1
+# else:
+#     dist[s]=1
+#
+# print(dist)

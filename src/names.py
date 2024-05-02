@@ -10,21 +10,22 @@ import random
 from util import to_proper_case, ListSelector
 
 male_first_names = ["Sid", "Chalky", "Wallace", "Reggie", "Frampton", "Curtis", "Alex", "Robert", "Bellamy", "Scrag",
-                    "Bodkin", "Roy", "Knolly", "Quackso", "Brutus", "Fingers", "Prettyface", "Sticky", "Ron", "Will",
+                    "Bodkin", "Roy", "Knolly", "Quinton", "Brutus", "Fingers", "Prettyface", "Sticky", "Ron", "Will",
                     "Billiam", "Royster", "Coolin", "John", "James", "Henry", "Paul", "Anders", "Bob", "Christophe",
                     "David", "Conrad", "Roderick", "Oliver", "Leopold",
                     "Eustace", "Fred", "Graeme", "Harolde", "Ian", "Ignatz", "Roach", "Louis", "Manfred",
                     "Norbert", "Oswald", "Patrick", "Quayde", "Rolfe", "Steven", "Tyler", "Umberto", "Vinny",
-                    "Wombert", "Xerxes", "Yerkin", "Zool", "Skeeter"]
+                    "Wombert", "Xerxes", "Yerkin", "Zino", "Skeeter"]
 female_first_names = ["Alice", "Bertha", "Cardigan", "Euphemia", "Fanny", "Geranium", "Herta", "Imogen", "Jessie",
                       "Kelli", "Laurie", "Moonie", "Noleen", "Ophellia", "Penelope", "Qualicia", "Rosy", "Susie",
                       "Tallia", "Unice", "Veroniqua", "Wendeigh", "Xendia", "Yolanda", "Zenia", "Chacona","Fiona",
                       "Cornay", "Pink", "Helen", "Jennifer", "Prudence"]
+# gender neutral
 other_first_names = ["Oaste", "Pat", "Fontarde", "Weem", "Pillial", "Snit"]
 # avoid adding common suffixes to these
 western_last_names = ["Smith", "Jones", "Trought", "Roth", "Hamm", "Winter", "Robin", "Wiener",
                       "Toe", "Foote", "Summer", "Sawyer", "Hunter", "Chandler", "Tanner", "Baker", "Butcher",
-                      "Arcy", "Shirmers", "Edwards", "Axe", "Skenus", "Slurm", "Ball"]
+                      "Arcy", "Shirker", "Edwards", "Axe", "Schatz", "Slurm", "Ball", "Belcher", "Boyle"]
 
 last_name_prefixes = ["Mc","O'","De","St. ", "Le", "D'", "Fitz", "Van"]
 last_name_suffixes = ["kin","son","ski","sky","sly","ian","o", "i", "christ", "low", "patrick", "is", "fifi","sey","sby"]
@@ -54,7 +55,7 @@ place_prefixes = ["Holy ", "New ", "Olde ", "Righteous ", "Far ", "The ",
 
 fancy_prefixes = ["Webe", "Bid", "Atl", "Bor", "Oner", "Mor", "Wan", "Pac", "App", "Crux", "Dex", "Eur", "Fraz", "Gon", "Her","Bra"]
 fancy_mid = ["ac","eh","ist", "on", "ed", "at", "an","ast","il","ih","oh","ent"]
-fancy_suffixes = ["ian", "az", "ius", "icus", "ast", "end", "ond", "ios", "onid", "id", "apae", "ot", "st"]
+fancy_suffixes = ["ian", "ase", "ius", "icus", "ast", "end", "ond", "ios", "onid", "id", "apae", "ot", "st"]
 
 class Name:
     def __init__(self):
