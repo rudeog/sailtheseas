@@ -65,6 +65,8 @@ class CommandSystem:
         :param cmd:
         :return:
         """
+        if cmd.name in self.cmds:
+            raise ValueError(f"Command {cmd.name} already registered.")
         self.cmds[cmd.name] = cmd
 
 

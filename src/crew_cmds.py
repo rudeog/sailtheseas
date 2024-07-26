@@ -29,7 +29,7 @@ def rations_cmd(rt: RunType, toks):
         gs.output("  - full - The crew receives a full portion of food every day")
         gs.output("  - reduced - The crew receives a reduced portion of food every day")
         gs.output("  - meager - The crew receives a very small portion of food every day")
-        gs.output("Example: 'ration full")
+        gs.output("Example: 'ration full'")
 
         return
 
@@ -58,7 +58,12 @@ def grog_cmd(rt: RunType, toks):
         return True
     if rt == RunType.HELP or not toks:
         grog, _ = gs.stock.get_grog_portion()
-        gs.output(f"{gs.crew.boatswain}: The crew is on {grog}, captain.")
+        if gs.stock.get_remaining_grog() <= 0:
+            nogrog = " however we have none left"
+        else:
+            nogrog = ""
+
+        gs.output(f"{gs.crew.boatswain}: The crew is on {grog}{nogrog}, captain.")
         gs.output("You may adjust whether or not the crew get grog while at sea. To do this "
                   "use the grog command followed by a level. The following levels are valid:"  )
         gs.output("  - extra - The crew receives a generous amount of grog every day")

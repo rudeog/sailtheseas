@@ -54,7 +54,7 @@ class Stock:
             # a full complement of food should feed a full staffing of ABS for 7 days
             # 7 * 5 * 100 = 3500
             # can restock from preserved foods, grain, livestock
-            StockItem(STOCK_FOOD_IDX, 5, 3500, .5),
+            StockItem(STOCK_FOOD_IDX, 5, 3500, .3),
 
             # water is consumed at a fixed rate of 1 unit per day per abs
             # assuming grog is not being given.
@@ -217,6 +217,9 @@ class Stock:
             raise ValueError
         item.consumption_rate = i
 
+    def get_remaining_grog(self):
+        return self.items[STOCK_GROG_IDX].qty
+
     def get_grog_portion(self) -> tuple[str, int]:
         """
         :return: a description of the current grog consumption and its constant
@@ -341,7 +344,7 @@ def do_interactive_restock():
             have = int(si.qty * 100 / si.max_qty)
             gs.output(f"{idx + 1} - {option.description} (currently {have}%)")
 
-        sel = gs.input_num(1, len(restock_options), "Enter an option or 'f' when finished", done_token='f')
+        sel = gs.input_num(1, len(restock_options), "Enter an option or $ when finished")
         if sel < 1:
             return
 

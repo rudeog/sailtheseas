@@ -4,10 +4,9 @@ from state import gs
 from util import as_int
 
 def register_status_cmds():
-    gs.cmdsys.register(Command("status",  show_status, "Show status"))
+    gs.cmdsys.register(Command("status", show_status, "Show current status"))
     gs.cmdsys.register(Command("cargo",  show_cargo, "List cargo on vessel"))
     gs.cmdsys.register(Command("describe",  describe_island_cmd, "Describe an island given it's ID."))
-    gs.cmdsys.register(Command("ship",  describe_ship_cmd, "Describe your ship"))
     gs.cmdsys.register(Command("stock",  describe_stock_cmd, "Show the stock of supplies that you are carrying: food, water, etc."))
 
 
@@ -21,16 +20,6 @@ def describe_stock_cmd(rt: RunType, toks):
     gs.output(f"{gs.crew.firstmate}: I've taken stock of what we have on board {gs.ship.name} and we have "
               "the following supplies:")
     gs.output(gs.stock.describe())
-
-def describe_ship_cmd(rt: RunType, toks):
-    if rt == RunType.CHECK_AVAILABLE:
-        return True
-    if rt == RunType.HELP:
-        gs.output("This gives more details about your ship.")
-        return
-
-    gs.ship.describe()
-
 
 def describe_island_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
@@ -70,17 +59,20 @@ def describe_island_cmd(rt: RunType, toks):
 
 
 def show_status(rt: RunType, toks):
+
     if rt == RunType.CHECK_AVAILABLE:
         return True
     if rt == RunType.HELP:
         gs.output(
-            "This shows a summary about you and your voyage.")
+            "This shows all information about you, your ship and your voyage.")
         return
     if not toks:
         gs.output(f"You are captain {gs.player.name} who hails from {gs.player.birthplace}. "
-                  f"You are in the world of {gs.world_name} which is ruled by emperor {gs.emperor.last} and "
-                  f"are on day {gs.player.num_days_elapsed + 1} of your voyage. You "
-                  f"have {gs.player.doubloons} doubloons.", False)
+                  f"You are in the world of {gs.world_name} which is ruled by emperor {gs.emperor.last}. "
+                  f"You are on day {gs.player.num_days_elapsed + 1} of your voyage. You "
+                  f"have {gs.player.doubloons} doubloons. ", False)
+        gs.ship.describe()
+        gs.output("")
 
         # see if we are at a place
         place = gs.map.get_place_at_location(gs.ship.location)
@@ -92,28 +84,32 @@ def show_status(rt: RunType, toks):
                 prox = "at"
 
             # there should always be an island at a place
-            gs.output(f" You are {prox} {place.island.name}", False)
+            gs.output(f"You are {prox} {place.island.name}", False)
             if gs.player.is_onland():
                 if place.island.port:
                     gs.output(f" and {gs.ship.name} is docked at {place.island.port.name}.", False)
                 else:
                     gs.output(f". You and your crew have disembarked, and are on shore.", False)
             else:
-                gs.output(".", False)
+                gs.output(".")
+
         if gs.player.is_sailing():
             if gs.ship.b.is_direction():
-                gs.output(f" {gs.ship.name} is heading to the {gs.ship.b.as_target_or_direction()}.", False)
+                gs.output(f"{gs.ship.name} is heading to the {gs.ship.b.as_target_or_direction()}.")
             elif gs.ship.b.is_target():
                 place = gs.map.get_place_at_location(gs.ship.b.as_target_or_direction())
                 if place:
-                    gs.output(f" {gs.ship.name} is heading toward {place.island.name}.", False)
+                    gs.output(f"{gs.ship.name} is heading toward {place.island.name}.")
                 else:  # shouldnt happen
-                    gs.output(" {gs.ship.name} is heading to an undisclosed location.", False)
+                    gs.output("{gs.ship.name} is heading to an undisclosed location.")
 
             if gs.player.num_days_at_sea > 0:
-                gs.output(f" You have been at sea for {gs.player.num_days_at_sea} days.", False)
-            gs.output(f" The wind is {gs.wind}.", False)
+                gs.output(f"You have been at sea for {gs.player.num_days_at_sea} days." )
+
+            # show weather conditions
+            gs.output(f"The wind is {gs.wind}.")
         gs.output("")
+
         return
 
 

@@ -1,6 +1,9 @@
 todo:
+
+- output func with False argument for crlf can end up going past end of width if multiple are called in succession
 - consume grog when run out of water (test this)
-- Save/load should include random number info so we get proper generation (check)
+- it seems that when grog is run out and crew is set to normal portion they don't get dissatisfied
+- Save/load should include random number info so we get proper generation (check this)
 - Bypass intro by supplying cmd line args
 - come up with a way to render the world map in chunks or something, this would allow us to make a bigger world
 - separate log output
@@ -42,6 +45,8 @@ todo:
       therefore 24 knots * 1.5 = 36 knots
 
 
+reminders:
+why does an island not have cargo available that it produces? it might consume all it produces
 
 
 period facts:

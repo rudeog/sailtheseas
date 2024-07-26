@@ -189,8 +189,8 @@ class Ship:
 
     def _distance_from_edge_to_center(self):
         """
-        Total distance to travel to either edge or center 
-        :return: 
+        Total distance to travel to either edge or center
+        :return:
         """
         dist = _SHORT_RADIUS
         if self._diagonal_entry:
@@ -279,11 +279,11 @@ class Ship:
     def describe(self):
         wt = int(self.cargo.total_weight()/2000)
         gs.output(f"{self.name} is a merchant ship that has a cargo capacity of {int(self.cargo_capacity/2000)} tons. "
-              f"It has traveled {self.miles_traveled} nautical miles in the seas of {gs.world_name}. ")
+              f"It has traveled {self.miles_traveled} nautical miles in the seas of {gs.world_name}. ", False)
         if wt:
-              gs.output(f"It is currently carrying cargo to the weight of approximately {wt} tons.")
+              gs.output(f" It is currently carrying cargo to the weight of approximately {wt} tons.")
         else:
-            gs.output("It is not carrying any cargo at this time.")
+            gs.output(" It is not carrying any cargo at this time.")
 
     def debug_prompt(self):
         p = f"\n{'inward' if self._toward_center else 'outward'} {self._miles_traveled_in_square} miles"

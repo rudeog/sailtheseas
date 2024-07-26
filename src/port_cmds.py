@@ -165,28 +165,34 @@ def trade_shared_cmd(rt: RunType, toks):
     pm = place.island.port.port_master
     if toks[0] == 'list':
         gs.output(f"Port manager {pm} has these items available to buy:")
-        for avail in t.on_hand:
-            max_afford = int(gs.player.doubloons / avail.price_per)
-            if max_afford >= avail.quantity:
-                ycb = "(you can buy all)"
-            elif max_afford == 0:
-                ycb = "(you can't afford this)"
-            else:
-                ycb = f"(you can afford {max_afford} {avail.type.units})"
+        if not t.on_hand:
+            gs.output("(none)")
+        else:
+            for avail in t.on_hand:
+                max_afford = int(gs.player.doubloons / avail.price_per)
+                if max_afford >= avail.quantity:
+                    ycb = "(you can buy all)"
+                elif max_afford == 0:
+                    ycb = "(you can't afford this)"
+                else:
+                    ycb = f"(you can afford {max_afford} {avail.type.units})"
 
-            gs.output(
-                f"[{avail.type.code}] {avail.type.name} - {avail.quantity} {avail.type.units} - {avail.price_per}D ea. {ycb}")
+                gs.output(
+                    f"[{avail.type.code}] {avail.type.name} - {avail.quantity} {avail.type.units} - {avail.price_per}D ea. {ycb}")
 
         gs.output("")
         gs.output(f"{to_proper_case(pm.pronoun())} is looking to buy these items:")
-        for wtb in t.want:
-            incargo = gs.ship.cargo[wtb.type_idx]
-            if incargo:
-                youhave = f" (you have {incargo.quantity} {wtb.type.units})"
-            else:
-                youhave = ""
-            gs.output(
-                f"[{wtb.type.code}] {wtb.type.name} {wtb.quantity} {wtb.type.units} - {wtb.price_per}D ea.{youhave}")
+        if not t.want:
+            gs.output("(none)")
+        else:
+            for wtb in t.want:
+                incargo = gs.ship.cargo[wtb.type_idx]
+                if incargo:
+                    youhave = f" (you have {incargo.quantity} {wtb.type.units})"
+                else:
+                    youhave = ""
+                gs.output(
+                    f"[{wtb.type.code}] {wtb.type.name} {wtb.quantity} {wtb.type.units} - {wtb.price_per}D ea.{youhave}")
         gs.output("")
         gs.gm_output(f"You have {gs.player.doubloons}D "
                      f"and {int((gs.ship.cargo_capacity - gs.ship.cargo.total_weight()) / 2000)} "

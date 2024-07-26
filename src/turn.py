@@ -49,7 +49,8 @@ def _sail():
             w = f"toward the {dir_moving} "
         else:
             w = ""
-        gs.output(f"{gs.crew.boatswain}: {gs.ship.name} sails {miles_traveled} miles {w}at an average speed of {knots} knots.")
+        gs.output(f"{gs.crew.boatswain}: {gs.ship.name} sails {miles_traveled} miles" 
+                  f" {w}at an average speed of {knots} knots.")
     else:
         gs.output(f"{gs.crew.navigator}: Captain, despite our best efforts, we made no progress.")
 

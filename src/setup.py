@@ -104,7 +104,7 @@ def player_setup() -> bool:
             gs.gm_output(f"You spent {spent}D to fully stock {gs.ship.name}.")
         else:
             gs.gm_output(f"Well, it looks like you don't have enough doubloons to fully stock the ship.")
-
+    gs.output("")
     return True
 
 
@@ -133,7 +133,7 @@ def setup_crew() -> bool:
         gs.output("")
         gs.crew.describe_named(True)
 
-        i = gs.input_num(1, NUM_ROLES, "Enter a number modify an entry, or 'f' when finished", done_token='f')
+        i = gs.input_num(1, NUM_ROLES, "Enter a number modify an entry, or $ when finished")
         gs.output("")
         if i < 1:
             if gs.quitting:

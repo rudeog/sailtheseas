@@ -127,7 +127,7 @@ class GlobalState:
         suff = f"[{int(min_val)}..{int(max_val)}"
         if not nocancel:
             if done_token=='$':
-                suff += '/$=cancel'
+                suff += '/$=done'
             else:
                 suff += "/"+done_token
         suff += "]"
