@@ -40,11 +40,13 @@ def clamp(value, minimum, maximum):
 
 def choices_ex(rng, distribution, weights, exclude=None):
     '''
-    Like random.choices but excludes items in exclude
+    Like random.choices but return a single item instead of an array. also excludes items in exclude
     :param rng: which rng to use
     :param dist:
     :param wght:
-    :param exclude:
+    :param exclude: this is a convenience. we have fixed lists of things that we pass for
+        distribution and weights, this just lets us exclude items from them where exclude may be a
+        variable.
     :return:
     '''
     dist = distribution.copy()

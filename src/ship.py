@@ -278,12 +278,13 @@ class Ship:
 
     def describe(self):
         wt = int(self.cargo.total_weight()/2000)
-        gs.output(f"{self.name} is a merchant ship that has a cargo capacity of {int(self.cargo_capacity/2000)} tons. "
-              f"It has traveled {self.miles_traveled} nautical miles in the seas of {gs.world_name}. ", False)
+        ret = f"{self.name} is a merchant ship that has a cargo capacity of {int(self.cargo_capacity/2000)} tons. "
+        ret += f"It has traveled {self.miles_traveled} nautical miles in the seas of {gs.world_name}. "
         if wt:
-              gs.output(f" It is currently carrying cargo to the weight of approximately {wt} tons.")
+            ret += f" It is currently carrying cargo to the weight of approximately {wt} tons."
         else:
-            gs.output(" It is not carrying any cargo at this time.")
+            ret += " It is not carrying any cargo at this time."
+        return ret
 
     def debug_prompt(self):
         p = f"\n{'inward' if self._toward_center else 'outward'} {self._miles_traveled_in_square} miles"

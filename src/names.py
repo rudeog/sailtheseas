@@ -7,7 +7,7 @@
 # - silly phrases
 import random
 
-from util import to_proper_case, ListSelector
+from util import to_proper_case, ListSelector, choices_ex
 
 male_first_names = ["Sid", "Chalky", "Wallace", "Reggie", "Frampton", "Curtis", "Alex", "Robert", "Bellamy", "Scrag",
                     "Bodkin", "Roy", "Knolly", "Quinton", "Brutus", "Fingers", "Prettyface", "Sticky", "Ron", "Will",
@@ -42,7 +42,7 @@ places_compound = ["fa", "gro","qua","bal","su","xin","cha","ka","kwa","wa","cla
 western_places = ["Giles", "York", "Wales", "London", "Amsterdam", "Paris", "East", "North", "South", "West",
                   "Shayne", "Potato", "Smith", "Furrow", "Wheat", "Cabbage", "Flower", "Cows", "Shartle",
                   "Sisk", "Quayle", "Kitty", "Crescent", "Whiskey", "Bourbon", "Francis", "Paul", "Peter", "Bath",
-                  "Cheeks", "Greentree", "Cloud", "Jefferson", "Jacksasm", "Chicken", "Duck", "Bird", "Reginald",
+                  "Cheeks", "Greentree", "Cloud", "Jefferson", "Jacks", "Chicken", "Duck", "Bird", "Reginald",
                   "Albert", "William", "Wags", "Chups", "Mumps"]
 place_suffixes = ["gate", "ton", "town", " Forest", " Farms", " Patch", "-on-Avon", "-on-James", "thorpe", "thwaite",
                   " in-the-Fields", "wich", "-Row", "burg", "borough", " Hollow", " Fort", "ville", "port", " Colony",
@@ -181,7 +181,7 @@ class NameGenerator:
         r = Name()
 
         if desired_gender not in ("o", "m", "f"):
-            r.gender = self.rng.choice(["o", "m", "f"])
+            r.gender = choices_ex(self.rng, ["o", "m", "f"],[1,5,4])
         else:
             r.gender = desired_gender
 
@@ -190,7 +190,7 @@ class NameGenerator:
         elif r.gender == "f":
             r.title = self.rng.choices(["Mrs.","Miss","Widow","Lady","Auntie","Sister"],[9,3,1,1,1,1],k=1)[0]
         else: # non-binary
-            r.title = self.rng.choices(["Private","Partner","Citizen",""],[2,1,1,4],k=1)[0]
+            r.title = self.rng.choices(["Private","Partner","Citizen",""],[1,1,1,5],k=1)[0]
         if desired_class not in ("w", "e"):
             cl = self.rng.choice(["w", "e"])
         else:

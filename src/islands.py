@@ -423,7 +423,7 @@ class Port:
             port_name = "Port " + ng.name("", ethnicity).last
         else:
             port_name = str(pg.name(ethnicity)) + " Harbor"
-        self.port_master = ng.name("m")  # might be ethnic
+        self.port_master = ng.name("")  # might be ethnic
         self.name = port_name
         self.civ_type = civ_type
         self.primary_class = primary_class

@@ -1,8 +1,7 @@
 todo:
-
-- output func with False argument for crlf can end up going past end of width if multiple are called in succession
+- need consequences for unhappy crew
+- need consequences for no meds (check this)
 - consume grog when run out of water (test this)
-- it seems that when grog is run out and crew is set to normal portion they don't get dissatisfied
 - Save/load should include random number info so we get proper generation (check this)
 - Bypass intro by supplying cmd line args
 - come up with a way to render the world map in chunks or something, this would allow us to make a bigger world
@@ -10,9 +9,6 @@ todo:
 - ability to pawn off something you don't want at a lower price
   - pawn command lists prices that will be paid
   - pawn code will get rid of that item yielding the lower price
-- better partial restock options
-- warn if sailing with low stock
-- restock at beginning of game
 - add other cargo types for items gotten at sea and on land exploring:
   - oil - comes from sea creatures
   - fish - caught at sea
@@ -20,6 +16,10 @@ todo:
 - consumption
   - consume medical at a fixed rate. if crew is unhealthy its consumed at a higher rate
     maybe after battle, an even higher rate?
+
+
+
+Some maybe outdated info:
 - wind
   - wind may be blowing from one of the 8 directions and may be one of these strengths (and likelihoods):
     - none (not blowing) 5%
