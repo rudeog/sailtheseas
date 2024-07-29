@@ -1,3 +1,5 @@
+import logging
+
 import util
 
 
@@ -13,6 +15,9 @@ class CargoType:
         self.code = code
         # this determines how much can be produced
         self.prod_coefficient = prod_coeff
+
+    def __str__(self):
+        return self.name
 
 
 # All the possible types of cargo that can be carried at sea
@@ -38,6 +43,9 @@ CARGO_MFG = 4
 CARGO_RUM = 5
 CARGO_LUMBER = 6
 CARGO_GOLD = 7
+
+# for logging
+cargo_code_names = ['grain','food','livestock','iron','mfg','rum','lumber','gold']
 
 
 class CargoItem:
@@ -125,6 +133,7 @@ class CargoCollection:
         :param qty: if 0 nothing happens
         :return: the updated qty
         """
+        logging.log("trade",f"add/rem {qty} units of {cargo_code_names[cargo_type_idx]}")
         it = self[cargo_type_idx]
         if it:  # exist   already, adjust qty
             it._quantity = it.quantity + qty

@@ -4,6 +4,7 @@ import textwrap
 import shutil
 from datetime import datetime
 
+import debug
 from util import as_int
 
 #
@@ -100,11 +101,16 @@ class GlobalState:
         return self.input(prompt)
 
     def input(self, prompt):
-        while True:
-            r = input(prompt)
-            if r:
-                break
-            self.gm_output("You didn't enter anything!")
+        r = debug.read_prompt()
+        if r is None:
+            while True:
+                r = input(prompt)
+                if r:
+                    break
+                self.gm_output("You didn't enter anything!")
+        else:
+            self.output(f"{prompt} \"{r}\"")
+        debug.write_prompt(r, prompt)
         return r
 
     def input_num(self, min_val, max_val, prompt="", nocancel=False, done_token='$', noquit=False):
@@ -127,7 +133,7 @@ class GlobalState:
         suff = f"[{int(min_val)}..{int(max_val)}"
         if not nocancel:
             if done_token=='$':
-                suff += '/$=done'
+                suff += '/$=back'
             else:
                 suff += "/"+done_token
         suff += "]"

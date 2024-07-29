@@ -1,5 +1,6 @@
 import random
 
+import logging
 import stock
 from names import PlaceGenerator, NameGenerator
 import cargo
@@ -128,10 +129,9 @@ class Generator:
         else:
             self.civ_distribution[civ_type] += 1
         if pc is None:
-            pc,sc = self._assign_classes(civ_type)
+            pc, sc = self._assign_classes(civ_type)
         elif sc is None:
             sc = ISLAND_CLASS_NONE
-
 
         island = Island(idx, civ_type, self.ng, self.pg, pc, sc, self.map_rng)
         model = IslandModel(island)
@@ -145,31 +145,34 @@ class Generator:
 
         if civ_type == ISLAND_CIV_OUTPOST:
             primary_class = choices_ex(self.map_rng,
-                [ISLAND_CLASS_TROPICAL, ISLAND_CLASS_FARMING, ISLAND_CLASS_AGRI, ISLAND_CLASS_FOREST],
-                [1, 2, 1, 1])
-            secondary_class = choices_ex(self.map_rng,[ISLAND_CLASS_NONE, ISLAND_CLASS_TROPICAL, ISLAND_CLASS_FARMING,
-                                               ISLAND_CLASS_AGRI, ISLAND_CLASS_FOREST],
-                                              [3, 2, 1, 1, 1], [primary_class])
+                                       [ISLAND_CLASS_TROPICAL, ISLAND_CLASS_FARMING, ISLAND_CLASS_AGRI,
+                                        ISLAND_CLASS_FOREST],
+                                       [1, 2, 1, 1])
+            secondary_class = choices_ex(self.map_rng, [ISLAND_CLASS_NONE, ISLAND_CLASS_TROPICAL, ISLAND_CLASS_FARMING,
+                                                        ISLAND_CLASS_AGRI, ISLAND_CLASS_FOREST],
+                                         [3, 2, 1, 1, 1], [primary_class])
         elif civ_type == ISLAND_CIV_TOWN:
             primary_class = choices_ex(self.map_rng,
-                [ISLAND_CLASS_TROPICAL, ISLAND_CLASS_FARMING, ISLAND_CLASS_AGRI,
-                 ISLAND_CLASS_FOREST, ISLAND_CLASS_MINING, ISLAND_CLASS_MFG],
-                [1, 1, 1, 1, 3, 3])
+                                       [ISLAND_CLASS_TROPICAL, ISLAND_CLASS_FARMING, ISLAND_CLASS_AGRI,
+                                        ISLAND_CLASS_FOREST, ISLAND_CLASS_MINING, ISLAND_CLASS_MFG],
+                                       [1, 1, 1, 1, 3, 3])
             secondary_class = choices_ex(self.map_rng,
-                [ISLAND_CLASS_NONE, ISLAND_CLASS_TROPICAL, ISLAND_CLASS_FARMING, ISLAND_CLASS_AGRI,
-                 ISLAND_CLASS_FOREST, ISLAND_CLASS_MINING, ISLAND_CLASS_MFG],
-                [2, 2, 2, 2, 2, 1, 1], [primary_class])
+                                         [ISLAND_CLASS_NONE, ISLAND_CLASS_TROPICAL, ISLAND_CLASS_FARMING,
+                                          ISLAND_CLASS_AGRI,
+                                          ISLAND_CLASS_FOREST, ISLAND_CLASS_MINING, ISLAND_CLASS_MFG],
+                                         [2, 2, 2, 2, 2, 1, 1], [primary_class])
         elif civ_type == ISLAND_CIV_CITY:
             primary_class = choices_ex(self.map_rng,
-                [ISLAND_CLASS_MINING, ISLAND_CLASS_MFG, ISLAND_CLASS_COMMERCE],
-                [1, 1, 3])
+                                       [ISLAND_CLASS_MINING, ISLAND_CLASS_MFG, ISLAND_CLASS_COMMERCE],
+                                       [1, 1, 3])
             if primary_class != ISLAND_CLASS_COMMERCE:
                 # city will always have at least one commerce class
                 secondary_class = ISLAND_CLASS_COMMERCE
             else:
                 secondary_class = choices_ex(self.map_rng,
-                    [ISLAND_CLASS_AGRI, ISLAND_CLASS_FOREST, ISLAND_CLASS_MINING, ISLAND_CLASS_MFG],
-                    [2, 2, 1, 1], [primary_class])
+                                             [ISLAND_CLASS_AGRI, ISLAND_CLASS_FOREST, ISLAND_CLASS_MINING,
+                                              ISLAND_CLASS_MFG],
+                                             [2, 2, 1, 1], [primary_class])
 
         return primary_class, secondary_class
 
@@ -183,10 +186,10 @@ class Island:
         # city will always get 2
         # also determine whether the main ethnicity will be western or exotic.
         # this determines the ruler's ethnicity and possibly island name and port name and other personages
-        self.primary_class=pc
-        self.secondary_class=sc
+        self.primary_class = pc
+        self.secondary_class = sc
         self.explored = 0  # percentage explored
-        self.visit_count = 0 # number of arrivals at island
+        self.visit_count = 0  # number of arrivals at island
         self.quest_item = None
         self.quest_clue = None
 
@@ -199,11 +202,11 @@ class Island:
         port_name_ethnicity = "e"
 
         if civ_type == ISLAND_CIV_OUTPOST:
-            ruler_ethnicity = choices_ex(map_rng,["e", "w"], [1, 1])
-            place_ethnicity = choices_ex(map_rng,['e', 'w'], [1, 1])
+            ruler_ethnicity = choices_ex(map_rng, ["e", "w"], [1, 1])
+            place_ethnicity = choices_ex(map_rng, ['e', 'w'], [1, 1])
         elif civ_type == ISLAND_CIV_TOWN:
-            ruler_ethnicity = choices_ex(map_rng,["e", "w"], [1, 1])
-            place_ethnicity = choices_ex(map_rng,['e', 'w'], [1, 1])
+            ruler_ethnicity = choices_ex(map_rng, ["e", "w"], [1, 1])
+            place_ethnicity = choices_ex(map_rng, ['e', 'w'], [1, 1])
             port_name_ethnicity = "w"
         elif civ_type == ISLAND_CIV_CITY:
             ruler_ethnicity = "w"
@@ -237,7 +240,7 @@ class Island:
             # town - adds ship materials, ordnance
             # city - medicine
         """
-        ret = {STOCK_WATER_IDX: f"Refill {stock.stock_name[STOCK_WATER_IDX]} from natural springs on the island" }
+        ret = {STOCK_WATER_IDX: f"Refill {stock.stock_name[STOCK_WATER_IDX]} from natural springs on the island"}
         if self.civ_type >= ISLAND_CIV_TRIBAL:
             ret[STOCK_FOOD_IDX] = f"Restock {stock.stock_name[STOCK_FOOD_IDX]} by buying from one of the local tribes"
         if self.civ_type >= ISLAND_CIV_OUTPOST:
@@ -251,7 +254,7 @@ class Island:
             ret[STOCK_MATERIALS_IDX] = f"Resupply {stock.stock_name[STOCK_MATERIALS_IDX]} at the port"
             ret[STOCK_ORDNANCE_IDX] = f"Resupply {stock.stock_name[STOCK_ORDNANCE_IDX]} at the port"
         if self.civ_type >= ISLAND_CIV_CITY:
-            ret[STOCK_MEDICINE_IDX]= f"Restock {stock.stock_name[STOCK_MEDICINE_IDX]} at the port"
+            ret[STOCK_MEDICINE_IDX] = f"Restock {stock.stock_name[STOCK_MEDICINE_IDX]} at the port"
         return ret
 
     def summary(self):
@@ -320,14 +323,13 @@ class TradingPost:
         self.want: cargo.CargoCollection = cargo.CargoCollection()
 
     def get(self):
-        return {"have": self.on_hand.get(), "want": self.want.get() }
+        return {"have": self.on_hand.get(), "want": self.want.get()}
 
     def set(self, d: dict):
         have = d["have"]
         want = d["want"]
         self.on_hand.set(have)
         self.want.set(want)
-
 
     def update(self):
         '''
@@ -341,49 +343,54 @@ class TradingPost:
 
         # primary = 3x production, secondary = 2x production
         # we will add more factors here later
-
+        logging.log("trade", f"update tradingpost. pc:"
+                             f" {class_descriptions[self.primary_class]}, sc: "
+                             f"{class_descriptions[self.secondary_class]}")
         pt = production_table[self.primary_class]
+        logging.log("trade", "  primary production")
         for pi in pt:
             ct = cargo.cargo_types[pi]
             qty = ct.prod_coefficient * 3
             existing = self.on_hand[pi]
             # cap it off at 2x the production
             if existing:
-                qty = min(qty*2 - existing.quantity, qty)
+                qty = min(qty * 2 - existing.quantity, qty)
             self.on_hand.add_remove(pi, qty)
 
         pt = production_table[self.secondary_class]
+        logging.log("trade", "  secondary production")
         for pi in pt:
             ct = cargo.cargo_types[pi]
             qty = ct.prod_coefficient * 2
             existing = self.on_hand[pi]
             # cap it off at 2x the production
             if existing:
-                qty = min(qty*2 - existing.quantity, qty)
+                qty = min(qty * 2 - existing.quantity, qty)
             self.on_hand.add_remove(pi, qty)
 
         # set prices
         for ci in self.on_hand:
             ct = cargo.cargo_types[ci.type_idx]
-            normal = ct.prod_coefficient * 3 # considered the 'normal qty on hand'
+            normal = ct.prod_coefficient * 3  # considered the 'normal qty on hand'
             qty = ci.quantity
             if qty:
                 # price is steady unless we have more than normal in which case price goes down
-                ce = min(float(normal)/float(qty),1.0)
+                ce = min(float(normal) / float(qty), 1.0)
                 price = int(ct.price_coefficient * ce)
                 self.on_hand.set_price(ci.type_idx, price)
 
-
-
         # want to buy. we will use prod coefficient for now to determine need
+        logging.log("trade", "  primary consumption")
         self._update_wtb(3, consumption_table[self.primary_class])
+        logging.log("trade", "  secondary consumption")
         self._update_wtb(2, consumption_table[self.secondary_class])
 
         # if island consumes what it produces, remove the right amt of available resources
+        logging.log("trade", "  consume self produced")
         for need in self.want:
             got = self.on_hand[need.type_idx]
             if got is not None:
-                gq = got.quantity # because add_remove will adjust this ptr
+                gq = got.quantity  # because add_remove will adjust this ptr
                 nq = need.quantity
                 self.on_hand.add_remove(need.type_idx, -nq)
                 self.want.add_remove(need.type_idx, -gq)
@@ -391,17 +398,14 @@ class TradingPost:
         # set prices based on demand
         for ci in self.want:
             ct = cargo.cargo_types[ci.type_idx]
-            normal = ct.prod_coefficient * 3 # considered the 'normal qty wanted'
+            normal = ct.prod_coefficient * 3  # considered the 'normal qty wanted'
             qty = ci.quantity
             if qty:
                 # if we want more than normal, the price goes up, if we want less than normal we still
                 # honor the base price
-                ce = max((float(qty)/float(normal),1.0))+0.15
+                ce = max((float(qty) / float(normal), 1.0)) + 0.15
                 price = int(ct.price_coefficient * ce)
                 self.want.set_price(ci.type_idx, price)
-
-
-
 
     def _update_wtb(self, mult, wanttobuy):
         for pi in wanttobuy:  # earlier in list is higher consumption
@@ -410,13 +414,14 @@ class TradingPost:
             existing = self.want[pi]
             # cap it off at 2x the want
             if existing:
-                qty = min(qty*2 - existing.quantity, qty)
+                qty = min(qty * 2 - existing.quantity, qty)
             self.want.add_remove(pi, qty)
             mult = mult - (1 if mult > 1 else 0)
 
 
 class Port:
-    def __init__(self, civ_type, primary_class, secondary_class, ng: NameGenerator, pg: PlaceGenerator, ethnicity, map_rng):
+    def __init__(self, civ_type, primary_class, secondary_class, ng: NameGenerator, pg: PlaceGenerator, ethnicity,
+                 map_rng):
 
         if map_rng.random() < .4:
             # use a name rather than a place

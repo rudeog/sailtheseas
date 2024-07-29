@@ -1,8 +1,9 @@
+import logging
 from command import RunType, Command
 from islands import TradingPost
 from save import save_game
 from state import gs
-from cargo import cargo_types, cargo_type_lookup, CargoItem
+from cargo import cargo_types, cargo_type_lookup, cargo_code_names
 from explore import do_explore
 from util import as_int, to_proper_case
 import stock
@@ -20,6 +21,8 @@ def register_port_cmds():
                                "Buy cargo."))
     gs.cmdsys.register(Command("sell", trade_sell_cmd,
                                "Sell cargo."))
+    gs.cmdsys.register(Command("pawn", trade_pawn_cmd,
+                               "Sell unwanted cargo at a lower rate."))
     gs.cmdsys.register(Command("explore", explore_cmd,
                                "Explore the island."))
     gs.cmdsys.register(Command("restock",  restock_cmd,
@@ -109,16 +112,18 @@ def depart_cmd(rt: RunType, toks):
 
 
 def _show_bs_help():
-    gs.output("The trading commands allow you to buy and sell goods. "
+    gs.output("The trading commands allow you to buy, sell and pawn goods. "
               "The 'trade' command lists items that are available for purchase and also items that are wanted "
               "by the island.")
     gs.output("Use the 'buy' and 'sell' commands to buy and sell products using their codes as follows:")
     gs.output("  buy <qty> <code>")
     gs.output("  sell <qty> <code>")
+    gs.output("Use the 'pawn' command to sell off unwanted cargo at a lower rate.")
     gs.output("You may also specify 'all' instead of a quantity to either buy or sell the max available.")
     gs.output("Examples:")
     gs.output("  'buy 10 gr' - buy 10 units of grain.")
     gs.output("  'sell all lu' - sell all lumber in cargo.")
+    gs.output("  'pawn 2 ir' - pawn off 2 units of iron.")
 
 
 def trade_list_cmd(rt: RunType, toks):
@@ -132,6 +137,8 @@ def trade_buy_cmd(rt: RunType, toks):
 def trade_sell_cmd(rt: RunType, toks):
     return trade_shared_cmd(rt, ['sell'] + toks)
 
+def trade_pawn_cmd(rt: RunType, toks):
+    return trade_shared_cmd(rt, ['pawn'] + toks)
 
 def trade_shared_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
@@ -148,7 +155,7 @@ def trade_shared_cmd(rt: RunType, toks):
         help = True
     elif len(toks) == 1 and toks[0] != 'list':
         help = True
-    elif len(toks) == 3 and toks[0] not in ['buy', 'sell', 'list']:
+    elif len(toks) == 3 and toks[0] not in ['buy', 'sell', 'list', 'pawn']:
         help = True
     if help:
         _show_bs_help()
@@ -215,8 +222,10 @@ def trade_shared_cmd(rt: RunType, toks):
         cti = cargo_type_lookup[type_code]
         if toks[0] == 'buy':
             trade_buy(t, quant, cti, pm)
-        else:
+        elif toks[0] == 'sell':
             trade_sell(t, quant, cti, pm)
+        else:  # pawn
+            trade_pawn(t, quant, cti, pm)
 
 
 def trade_buy(t: TradingPost, qty, type_idx, pm):
@@ -249,14 +258,19 @@ def trade_buy(t: TradingPost, qty, type_idx, pm):
         return
 
     # its a go
+    logging.log("trade",f"purchase of {qty} units of {cargo_code_names[type_idx]} at {carg.price_per}" )
     t.on_hand.add_remove(type_idx, -qty)
 
     # do we already have this type of cargo
     have_it = gs.ship.cargo[type_idx]
+    # adjust our cost basis (for figuring profit, etc) based on what we have and what we are buying
     if have_it:
-        current_basis = int((have_it.price_per + carg.price_per) / 2)
+        tot_value = (have_it.quantity * have_it.price_per) + (carg.quantity * carg.price_per)
+        tot_qty = have_it.quantity + carg.quantity
+        current_basis = tot_value/tot_qty
     else:
         current_basis = carg.price_per
+    logging.log("trade",f"  cost basis {current_basis}" )
 
     gs.ship.cargo.add_remove(type_idx, qty)
     gs.ship.cargo.set_price(type_idx, current_basis)
@@ -293,6 +307,7 @@ def trade_sell(t: TradingPost, qty, type_idx, pm):
     prof_loss = qty * (want_carg.price_per - my_cargo.price_per)
     if prof_loss < 0:
         pl = "loss"
+        prof_loss=-prof_loss
     else:
         pl = "profit"
 
@@ -306,6 +321,50 @@ def trade_sell(t: TradingPost, qty, type_idx, pm):
                  f"for a total price of {sale_price}D which yields a {pl} of {prof_loss}D. "
                  f"You now have {gs.player.doubloons}D.")
     gs.output(f"{pm.first}: Looking forward to doing more business with you.")
+
+def trade_pawn(t: TradingPost, qty, type_idx, pm):
+    my_cargo = gs.ship.cargo[type_idx]
+    if not my_cargo:
+        gs.output(f"{gs.crew.firstmate}: Captain, we don't have any {cargo_types[type_idx].name} to sell.")
+        return
+
+    if qty == -1:  # all
+        qty = my_cargo.quantity
+    elif qty > my_cargo.quantity or qty < 0:
+        gs.output(
+            f"{pm.first}: You are trying to pawn off more than you have. Don't play games with me!")
+        return
+
+    # see if the portmaster actually wants it, and just sell it for the price they are willing to pay
+    # otherwise offer half of the cost basis for what the player has
+    want_carg = t.want[type_idx]
+    if want_carg and want_carg.quantity >= my_cargo.quantity:
+        will_give = want_carg.price_per
+    else:
+        will_give = my_cargo.price_per / 2
+
+    offer = will_give * qty
+
+    go = gs.confirm(f"{pm.first}: Tough times for you. I'll offer {offer}D for the {my_cargo.type.name}. It's the best I can do.")
+    if not go:
+        return
+
+    # it's a go
+    prof_loss = qty * (will_give - my_cargo.price_per)
+    if prof_loss < 0:
+        pl = "loss"
+        prof_loss=-prof_loss
+    else:
+        pl = "profit"
+
+
+    gs.ship.cargo.add_remove(type_idx, -qty)
+    gs.player.add_remove_doubloons(offer)
+
+    gs.gm_output(f"You pawned {qty} {cargo_types[type_idx].units} of {cargo_types[type_idx].name} "
+                 f"for a total price of {offer}D which yields a {pl} of {prof_loss}D. "
+                 f"You now have {gs.player.doubloons}D.")
+    gs.output(f"{pm.first}: Glad to help you out.")
 
 def explore_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:

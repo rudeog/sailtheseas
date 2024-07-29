@@ -1,3 +1,6 @@
+import argparse
+
+import debug
 from mainloop import run_loop
 from port_cmds import register_port_cmds
 from names import NameGenerator, PlaceGenerator
@@ -15,7 +18,7 @@ from player import Player
 from ship import Ship
 from crew import Crew
 from stock import Stock
-
+import logging
 
 # registered quit command
 def cmd_quit(run_type, toks):
@@ -26,20 +29,32 @@ def cmd_quit(run_type, toks):
         return
     gs.quitting = True
 
-# todo move this somewhere
-def init_trading_data():
-    for loc in gs.map.places:
-        if loc.island and loc.island.port and loc.island.port.trader:
-            t = loc.island.port.trader
-            t.update()
-
-
-
-
-
 ##################################################################
 
+# check for config options
+parser = argparse.ArgumentParser(description="Parse command-line arguments")
+parser.add_argument("-l", "--logfile", required=False, help="Send logging output to specified file")
+parser.add_argument("-rp", "--read-prompt", required=False, help="Read commands from file")
+parser.add_argument("-wp", "--write-prompt", required=False, help="Write commands to file")
+parser.add_argument("-lf", "--log-filter", required=False, nargs="+", help="List of log targets to include")
+parser.add_argument("-sf", "--show-log-filters", required=False, action="store_true",help="Show all log filters")
+args = parser.parse_args()
 
+# set up logging
+if args.show_log_filters:
+    logging.list_log_targets()
+    exit(0)
+if args.logfile:
+    logging.init(args.logfile, args.log_filter)
+
+if args.read_prompt and args.read_prompt==args.write_prompt:
+    print("Can't have same file for prompt reading and writing right now.")
+    exit(1)
+
+if args.read_prompt:
+    debug.open_prompt_reader(args.read_prompt)
+if args.write_prompt:
+    debug.open_prompt_writer(args.write_prompt)
 
 # initialize our global obj (due to circular refs issue)
 gs.player = Player()
@@ -99,7 +114,7 @@ if cont:
         # place player at 0 location
         setup.set_player_start_location()
         # initialize trading data
-        init_trading_data()
+        setup.init_trading_data()
         # init wind
         gs.wind.init_random()
 
@@ -119,5 +134,6 @@ if cont:
     run_loop()
 
 
-
+logging.cleanup()
+debug.close_prompt()
 

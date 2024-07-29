@@ -1,6 +1,7 @@
 #
 # Do initial player setup. Ask player for info
 #
+import logging
 import random
 
 import crew
@@ -185,3 +186,12 @@ def setup_abs():
         gs.output(f"{gs.crew.boatswain}: We hired {nc} ABS and paid them "
                   f"up-front for {state.ABS_PAY_PERIOD} days at an amount of {pd}D.")
         return True
+
+# create the initial set of cargo at each port
+def init_trading_data():
+
+    for loc in gs.map.places:
+        if loc.island and loc.island.port and loc.island.port.trader:
+            t = loc.island.port.trader
+            logging.log('trade',f'initialize trading data for {loc.index}')
+            t.update()
