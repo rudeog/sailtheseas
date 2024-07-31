@@ -1,25 +1,8 @@
 from cargo import CargoItem, cargo_types
 from util import serialize_obj, deserialize_obj
 from state import gs
+import const
 
-STOCK_FOOD_IDX = 0
-STOCK_WATER_IDX = 1
-STOCK_GROG_IDX = 2
-STOCK_MEDICINE_IDX = 3
-STOCK_MATERIALS_IDX = 4
-STOCK_ORDNANCE_IDX = 5
-
-# 5 units per day per abs = full ration
-# 3 units per day is reduced ration
-# 2 units per day is meager
-STOCK_RATIONS_FULL = 5
-STOCK_RATIONS_REDUCED = 3
-STOCK_RATIONS_MEAGER = 2
-
-# grog consumption rate
-STOCK_GROG_HIGH = 2
-STOCK_GROG_LOW = 1
-STOCK_GROG_NONE = 0
 
 stock_name = ['food', 'water', 'grog', 'medicine', 'ship materials', 'ordnance']
 
@@ -54,32 +37,32 @@ class Stock:
             # a full complement of food should feed a full staffing of ABS for 7 days
             # 7 * 5 * 100 = 3500
             # can restock from preserved foods, grain, livestock
-            StockItem(STOCK_FOOD_IDX, 5, 3500, .3),
+            StockItem(const.STOCK_FOOD_IDX, 5, 3500, .3),
 
             # water is consumed at a fixed rate of 1 unit per day per abs
             # assuming grog is not being given.
             # a full amount of water should last 4 days
-            StockItem(STOCK_WATER_IDX, 1, 400, 0),
+            StockItem(const.STOCK_WATER_IDX, 1, 400, 0),
 
             # grog is an optional item. if given at 1 unit per day, crew is
             # kept from becoming dissatisfied. if given at 2 per day, crew
             # can gain happiness. if withheld, crew becomes dissatisfied
             # if grog is set at 0, water is consumed at 1 per day
             # can restock from rum and water
-            StockItem(STOCK_GROG_IDX, 1, 700, 2),
+            StockItem(const.STOCK_GROG_IDX, 1, 700, 2),
 
             # medical supplies are consumed at 1 per day. after calamities, they are consumed more.
             # they may only be available at higher level islands
-            StockItem(STOCK_MEDICINE_IDX, 1, 28, 50),
+            StockItem(const.STOCK_MEDICINE_IDX, 1, 28, 50),
 
             # materials to fix the ship. the ship can become damaged due to storm, animals, battles.
             # it also has a natural wear and tear. 1 unit gets consumed normally per day.
             # generally available
-            StockItem(STOCK_MATERIALS_IDX, 1, 20, 30),
+            StockItem(const.STOCK_MATERIALS_IDX, 1, 20, 30),
 
             # cannon balls and powder. consumed during battles. each battle round consumes 1
             # unit.
-            StockItem(STOCK_ORDNANCE_IDX, 0, 10, 70),
+            StockItem(const.STOCK_ORDNANCE_IDX, 0, 10, 70),
         ]
 
     def set(self, lst: list):
@@ -100,7 +83,7 @@ class Stock:
         """
         s = []
         for v in self.items:
-            if v.idx in (STOCK_GROG_IDX, STOCK_ORDNANCE_IDX):
+            if v.idx in (const.STOCK_GROG_IDX, const.STOCK_ORDNANCE_IDX):
                 continue  # these are considered non-essential
             pctage = int(100 * v.qty / v.max_qty)
             if pctage <= 50:
@@ -129,7 +112,7 @@ class Stock:
         consume a daily amount of rations at the current rate.
         :return: False if we came up short, true otherwise
         '''
-        item = self.items[STOCK_FOOD_IDX]
+        item = self.items[const.STOCK_FOOD_IDX]
         to_consume = item.consumption_rate * gs.crew.seamen_count
         if item.qty < to_consume:
             item.qty = 0
@@ -140,23 +123,23 @@ class Stock:
     def set_rations(self, amt):
         """
         set the current rations
-        :param amt: use one of STOCK_RATIONS_
+        :param amt: use one of const.STOCK_RATIONS_
         :return:
         """
-        if amt > STOCK_RATIONS_FULL or amt < STOCK_RATIONS_MEAGER:
+        if amt > const.STOCK_RATIONS_FULL or amt < const.STOCK_RATIONS_MEAGER:
             raise ValueError
-        self.items[STOCK_FOOD_IDX].consumption_rate = amt
+        self.items[const.STOCK_FOOD_IDX].consumption_rate = amt
 
     def get_rations(self) -> tuple[str, int]:
         """
         :return: a description of the current ration consumption and its constant
         """
-        rate = self.items[STOCK_FOOD_IDX].consumption_rate
-        if rate >= STOCK_RATIONS_FULL:
-            return "full", STOCK_RATIONS_FULL
-        if rate >= STOCK_RATIONS_REDUCED:
-            return "reduced", STOCK_RATIONS_REDUCED
-        return "meager", STOCK_RATIONS_MEAGER
+        rate = self.items[const.STOCK_FOOD_IDX].consumption_rate
+        if rate >= const.STOCK_RATIONS_FULL:
+            return "full", const.STOCK_RATIONS_FULL
+        if rate >= const.STOCK_RATIONS_REDUCED:
+            return "reduced", const.STOCK_RATIONS_REDUCED
+        return "meager", const.STOCK_RATIONS_MEAGER
 
     def consume_fluids(self) -> int:
         """
@@ -168,25 +151,25 @@ class Stock:
                  2 - high level grog was consumed
         """
         grog_offset = 0
-        item = self.items[STOCK_GROG_IDX]
-        if item.consumption_rate > STOCK_GROG_NONE:
+        item = self.items[const.STOCK_GROG_IDX]
+        if item.consumption_rate > const.STOCK_GROG_NONE:
             to_consume = item.consumption_rate * gs.crew.seamen_count
             if to_consume <= item.qty:
                 item.qty -= to_consume
                 return item.consumption_rate
 
-            if item.consumption_rate > STOCK_GROG_LOW:
+            if item.consumption_rate > const.STOCK_GROG_LOW:
                 # see if we can consume a lower level
-                to_consume = STOCK_GROG_LOW * gs.crew.seamen_count
+                to_consume = const.STOCK_GROG_LOW * gs.crew.seamen_count
                 if to_consume <= item.qty:
                     item.qty -= to_consume
-                    return STOCK_GROG_LOW
+                    return const.STOCK_GROG_LOW
             # consume the rest of the grog as an offset to water
             grog_offset = item.qty
             item.qty = 0
 
         # fall back to water (use any remaining grog if we were consuming it)
-        item = self.items[STOCK_WATER_IDX]
+        item = self.items[const.STOCK_WATER_IDX]
         to_consume = (item.consumption_rate * gs.crew.seamen_count) - grog_offset
         if to_consume > 0:  # and it should be
             if to_consume <= item.qty:
@@ -196,7 +179,7 @@ class Stock:
             # failed to satisfy the need, see if grog remains
             to_consume -= item.qty  # drink remaining water
             item.qty = 0
-            item = self.items[STOCK_GROG_IDX]
+            item = self.items[const.STOCK_GROG_IDX]
             if item.qty >= to_consume:
                 item.qty -= to_consume
                 return 0
@@ -209,27 +192,27 @@ class Stock:
     def set_grog_portion(self, i: int):
         """
         Set grog to high, low, nonw
-        :param i: STOCK_GROG_*
+        :param i: const.STOCK_GROG_*
         :return:
         """
-        item = self.items[STOCK_GROG_IDX]
-        if i > STOCK_GROG_HIGH or i < STOCK_GROG_NONE:
+        item = self.items[const.STOCK_GROG_IDX]
+        if i > const.STOCK_GROG_HIGH or i < const.STOCK_GROG_NONE:
             raise ValueError
         item.consumption_rate = i
 
     def get_remaining_grog(self):
-        return self.items[STOCK_GROG_IDX].qty
+        return self.items[const.STOCK_GROG_IDX].qty
 
     def get_grog_portion(self) -> tuple[str, int]:
         """
         :return: a description of the current grog consumption and its constant
         """
-        rate = self.items[STOCK_GROG_IDX].consumption_rate
-        if rate >= STOCK_GROG_HIGH:
-            return "a generous portion of grog", STOCK_GROG_HIGH
-        if rate >= STOCK_GROG_LOW:
-            return "a normal portion of grog", STOCK_GROG_LOW
-        return "water only", STOCK_GROG_NONE
+        rate = self.items[const.STOCK_GROG_IDX].consumption_rate
+        if rate >= const.STOCK_GROG_HIGH:
+            return "a generous portion of grog", const.STOCK_GROG_HIGH
+        if rate >= const.STOCK_GROG_LOW:
+            return "a normal portion of grog", const.STOCK_GROG_LOW
+        return "water only", const.STOCK_GROG_NONE
 
     def consume_medicine(self):
         '''
@@ -238,7 +221,7 @@ class Stock:
         Possibly the consumption rate gets increased in certain circumstances
         :return: True if able to consume
         '''
-        item = self.items[STOCK_MEDICINE_IDX]
+        item = self.items[const.STOCK_MEDICINE_IDX]
         to_consume = item.consumption_rate
         item.qty -= to_consume
         if item.qty < 0:

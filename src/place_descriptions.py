@@ -5,7 +5,6 @@ import random
 from names import NameGenerator, PlaceGenerator
 from state import gs
 from util import ListSelector, fancy_date
-import islands
 from state import STARTING_DATE
 from datetime import timedelta
 

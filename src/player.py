@@ -6,7 +6,7 @@ from enum import Enum
 from state import STARTING_DATE, gs
 from util import Direction, serialize_obj, deserialize_obj
 
-
+_MAX_LAST_VISITED = 5
 
 class Player:
     class _state_e(Enum):
@@ -15,7 +15,8 @@ class Player:
         ATSEA = 2
 
     # this handles simpler serialized types
-    _serialized_attrs = ['name','birthplace','_days','_day_frags','_days_at_sea','_days_since_port', '_doubloons']
+    _serialized_attrs = ['name','birthplace','_days','_day_frags','_days_at_sea','_days_since_port',
+                         '_doubloons', '_last_visited']
 
     def __init__(self):
         # player's personal info
@@ -27,6 +28,9 @@ class Player:
         self._day_frags = 0  # morning, afternoon, evening, night
         self._days_at_sea = 0  # how many days since left land
         self._days_since_port = 0 # how many days since landed at a port
+
+        # last few islands visited
+        self._last_visited = []
         # personal property
         self._doubloons = 0
 
@@ -110,6 +114,12 @@ class Player:
         else:
             return ""
 
+    def add_to_visited(self, island_id):
+        self._last_visited.append(island_id)
+        if len(self._last_visited) > _MAX_LAST_VISITED:
+            del self._last_visited[0]
+    def get_last_visited(self):
+        return self._last_visited
 
 class CrewMember:
     def __init__(self):

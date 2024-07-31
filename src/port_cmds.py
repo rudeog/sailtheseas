@@ -1,6 +1,6 @@
 import logging
 from command import RunType, Command
-from islands import TradingPost
+from port import TradingPost
 from save import save_game
 from state import gs
 from cargo import cargo_types, cargo_type_lookup, cargo_code_names
@@ -258,7 +258,7 @@ def trade_buy(t: TradingPost, qty, type_idx, pm):
         return
 
     # its a go
-    logging.log("trade",f"purchase of {qty} units of {cargo_code_names[type_idx]} at {carg.price_per}" )
+    logging.log("trade",f"buy {qty} units of {cargo_code_names[type_idx]} at {carg.price_per}" )
     t.on_hand.add_remove(type_idx, -qty)
 
     # do we already have this type of cargo
@@ -311,6 +311,7 @@ def trade_sell(t: TradingPost, qty, type_idx, pm):
     else:
         pl = "profit"
 
+    # the portmaster will now want less
     t.want.add_remove(type_idx, -qty)
 
     gs.ship.cargo.add_remove(type_idx, -qty)
@@ -350,6 +351,7 @@ def trade_pawn(t: TradingPost, qty, type_idx, pm):
         return
 
     # it's a go
+    logging.log("trade",f"pawn {qty} units of {cargo_code_names[type_idx]} at {will_give}" )
     prof_loss = qty * (will_give - my_cargo.price_per)
     if prof_loss < 0:
         pl = "loss"

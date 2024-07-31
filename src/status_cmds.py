@@ -91,11 +91,11 @@ def show_status(rt: RunType, toks):
             op += f"You are {prox} {place.island.name}"
             if gs.player.is_onland():
                 if place.island.port:
-                    op += f" and {gs.ship.name} is docked at {place.island.port.name}."
+                    op += f" and {gs.ship.name} is docked at {place.island.port.name}. "
                 else:
-                    op += f". You and your crew have disembarked, and are on shore."
+                    op += f". You and your crew have disembarked, and are on shore. "
             else:
-                op += "."
+                op += ". "
 
         if gs.player.is_sailing():
             if gs.ship.b.is_direction():

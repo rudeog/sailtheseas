@@ -1,10 +1,14 @@
 from command import Command, RunType
 from turn import pass_time
 from state import gs
-from util import list_valid_directions, is_direction_valid, Direction, direction_from_two_coords, as_int
+from util import list_valid_directions, is_direction_valid, Direction, direction_from_two_coords, as_int, fancy_time
 
 
 def register_nav_cmds():
+    # not really a nav command but...
+    gs.cmdsys.register(Command("rest", rest_cmd,
+                               "Rest for a watch."))
+
     gs.cmdsys.register(Command("nav", navigate_cmd,
                                "Navigate to an island specified by its numeric id."))
 
@@ -24,6 +28,18 @@ def register_nav_cmds():
                                "Display details of all known islands."))
     gs.cmdsys.register(Command("nearby", list_islands_nearby_cmd,
                                "Display details of nearby islands."))
+
+
+def rest_cmd(rt: RunType, toks):
+    if rt == RunType.CHECK_AVAILABLE:
+        return True
+    if rt == RunType.HELP:
+        gs.output(
+            "This command will allow the crew to rest for a period of six hours (one watch). If sailing, "
+            "your ship will be anchored. Your crew will still consume resources when resting.")
+        return
+    gs.output(f"{gs.crew.boatswain}: I've ordered the crew to do nothing until {fancy_time(gs.player.current_time()+1)}, captain.")
+    pass_time(True)
 
 
 def navigate_cmd(rt: RunType, toks):
@@ -123,7 +139,7 @@ def sail_cmd(rt: RunType, toks):
         return
 
     # all we need to do is pass the time, it will take care of the rest
-    pass_time()
+    pass_time(False)
 
 def list_islands_nearby_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
@@ -145,7 +161,7 @@ def list_islands_cmd(rt: RunType, toks):
     _list_islands(False)
 
 def _list_islands(local_only: bool):
-
+    recent = gs.player.get_last_visited()  # list
     np = gs.map.get_all_nearby_places(gs.ship.location)
     nearby = set()
     for n in np:
@@ -161,4 +177,8 @@ def _list_islands(local_only: bool):
                 exp = f" - {p.island.explored}% explored"
             else:
                 exp = ""
-            gs.output(f"{str(p.index).rjust(3)} {p.island.name} ({p.island.summary()}) - {dist} miles {dir}{exp}")
+            if p.index in recent:
+                rv = " (recently visited)"
+            else:
+                rv = ""
+            gs.output(f"{str(p.index).rjust(3)} {p.island.name} ({p.island.summary()}) - {dist} miles {dir}{exp}{rv}")

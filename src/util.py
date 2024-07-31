@@ -181,6 +181,10 @@ def fancy_date(current_date):
 
 
 def fancy_time(current_time):
+    # wrap around for convenience
+    if current_time > 2:
+        current_time=0
+
     if not current_time:
         return "morning"
     elif current_time == 1:

@@ -247,6 +247,8 @@ class Ship:
                     if self.b.is_target() and self._location == self.b.as_target_or_direction():
                         # throw away rest of miles we are done navigating to target
                         arrived = True
+                        # add to last visited
+                        gs.player.add_to_visited(gs.map.get_place_at_location(gs.ship.location).index)
                         break
                 else:  # reached edge of square so move to next square
                     self._toward_center = True

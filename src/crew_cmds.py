@@ -2,8 +2,8 @@ import state
 from command import Command, RunType
 from state import gs
 import crew
-from stock import STOCK_RATIONS_FULL, STOCK_RATIONS_REDUCED, STOCK_RATIONS_MEAGER, STOCK_GROG_HIGH, STOCK_GROG_NONE, \
-    STOCK_GROG_LOW
+import const
+
 from util import as_int
 
 def register_crew_cmds():
@@ -40,12 +40,12 @@ def rations_cmd(rt: RunType, toks):
     _, orig = gs.stock.get_rations()
 
     if toks[0]=='full':
-        gs.stock.set_rations(STOCK_RATIONS_FULL)
+        gs.stock.set_rations(const.STOCK_RATIONS_FULL)
 
     elif toks[0]=='reduced':
-        gs.stock.set_rations(STOCK_RATIONS_REDUCED)
+        gs.stock.set_rations(const.STOCK_RATIONS_REDUCED)
     elif toks[0]=='meager':
-        gs.stock.set_rations(STOCK_RATIONS_MEAGER)
+        gs.stock.set_rations(const.STOCK_RATIONS_MEAGER)
 
     rats, cur = gs.stock.get_rations()
     if cur == orig:
@@ -80,11 +80,11 @@ def grog_cmd(rt: RunType, toks):
     _, orig = gs.stock.get_grog_portion()
 
     if toks[0]=='extra':
-        gs.stock.set_grog_portion(STOCK_GROG_HIGH)
+        gs.stock.set_grog_portion(const.STOCK_GROG_HIGH)
     elif toks[0]=='normal':
-        gs.stock.set_grog_portion(STOCK_GROG_LOW)
+        gs.stock.set_grog_portion(const.STOCK_GROG_LOW)
     elif toks[0]=='none':
-        gs.stock.set_grog_portion(STOCK_GROG_NONE)
+        gs.stock.set_grog_portion(const.STOCK_GROG_NONE)
 
     grog, cur = gs.stock.get_grog_portion()
     if cur == orig:

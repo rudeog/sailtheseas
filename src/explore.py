@@ -42,7 +42,7 @@ def do_explore(island):
     if island.explored >= 100:
         gs.gm_output(f"It looks like you have already explored the entire island of {island.name}.")
     else:
-        pass_time()
+        pass_time(False)
         # eventually, various factors will influence the speed of exploration
         pctage = gs.rng_play.randint(5,15)
         island.explored += 10

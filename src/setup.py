@@ -117,6 +117,7 @@ def set_player_start_location():
     gs.ship.b.reset()
     gs.map.places[0].visited = True
     gs.map.places[0].island.visit_count = 1
+    gs.player.add_to_visited(0)
 
 
 def setup_crew() -> bool:

@@ -2,6 +2,8 @@
 # a location has a populated bool which signifies whether anything is there
 
 import random
+
+import const
 from util import clamp
 import islands
 
@@ -86,8 +88,8 @@ class Map:
     def get_location(self, coords: tuple[int, int]):
         """
         Return a location at given coordinates. if invalid return None
-        :param coords: 
-        :return: 
+        :param coords:
+        :return:
         """
         if coords[0] < 0 or coords[1] < 0 or coords[0] >= self.rows or coords[1] >= self.cols:
             return None
@@ -257,7 +259,7 @@ class Map:
         first = True  # we always want a port at the first location with high civ
         for loc in self.places:
             if first:
-                loc.island = g.generate_island(loc.index, islands.ISLAND_CIV_CITY)
+                loc.island = g.generate_island(loc.index, const.ISLAND_CIV_CITY)
             else:
                 loc.island = g.generate_island(loc.index)
             first = False

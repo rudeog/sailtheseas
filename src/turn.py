@@ -5,7 +5,7 @@ import ship
 from state import gs
 
 
-def pass_time():
+def pass_time(resting: bool):
     day_at_sea = gs.player.time_increment()
 
     # if we are sailing and a day has elapsed
@@ -29,7 +29,7 @@ def pass_time():
 
 
     # if we are sailing we need to move if possible
-    if gs.player.is_sailing() and gs.ship.b.is_set():
+    if not resting and gs.player.is_sailing() and gs.ship.b.is_set():
         _sail()
 
 

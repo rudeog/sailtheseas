@@ -2,6 +2,7 @@
 import base64
 import pickle
 
+import const
 from player import Player
 from quest import QuestGenerator
 from ship import Ship
@@ -38,7 +39,7 @@ def describe_island(i):
 
 def custom_island():
     g=islands.Generator(1,1)
-    isl = g.generate_island(0,islands.ISLAND_CIV_CITY, islands.ISLAND_CLASS_FOREST)
+    isl = g.generate_island(0,const.ISLAND_CIV_CITY, const.ISLAND_CLASS_FOREST)
     print(f"Generated '{isl.name}'")
     return isl
 

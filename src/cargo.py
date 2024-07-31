@@ -1,5 +1,5 @@
 import logging
-
+import const
 import util
 
 
@@ -170,14 +170,14 @@ class CargoCollection:
         r = {}
         for c in self.cargo:
             if c.type_idx == CARGO_FOOD:
-                r[stock.STOCK_FOOD_IDX] = (c, 340)
+                r[const.STOCK_FOOD_IDX] = (c, 340)
             elif c.type_idx == CARGO_GRAIN:
-                r[stock.STOCK_FOOD_IDX] = (c, 15)
+                r[const.STOCK_FOOD_IDX] = (c, 15)
             elif c.type_idx == CARGO_LIVESTOCK:
-                r[stock.STOCK_FOOD_IDX] = (c, 250)
+                r[const.STOCK_FOOD_IDX] = (c, 250)
             elif c.type_idx == CARGO_RUM:
-                r[stock.STOCK_GROG_IDX] = (c, 100)
+                r[const.STOCK_GROG_IDX] = (c, 100)
             elif c.type_idx == CARGO_LUMBER:
-                r[stock.STOCK_MATERIALS_IDX] = (c, 20)
+                r[const.STOCK_MATERIALS_IDX] = (c, 20)
 
         return r
