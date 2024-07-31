@@ -17,7 +17,7 @@ def pass_time(resting: bool):
             gs.output(f"{gs.crew.navigator}: We need wind to sail our ship!")
         # feed and water the crew
         _feed_crew()
-        gs.stock.check_important_stock()
+        gs.stock.check_important_stock(False)
 
     # see if the crew needs to be paid (every n days)
     pd = gs.crew.update_pay_due()
@@ -72,8 +72,8 @@ def _sail():
         if p.island.visit_count == 1:
             gs.gm_output("Here is some more information I found about the island:")
             gs.output(p.island.describe())
-
-        gs.ship.b.reset()
+        gs.hints.show("arrived")
+        gs.ship.b.reset() # reset bearing
     elif sail_result == gs.ship.SAIL_RESULT_ENTERED_NEW_SQUARE:
         loc = gs.map.get_location(gs.ship.location)
         if not loc.visited:
@@ -84,7 +84,7 @@ def _sail():
             dist = gs.ship.distance_to_location(gs.ship.location)
             gs.output(f"{gs.crew.lookout}: I have sighted the island of {pl.island.name}!")
             gs.output(f"{gs.crew.navigator}: The island is {dist} miles away, captain.")
-
+    gs.hints.show("sailing")
 
 
 def _feed_crew():

@@ -3,6 +3,7 @@ from place_descriptions import PlaceGenerator
 import const
 import cargo
 import logging
+from state import gs
 
 # what each one produces
 # gold is going to be special and should be produced in very small qty
@@ -74,7 +75,7 @@ class TradingPost:
         logging.log("trade", "  primary production")
         for pi in pt:
             ct = cargo.cargo_types[pi]
-            qty = ct.prod_coefficient * 3
+            qty = ct.prod_coefficient * 3  # normal amount the island produces
             existing = self.on_hand[pi]
             # cap it off at 2x the production
             if existing:
@@ -161,3 +162,9 @@ class Port:
 
         # note - port doesnt have any save data right now as its generated.
         # be aware if adding save data
+
+# given an island index, do an update on the trading data there
+def update_trading_post(idx):
+    isl = gs.map.get_place_by_index(idx).island
+    if isl.port:
+        isl.port.trader.update()

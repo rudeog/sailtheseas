@@ -71,6 +71,7 @@ def land_cmd(rt: RunType, toks):
                 f"{gs.crew.boatswain}: {gs.ship.name} is now docked at {p.island.port.name} on the island of {p.island.name}.")
         else:
             gs.output(f"{gs.crew.boatswain}: {gs.ship.name} has dropped anchor and the crew has gone ashore.")
+        gs.hints.show("landed")
         gs.ship.b.reset() # reset bearing since we are not sailing
 
 
@@ -104,11 +105,13 @@ def depart_cmd(rt: RunType, toks):
             "This command allows you to embark.")
         return
     if not toks:
-        if gs.stock.check_important_stock() and not gs.gm_confirm("Do you want to depart anyway without restocking?"):
+        if gs.stock.check_important_stock(True) and not gs.gm_confirm("Do you want to depart anyway without restocking?"):
             return
+
         gs.player.set_state_sailing()
         p = gs.map.get_place_at_location(gs.ship.location)
         gs.output(f"{gs.crew.boatswain}: {gs.ship.name} has departed from {p.island.name}.")
+        gs.hints.show("atsea")
 
 
 def _show_bs_help():
@@ -169,41 +172,10 @@ def trade_shared_cmd(rt: RunType, toks):
     if not t:
         gs.gm_output(f"There is no trading available on {place.island.name}.")
         return
+
     pm = place.island.port.port_master
     if toks[0] == 'list':
-        gs.output(f"Port manager {pm} has these items available to buy:")
-        if not t.on_hand:
-            gs.output("(none)")
-        else:
-            for avail in t.on_hand:
-                max_afford = int(gs.player.doubloons / avail.price_per)
-                if max_afford >= avail.quantity:
-                    ycb = "(you can buy all)"
-                elif max_afford == 0:
-                    ycb = "(you can't afford this)"
-                else:
-                    ycb = f"(you can afford {max_afford} {avail.type.units})"
-
-                gs.output(
-                    f"[{avail.type.code}] {avail.type.name} - {avail.quantity} {avail.type.units} - {avail.price_per}D ea. {ycb}")
-
-        gs.output("")
-        gs.output(f"{to_proper_case(pm.pronoun())} is looking to buy these items:")
-        if not t.want:
-            gs.output("(none)")
-        else:
-            for wtb in t.want:
-                incargo = gs.ship.cargo[wtb.type_idx]
-                if incargo:
-                    youhave = f" (you have {incargo.quantity} {wtb.type.units})"
-                else:
-                    youhave = ""
-                gs.output(
-                    f"[{wtb.type.code}] {wtb.type.name} {wtb.quantity} {wtb.type.units} - {wtb.price_per}D ea.{youhave}")
-        gs.output("")
-        gs.gm_output(f"You have {gs.player.doubloons}D "
-                     f"and {int((gs.ship.cargo_capacity - gs.ship.cargo.total_weight()) / 2000)} "
-                     "tons of remaining cargo capacity")
+        trade_list(t, pm)
     else:
         qty = toks[1]
         type_code = toks[2]
@@ -226,6 +198,50 @@ def trade_shared_cmd(rt: RunType, toks):
             trade_sell(t, quant, cti, pm)
         else:  # pawn
             trade_pawn(t, quant, cti, pm)
+
+def trade_list(t, pm):
+
+    gs.output(f"Port manager {pm} has these items available to buy:")
+    if not t.on_hand:
+        gs.output("(none)")
+    else:
+        for avail in t.on_hand:
+            max_afford = int(gs.player.doubloons / avail.price_per)
+            if max_afford >= avail.quantity:
+                ycb = "(you can buy all)"
+            elif max_afford == 0:
+                ycb = "(you can't afford this)"
+            else:
+                ycb = f"(you can afford {max_afford} {avail.type.units})"
+
+            gs.output(
+                f"[{avail.type.code}] {avail.type.name} - {avail.quantity} {avail.type.units} - {avail.price_per}D ea. {ycb}")
+
+    gs.output("")
+    gs.output(f"{to_proper_case(pm.pronoun())} is looking to buy these items:")
+    showpawnhint = False
+    if not t.want:
+        gs.output("(none)")
+    else:
+        if gs.ship.cargo.total_weight() > 0:
+            showpawnhint = True
+        for wtb in t.want:
+            incargo = gs.ship.cargo[wtb.type_idx]
+            if incargo:
+                showpawnhint = False
+                youhave = f" (you have {incargo.quantity} {wtb.type.units})"
+            else:
+                youhave = ""
+            gs.output(
+                f"[{wtb.type.code}] {wtb.type.name} {wtb.quantity} {wtb.type.units} - {wtb.price_per}D ea.{youhave}")
+    gs.output("")
+    gs.gm_output(f"You have {gs.player.doubloons}D "
+                 f"and {int((gs.ship.cargo_capacity - gs.ship.cargo.total_weight()) / 2000)} "
+                 "tons of remaining cargo capacity")
+
+    gs.hints.show("trading")
+    if showpawnhint:
+        gs.hints.show("pawn")
 
 
 def trade_buy(t: TradingPost, qty, type_idx, pm):

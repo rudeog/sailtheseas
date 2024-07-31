@@ -1,12 +1,11 @@
 # current player stats
 from datetime import datetime, timedelta
 
-from cargo import CargoCollection
+from port import update_trading_post
 from enum import Enum
-from state import STARTING_DATE, gs
+from state import STARTING_DATE, MAX_LAST_VISITED, gs
 from util import Direction, serialize_obj, deserialize_obj
 
-_MAX_LAST_VISITED = 5
 
 class Player:
     class _state_e(Enum):
@@ -114,10 +113,20 @@ class Player:
         else:
             return ""
 
+    # add an island to lat visited. If this causes an island to
+    # come off the list, then its trading data is updated
     def add_to_visited(self, island_id):
+        # don't add it more than once
+        if island_id in self._last_visited:
+            return
+
         self._last_visited.append(island_id)
-        if len(self._last_visited) > _MAX_LAST_VISITED:
+        if len(self._last_visited) > MAX_LAST_VISITED:
+            r = self._last_visited[0]
             del self._last_visited[0]
+            update_trading_post(r)
+
+
     def get_last_visited(self):
         return self._last_visited
 

@@ -120,6 +120,7 @@ def set_player_start_location():
     gs.player.add_to_visited(0)
 
 
+
 def setup_crew() -> bool:
     gs.output("")
     gs.gm_output(

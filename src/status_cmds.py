@@ -6,6 +6,7 @@ from util import as_int
 
 def register_status_cmds():
     gs.cmdsys.register(Command("status", show_status, "Show current status"))
+    gs.cmdsys.register(Command("wind", show_wind, "Show current wind conditions"))
     gs.cmdsys.register(Command("cargo", show_cargo, "List cargo on vessel"))
     gs.cmdsys.register(Command("describe", describe_island_cmd, "Describe an island given it's ID."))
     gs.cmdsys.register(
@@ -61,6 +62,16 @@ def describe_island_cmd(rt: RunType, toks):
         gs.gm_output(
             f"Sorry, {gs.player.name} but you can only describe islands that you are very close to, or islands "
             "that you have been close to at some point.")
+
+def show_wind(rt: RunType, toks):
+    if rt == RunType.CHECK_AVAILABLE:
+        return not gs.player.is_onland()
+    if rt == RunType.HELP:
+        gs.output(
+            "This shows wind conditions.")
+        return
+
+    gs.output(f"{gs.crew.lookout}: The wind is {gs.wind}, captain.\n")
 
 
 def show_status(rt: RunType, toks):

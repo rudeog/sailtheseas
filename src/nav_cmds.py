@@ -49,8 +49,8 @@ def navigate_cmd(rt: RunType, toks):
         return False
     if rt == RunType.HELP or not toks:
         gs.output(
-            "To use this command you must know the id of the island you want to navigate to. Use a command such as "
-            "'map' to get valid island id's. Note that you can only navigate to an island if it is visible on a "
+            "To use this command you must know the id of the island you want to navigate to. Use commands such as "
+            "'m' or 'islands' to get valid island id's. Note that you can only navigate to an island if it is visible on a "
             "map. That is to say that you have either previously been to it's coordinates, or it is within your local vicinity.")
         return
 
@@ -177,8 +177,4 @@ def _list_islands(local_only: bool):
                 exp = f" - {p.island.explored}% explored"
             else:
                 exp = ""
-            if p.index in recent:
-                rv = " (recently visited)"
-            else:
-                rv = ""
-            gs.output(f"{str(p.index).rjust(3)} {p.island.name} ({p.island.summary()}) - {dist} miles {dir}{exp}{rv}")
+            gs.output(f"{str(p.index).rjust(3)} {p.island.name} ({p.island.summary()}) - {dist} miles {dir}{exp}")

@@ -37,6 +37,11 @@ ABS_PAY_PERIOD = 30
 
 DEFAULT_STARTING_DOUBLOONS = 10000
 
+# max islands to keep on last visited list. When an island is
+# bumped from this list its trading data is updated. Therefore given island X, a player must visit this many
+# other islands before island X gets its trading data updated
+MAX_LAST_VISITED = 3
+
 
 class GlobalState:
     """
@@ -50,6 +55,7 @@ class GlobalState:
         self.ship = None
         self.crew = None
         self.stock = None
+        self.hints = None
 
         self.world_name = None
 
@@ -104,7 +110,8 @@ class GlobalState:
         r = debug.read_prompt()
         if r is None:
             while True:
-                r = input(prompt)
+                self.output(prompt, newline=False)
+                r = input(" ")
                 if r:
                     break
                 self.gm_output("You didn't enter anything!")

@@ -85,7 +85,8 @@ def save_game():
             "rng": save_rng_state_to_string(gs.rng_play),
             "trade": _save_trading_data(),
             "visited": _save_visited_data(),
-            "wind": gs.wind.get()
+            "wind": gs.wind.get(),
+            "hint": gs.hints.get(),
             }
 
     json_string = json.dumps(data)
@@ -107,6 +108,7 @@ def load_game():
         gs.stock.set(data['stock'])
         gs.crew.set(data['crew'])
         gs.wind.set(data['wind'])
+        gs.hints.set(data['hint'])
 
     except KeyError as e:
         return None, f"Save file may be from an earlier version: {e}"

@@ -18,6 +18,8 @@ from player import Player
 from ship import Ship
 from crew import Crew
 from stock import Stock
+from hints import cmd_hints, Hints
+
 import logging
 
 # registered quit command
@@ -62,6 +64,7 @@ gs.ship = Ship()
 gs.crew = Crew()
 gs.stock = Stock()
 gs.wind = Wind()
+gs.hints = Hints()
 
 gs.output(f"{GAME_NAME} v{GAME_VERSION}")
 
@@ -98,7 +101,7 @@ if cont:
 
     gs.cmdsys.register(Command("!",  cmd_quit,
                                "Quit the game."))
-
+    gs.cmdsys.register(Command("hints", cmd_hints, "Reset or turn off all hints"))
     # register other commands
     register_info_cmds()
     register_status_cmds()
@@ -130,6 +133,8 @@ if cont:
     if p:
         gs.output(p.island.describe())
 
+    gs.hints.show("about")
+    gs.hints.show("basic")
     # start the play loop
     run_loop()
 

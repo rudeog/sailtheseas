@@ -76,12 +76,13 @@ class Stock:
             ret.append(v.get())
         return ret
 
-    def check_important_stock(self):
+    def check_important_stock(self, nohint):
         """
         This will check to see whether any important items of stock are less than 50% and report that.
         :return: True if any important items are less than 50%
         """
         s = []
+        r = False
         for v in self.items:
             if v.idx in (const.STOCK_GROG_IDX, const.STOCK_ORDNANCE_IDX):
                 continue  # these are considered non-essential
@@ -91,14 +92,15 @@ class Stock:
 
         if len(s) == 1:
             gs.output(f"{gs.crew.firstmate}: Captain, {gs.ship.name} only has {s[0][1]}% of {s[0][0]} remaining.")
-            return True
-
-        if len(s):
+            r = True
+        elif len(s):
             gs.output(f"{gs.crew.firstmate}: Captain, {gs.ship.name} is low on the following supplies:")
             for ss in s:
                 gs.output(f"{ss[0]} - {ss[1]}%")
-            return True
-        return False
+            r = True
+        if r and not nohint:
+            gs.hints.show("lowsupp")
+        return r
 
     def describe(self):
         ret = ""
