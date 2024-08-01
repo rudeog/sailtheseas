@@ -35,6 +35,11 @@ ABS_PAY = 5
 # pay period in days
 ABS_PAY_PERIOD = 30
 
+# if these are too high we might not be able to fit on map
+NUM_QUESTS = 2
+NUM_QUEST_CLUES = 2
+NUM_QUEST_ARTIFACTS = (2,3,5)
+
 DEFAULT_STARTING_DOUBLOONS = 10000
 
 # max islands to keep on last visited list. When an island is
@@ -49,8 +54,10 @@ class GlobalState:
     """
 
     def __init__(self):
-        # this will be overriden to DEFAULT_SEED + n when the player selects a world
+        # this will be overriden to DEFAULT_SEED + n when the player selects a world.
+        # this should only be used for setting up
         self.seed = DEFAULT_SEED
+
         self.player = None
         self.ship = None
         self.crew = None
@@ -60,15 +67,16 @@ class GlobalState:
         self.world_name = None
 
         self.map = None
+        self.quests = None
         self.cmdsys = None
-        # these are for generating names and places in this world deterministically for a seed
-        self.name_gen = None
-        self.place_gen = None
+
 
         # the play rng is used to determine random game events which may differ
         # between games set in the same world, but should be the same if the player
-        # does identical things in the same world
+        # does identical things in the same world. Same for name_gen
         self.rng_play = None
+        self.name_gen = None
+
         self.game_master = None
         self.emperor = None
         self.wind = None
@@ -115,10 +123,10 @@ class GlobalState:
                 if r:
                     break
                 self.gm_output("You didn't enter anything!")
-        else:
+        else: # output what came from the file
             self.output(f"{prompt} \"{r}\"")
         debug.write_prompt(r, prompt)
-        return r
+        return r.strip()
 
     def input_num(self, min_val, max_val, prompt="", nocancel=False, done_token='$', noquit=False):
         '''

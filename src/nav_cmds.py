@@ -5,6 +5,10 @@ from util import list_valid_directions, is_direction_valid, Direction, direction
 
 
 def register_nav_cmds():
+    # TODO REMOVE THIS!!!
+    gs.cmdsys.register(Command("warp", warp_cmd,
+                               "Do not use!."))
+
     # not really a nav command but...
     gs.cmdsys.register(Command("rest", rest_cmd,
                                "Rest for a watch."))
@@ -75,6 +79,24 @@ def navigate_cmd(rt: RunType, toks):
         return
     gs.output(f"{gs.crew.navigator}: {gs.ship.name} is set to sail to {place.island.name}")
     gs.ship.b.set_target(place.location)
+
+def warp_cmd(rt: RunType, toks):
+    if rt == RunType.CHECK_AVAILABLE:
+        if gs.player.is_sailing():
+            return True
+        return False
+    if rt == RunType.HELP:
+        gs.output("You should not be using this command")
+    if toks:
+        try:
+            idx = int(toks[0])
+        except ValueError:
+            gs.output("invalid")
+            return
+        gs.ship.b.reset()
+        pl = gs.map.get_place_by_index(idx)
+        pl.visited = True
+        gs.ship.set_location(pl.location)
 
 
 def direction_cmd(rt: RunType, toks):

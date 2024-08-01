@@ -13,7 +13,7 @@ PADDING = 3
 
 # how densely to populate.
 # higher is less dense
-DENSITY_COEFF = 12
+DENSITY_COEFF = 10
 
 INCLUDE_XY_RULER = True
 

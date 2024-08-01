@@ -19,6 +19,8 @@ from ship import Ship
 from crew import Crew
 from stock import Stock
 from hints import cmd_hints, Hints
+from quest import cmd_quests
+
 
 import logging
 
@@ -91,6 +93,9 @@ if cont:
     setup.base_setup()
     # generate the map
     gs.map = map.Map(MAP_WIDTH, MAP_HEIGHT, gs.seed)
+    # generate quests
+    setup.quest_setup()
+
 
     if not game_loaded:
         cont = setup.player_setup()
@@ -102,6 +107,8 @@ if cont:
     gs.cmdsys.register(Command("!",  cmd_quit,
                                "Quit the game."))
     gs.cmdsys.register(Command("hints", cmd_hints, "Reset or turn off all hints"))
+    gs.cmdsys.register(Command("quests", cmd_quests, "Show information about quests"))
+
     # register other commands
     register_info_cmds()
     register_status_cmds()

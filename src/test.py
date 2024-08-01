@@ -4,7 +4,7 @@ import pickle
 
 import const
 from player import Player
-from quest import QuestGenerator
+from quest import QuestGenerator, QuestItem, Quest
 from ship import Ship
 from status_cmds import show_status
 from state import gs
@@ -76,35 +76,40 @@ dump_trade_stuff_for_island(i)
 gs.map = map.Map(30, 30, gs.seed)
 # describe_island(38)
 #
-# qg = QuestGenerator(4444)
-# q = qg.generate(gs.map,1,2)
-# print(q)
-# q = qg.generate(gs.map,2,2)
-# print(q)
-# q = qg.generate(gs.map,3,2)
-# print(q)
 
-w = wind.Wind()
-print(w)
-w.init_random()
-print(w)
-w.init_random()
-print(w)
-w.init_random()
-print(w)
-w.init_random()
-print(w)
+def get_loc(i):
+    l=gs.map.get_place_by_index(i)
+    return f"{l.location[0]}/{l.location[1]}"
 
-print("changing...")
-dist = {}
-for c in range(0,40):
-    w.change_random()
-    s = f"{w}"
-    print(s)
+def dump_q(q:Quest):
+    print(f"Quest: {q.description}")
+    print(f"  Target: {q.target.name} at {get_loc(q.target.place_index)}")
+    for art in q.artifacts:
+        print(f"  Artifact: {art.name} at {get_loc(art.place_index)}")
+    for cl in q.clues:
+        print(f"  Clue at {get_loc(cl.place_index)}: {cl.name}")
+        art=cl.clue_target
+        print(f"    points to {art.name} at {get_loc(art.place_index)}")
+qg = QuestGenerator(4444)
+#q1 = qg.generate(gs.map,1,2)
+#print(q1)
+#q2 = qg.generate(gs.map,2,2)
+#print(q2)
+q3 = qg.generate(gs.map,3,2)
+print(q3)
 
-# if s in dist:
-#     dist[s] = dist[s]+1
-# else:
-#     dist[s]=1
-#
-# print(dist)
+#print(q3.describe())
+q3.target.found=True
+q3.clues[0].found=True
+q3.clues[1].found=True
+q3.artifacts[0].found=True
+q3.artifacts[1].found=True
+q3.artifacts[2].found=True
+q3.clues[4].found=True
+q3.clues[6].found=True
+print("msg: " + q3.check_completed(q3.target.place_index))
+print(q3.describe())
+
+#dump_q(q1)
+#dump_q(q2)
+#dump_q(q3)

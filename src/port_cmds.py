@@ -72,7 +72,16 @@ def land_cmd(rt: RunType, toks):
         else:
             gs.output(f"{gs.crew.boatswain}: {gs.ship.name} has dropped anchor and the crew has gone ashore.")
         gs.hints.show("landed")
-        gs.ship.b.reset() # reset bearing since we are not sailing
+        gs.ship.b.reset()  # reset bearing since we are not sailing
+
+        # check for quest completion
+        # todo move this somewhere shared. we are also checking in explore
+        if p.island.quest_item and p.island.quest_item.is_target():
+            q = p.island.quest_item.quest
+            msg = q.check_completed(p.island.island_index)
+            if msg: # the quest is completed
+                gs.gm_output(msg)
+
 
 
 def cmd_save(rt, toks):

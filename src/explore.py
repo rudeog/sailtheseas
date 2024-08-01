@@ -1,5 +1,7 @@
 from state import gs
 from turn import pass_time
+from util import choices_ex
+import const
 
 # these are randomly generated explore events
 explore_events = [
@@ -44,9 +46,32 @@ def do_explore(island):
     else:
         pass_time(False)
         # eventually, various factors will influence the speed of exploration
-        pctage = gs.rng_play.randint(5,15)
-        island.explored += 10
-        if island.explored > 100:
+        pctage = gs.rng_play.randint(25,35)
+        island.explored += pctage
+        quest_find=choices_ex(gs.rng_play, [True, False], [5,4])
+        if island.explored >= 100:
             island.explored = 100
+            quest_find=True # if we haven't found it by now, we must find it
+
+        if island.quest_item and not island.quest_item.found and quest_find:
+            island.quest_item.found=True
+            if island.quest_item.is_clue():
+                if island.civ_type != const.ISLAND_CIV_UNINHABITED:
+                    n = gs.name_gen.name("",island.ethnicity)
+                    clue_pre = f"Local resident {n.first}:"
+                else:
+                    clue_pre = "Message found in a bottle:"
+                gs.gm_output("It appears that you have found a clue!")
+                gs.output(f"{clue_pre} {island.quest_item.name}")
+            elif island.quest_item.is_artifact():
+                gs.gm_output(f"You have found {island.quest_item.name}!")
+            elif island.quest_item.is_target():
+                gs.gm_output(f"You have found {island.quest_item.name}!")
+                q = island.quest_item.quest
+                msg = q.check_completed(island.island_index)
+                if msg: # the quest is completed
+                    gs.gm_output(msg)
+
+
         gs.gm_output(f"We have now explored {island.explored} percent of the island.")
 

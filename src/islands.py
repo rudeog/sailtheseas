@@ -133,7 +133,6 @@ class Island:
         self.explored = 0  # percentage explored
         self.visit_count = 0  # number of arrivals at island
         self.quest_item = None
-        self.quest_clue = None
 
         # after generating the map, we come back in and add fixed encounters here.
         # these will always be encountered when exploring this island
@@ -166,6 +165,7 @@ class Island:
         self.island_index = index
 
         self.civ_type = civ_type
+        self.ethnicity = place_ethnicity
 
         # anything except uninhabited and tribal get a port
         if civ_type >= const.ISLAND_CIV_OUTPOST:

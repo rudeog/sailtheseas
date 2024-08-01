@@ -83,18 +83,25 @@ class ListSelector:
     the list
     """
 
-    def __init__(self, rng, in_list):
+    def __init__(self, rng, in_list, partner_list=None):
         self.in_list = in_list
+        self.partner_list = partner_list
         if not len(in_list):
             return
+        if partner_list and len(partner_list) != len(in_list):
+            raise ValueError("partner list size doesn't match")
+
         self.rng = rng
         # need ptrs so we dont shuffle the original list
         self.list_ptr = list(range(len(in_list)))
         self.index = len(in_list)
 
     def select(self):
+        return self.select_with_partner()[0]
+
+    def select_with_partner(self):
         if not len(self.in_list):
-            return ""
+            return "", ""
         # If all words have been used, shuffle the list and reset the index
         if self.index == len(self.list_ptr):
             self.rng.shuffle(self.list_ptr)
@@ -102,8 +109,13 @@ class ListSelector:
 
         # Select the next word in the shuffled list
         selected_word = self.in_list[self.list_ptr[self.index]]
+        if self.partner_list:
+            partner_word = self.partner_list[self.list_ptr[self.index]]
+        else:
+            partner_word = ""
         self.index += 1
-        return selected_word
+        return selected_word, partner_word
+
 
 
 _valid_dirs = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']

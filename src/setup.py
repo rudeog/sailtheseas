@@ -7,25 +7,34 @@ import random
 import crew
 import state
 from names import NameGenerator, PlaceGenerator
-from state import gs
-from map import Map
+from state import gs, NUM_QUESTS, NUM_QUEST_CLUES, NUM_QUEST_ARTIFACTS
 import phrase_gen
 from stock import do_full_restock
 from util import as_int
 from crew import NUM_ROLES, pay_description
-from wind import Wind
+import quest
 
 # this should generate the map, set up the rng's and the game master
 # based on info we have either gotten from user or from save file
 def base_setup():
-    gs.name_gen = NameGenerator(gs.seed)
-    gs.place_gen = PlaceGenerator(gs.seed)
-    gs.rng_play = random.Random(gs.seed)
-    # we should end up with the same name and place as was selected in determine seed
-    gs.emperor = gs.name_gen.name("m", "e")
-    gs.game_master = gs.name_gen.name("m", "w")
-    gs.world_name = gs.place_gen.name('f')
+    name_gen = NameGenerator(gs.seed)
+    place_gen = PlaceGenerator(gs.seed)
 
+    gs.rng_play = random.Random(gs.seed)
+    gs.name_gen = NameGenerator(gs.seed+1)
+
+    # we should end up with the same name and place as was selected in determine seed
+    gs.emperor = name_gen.name("m", "e")
+    gs.game_master = name_gen.name("m", "w")
+    gs.world_name = place_gen.name('f')
+
+
+def quest_setup():
+    qg = quest.QuestGenerator(gs.seed)
+    gs.quests = []
+    for i in range(NUM_QUESTS):
+        q = qg.generate(gs.map,NUM_QUEST_ARTIFACTS[i], NUM_QUEST_CLUES)
+        gs.quests.append(q)
 
 # This should find out what seed the user wants to use
 def determine_seed() -> bool:
@@ -157,20 +166,6 @@ def hire_crewmember(i):
         gs.gm_output(phrase_gen.get_phrase(n, phrase_gen.crew_name_phrases))
         cr.name = n
     return True
-
-
-def do_crew_assign():
-    named = False
-    for i in range(NUM_ROLES):
-        cr = gs.crew.get_by_idx(i)
-        if not cr.name:
-            named = True
-            name = gs.name_gen.name('m', 'w')
-            cr.name = name.first + " " + name.last
-
-    if not named:
-        gs.gm_output("It looks like you already have all positions filled. Just enter 'done' if you are satisfied.")
-
 
 def setup_abs():
     gs.output(f"{gs.crew.boatswain}: As boatswain of this ship, the crew is my responsibility. The ship needs a crew "

@@ -1,4 +1,5 @@
 todo:
+- ive added a partner system for random list. can we use it anywhere else?
 - need consequences for unhappy crew
 - need consequences for no meds (check this)
 - consume grog when run out of water (test this)
