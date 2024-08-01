@@ -7,6 +7,7 @@ from cargo import cargo_types, cargo_type_lookup, cargo_code_names
 from explore import do_explore
 from util import as_int, to_proper_case
 import stock
+from turn import pass_time
 
 
 def register_port_cmds():
@@ -21,9 +22,11 @@ def register_port_cmds():
                                "Buy cargo."))
     gs.cmdsys.register(Command("sell", trade_sell_cmd,
                                "Sell cargo."))
+    gs.cmdsys.register(Command("jet", trade_jettison_cmd,
+                               "Jettison cargo into the sea."))
     gs.cmdsys.register(Command("pawn", trade_pawn_cmd,
                                "Sell unwanted cargo at a lower rate."))
-    gs.cmdsys.register(Command("explore", explore_cmd,
+    gs.cmdsys.register(Command("exp", explore_cmd,
                                "Explore the island."))
     gs.cmdsys.register(Command("restock",  restock_cmd,
                                "Restock your ship with supplies."))
@@ -400,9 +403,50 @@ def explore_cmd(rt: RunType, toks):
         return False
     if rt == RunType.HELP:
         gs.output(f"The islands of {gs.world_name} are fascinating places. You never know what you'll find when you "
-                  "explore them. Each time you run the 'explore' command you will explore a certain percentage of the "
+                  "explore them. Each time you run the 'exp' command you will explore a certain percentage of the "
                   "island you are landed on. Once this reaches 100% then no further exploration is necessary.")
 
-    place = gs.map.get_place_at_location(gs.ship.location)
-    if place and place.island:  # should be true
-        do_explore(place.island)
+    pass_time(False, True)
+
+def trade_jettison_cmd(rt: RunType, toks):
+    if rt == RunType.CHECK_AVAILABLE:
+        if gs.player.is_sailing():
+            return True
+    if rt == RunType.HELP or len(toks) != 2:
+        gs.output("Dump cargo into the sea. If your ship is overburdened, this is your only option. ")
+        gs.output("Specify quantity and cargo code (use 'cargo' to see codes), for example:")
+        gs.output("  'jet 10 lu' - jettison 10 units of lumber.")
+        return
+
+    qty = toks[0]
+    type_code = toks[1]
+    if type_code not in cargo_type_lookup:
+        gs.gm_output("That is an invalid code. Please enter a valid two letter code from the list.")
+        return
+
+    if qty != 'all':
+        quant = as_int(qty)
+        if quant < 0:
+            gs.gm_output(f"Quantity entered must be a number or 'all'.")
+            return
+    else:
+        quant = -1
+
+    cti = cargo_type_lookup[type_code]
+
+    my_cargo = gs.ship.cargo[cti]
+    if not my_cargo:
+        gs.output(f"{gs.crew.firstmate}: Captain, we don't have any {cargo_types[cti].name} to jettison.")
+        return
+    if quant == -1:  # all
+        quant = my_cargo.quantity
+    elif quant > my_cargo.quantity or quant < 0:
+        gs.output(
+            f"{gs.crew.firstmate}: Captain we don't have that much.")
+        return
+
+    # it's a go
+    prof_loss = quant *  my_cargo.price_per
+    gs.ship.cargo.add_remove(cti, -quant)
+    gs.output(f"{gs.crew.firstmate}: We jettisoned {quant} {cargo_types[cti].units} of {cargo_types[cti].name} "
+              f"representing a loss of {prof_loss}D.")

@@ -87,6 +87,7 @@ def save_game():
             "visited": _save_visited_data(),
             "wind": gs.wind.get(),
             "hint": gs.hints.get(),
+            "quests": [q.get() for q in gs.quests]
             }
 
     json_string = json.dumps(data)
@@ -109,6 +110,7 @@ def load_game():
         gs.crew.set(data['crew'])
         gs.wind.set(data['wind'])
         gs.hints.set(data['hint'])
+
 
     except KeyError as e:
         return None, f"Save file may be from an earlier version: {e}"
@@ -138,6 +140,9 @@ def load_trading_and_visited_data(loaded: dict):
                 loc.island.explored = vis['e']
                 loc.island.visit_count = vis['vc']
 
+        # quest stuff
+        for i, v in enumerate(loaded["quests"]):
+            gs.quests[i].set(v)
 
         return True
 

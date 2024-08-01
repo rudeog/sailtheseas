@@ -3,21 +3,23 @@
 # other encounters such as trading, battling, etc do not.
 import ship
 from state import gs
+from explore import do_explore
 
-
-def pass_time(resting: bool):
-    day_at_sea = gs.player.time_increment()
+def pass_time(resting: bool, exploring: bool=False):
+    day_elapsed = gs.player.time_increment()
 
     # if we are sailing and a day has elapsed
-    if day_at_sea:
-        # possibly change wind direction
-        gs.wind.change_random()
-        gs.output(f"{gs.crew.lookout}: The wind is {gs.wind}, captain.")
-        if gs.wind.speed==0:
-            gs.output(f"{gs.crew.navigator}: We need wind to sail our ship!")
-        # feed and water the crew
-        _feed_crew()
-        gs.stock.check_important_stock(False)
+    if day_elapsed:
+        if gs.player.is_sailing():
+            # possibly change wind direction
+            gs.wind.change_random()
+            gs.output(f"{gs.crew.lookout}: The wind is {gs.wind}, captain.")
+            if gs.wind.speed==0:
+                gs.output(f"{gs.crew.navigator}: We need wind to sail our ship!")
+
+            # feed and water the crew (when on land they can find their own damn food)
+            _feed_crew()
+            gs.stock.check_important_stock(False)
 
     # see if the crew needs to be paid (every n days)
     pd = gs.crew.update_pay_due()
@@ -26,14 +28,24 @@ def pass_time(resting: bool):
                   f"purchase anything or hire anyone until they are paid. Amount owed {gs.crew.amt_due()}D.")
 
 
-
-
     # if we are sailing we need to move if possible
     if not resting and gs.player.is_sailing() and gs.ship.b.is_set():
         _sail()
 
+    # if exploring we need to explore
+    if not resting and exploring and gs.player.is_onland():
+        place = gs.map.get_place_at_location(gs.ship.location)
+        if place and place.island:  # should be true
+            do_explore(place.island)
+
 
 def _sail():
+    # make sure we are not overburdened
+    if gs.ship.cargo.total_weight() >  gs.ship.cargo_capacity:
+        gs.output(f"{gs.crew.firstmate}: {gs.ship.name} is overburdened with cargo! We can't sail.")
+        gs.hints.show("jettison")
+        return
+
     # figure out how many miles we will travel based on conditions, equipment and crew
     knots = 4
     dir_moving = gs.ship.direction_moving()

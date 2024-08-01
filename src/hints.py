@@ -15,6 +15,8 @@ _hints = {
     "arrived": "When you arrive at an island, you are still about ship. Use the 'land' command to disembark and go onto the island.",
     "lowsupp": "To keep your ship stocked with supplies, use the 'restock' command. To check current stocks use the 'stock' command.",
     "landed": "When you arrive at an island, you may save your progress using the 'save' command.",
+    "jettison": "If your are at sea and you need to get rid of cargo, you can jettison some cargo using the 'jet' command. You might "
+        "want to first use the 'restock' command to see if you can convert any cargo into stock items.",
 }
 # idx into above
 HINT_ID_ABOUTHINTS = 0

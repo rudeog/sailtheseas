@@ -33,9 +33,10 @@ art_adj = ["Crystal", "Golden", "Cursed", "Blessed", "Dark", "Arcane", "Ghostly"
 art_name = ["Shard", "Sword", "Scroll", "Statuette", "Effigy", "Shrunken Head", "Shield", "Undergarment"]
 art_desc = ["a remarkable", "a worn out", "a strange", "an ill-kept", "an unusual", "a common"]
 
-_QT_TARGET=1
-_QT_ARTIFACT=2
-_QT_CLUE=3
+_QT_TARGET = 1
+_QT_ARTIFACT = 2
+_QT_CLUE = 3
+
 
 # quest items and quests are serialized?
 
@@ -57,19 +58,31 @@ class QuestItem:
         self.clue_target = None
         # will be set to true when found
         self.found = False
-    def is_clue(self):
-        return self.type==_QT_CLUE
-    def is_target(self):
-        return self.type==_QT_TARGET
-    def is_artifact(self):
-        return self.type==_QT_ARTIFACT
 
-def _get_at( pi):
+    def is_clue(self):
+        return self.type == _QT_CLUE
+
+    def is_target(self):
+        return self.type == _QT_TARGET
+
+    def is_artifact(self):
+        return self.type == _QT_ARTIFACT
+
+    def get(self):
+        return self.found
+
+    def set(self, v):
+        self.found = v
+
+
+def _get_at(pi):
     w = gs.map.get_place_by_index(pi)
     c = util.coord_as_str(w.location)
     return f"{w.island.name} ({c})"
 
-adj_items = ['located','found','discovered']
+
+adj_items = ['located', 'found', 'discovered']
+
 
 class Quest:
     def __init__(self):
@@ -86,6 +99,19 @@ class Quest:
         self.target = None
         self.adj = 0
 
+    def get(self):
+        # we only need to keep track of whether found or completed
+        cs = [c.get() for c in self.clues]
+        a = [ai.get() for ai in self.artifacts]
+        return {"com": self.completed, "tgt": self.target.get(), "clu": cs, "art": a}
+
+    def set(self, d: dict):
+        self.completed = d["com"]
+        for i, v in enumerate(d["clu"]):
+            self.clues[i].set(v)
+        for i, v in enumerate(d["art"]):
+            self.artifacts[i].set(v)
+
     def _adj(self):
         self.adj += 1
         return adj_items[self.adj % len(adj_items)]
@@ -96,11 +122,11 @@ class Quest:
     # returns a glorious message of completion if it caused a completion
     def check_completed(self, place_index):
         if self.completed:
-            return "" # already completed
+            return ""  # already completed
         if place_index != self.target.place_index:
-            return "" # not at right location
+            return ""  # not at right location
         if not self.target.found:
-            return "" # havent found target (shouldnt happen here because we will have found it at this location)
+            return ""  # havent found target (shouldnt happen here because we will have found it at this location)
         for a in self.artifacts:
             if not a.found:
                 return ""
@@ -170,7 +196,7 @@ class QuestGenerator:
         qadj = self.ls_loc_adj.select()
         qname = self.ls_loc_name.select()
         qfinal = f"the {qadj} {qname}"
-        d,t = self.ls_quest.select_with_partner()
+        d, t = self.ls_quest.select_with_partner()
         quest.description = d.format(arts=art_group, loc=qfinal)
         quest.completion_text = t.format(arts=art_group, loc=qfinal)
 
@@ -200,15 +226,14 @@ class QuestGenerator:
 
         locations = locations[1:]
         # place artifacts
-        for i in range(0,num_arts):
+        for i in range(0, num_arts):
             quest.artifacts[i].place_index = locations[i]
             map.get_place_by_index(locations[i]).island.quest_item = quest.artifacts[i]
-        locations=locations[num_arts:]
+        locations = locations[num_arts:]
         #place clues
         for i in range(len(quest.clues)):
             quest.clues[i].place_index = locations[i]
             map.get_place_by_index(locations[i]).island.quest_item = quest.clues[i]
-
 
         # calculate clue descriptions
         clue_idx = 0
@@ -224,10 +249,12 @@ class QuestGenerator:
 
         return quest
 
+
 def num_to_text(n):
     if 0 < n < 11:
-        return ['one','two','three','four','five','six','seven','eight','nine','ten'][n-1]
+        return ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'][n - 1]
     return f"{n}"
+
 
 # todo move this elsewhere?
 def cmd_quests(run_type, toks):
@@ -238,7 +265,7 @@ def cmd_quests(run_type, toks):
                   "explore, you will find things and clues that help you complete your quests. They are listed here.")
 
         return
-    c=1
+    c = 1
     for q in gs.quests:
         gs.output(f"Quest {c}: {q.describe()}")
-        c+=1
+        c += 1
