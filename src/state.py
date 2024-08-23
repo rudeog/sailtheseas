@@ -77,6 +77,9 @@ class GlobalState:
         self.rng_play = None
         self.name_gen = None
 
+        # description generator is for generating island descriptions as well as exploration descriptions
+        self.desc_gen = None
+
         self.game_master = None
         self.emperor = None
         self.wind = None

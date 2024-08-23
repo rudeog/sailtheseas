@@ -92,7 +92,7 @@ if cont and not game_loaded:
 if cont:
     setup.base_setup()
     # generate the map
-    gs.map = map.Map(MAP_WIDTH, MAP_HEIGHT, gs.seed)
+    gs.map = map.Map(MAP_WIDTH, MAP_HEIGHT, gs.seed, gs.desc_gen)
     # generate quests
     setup.quest_setup()
 

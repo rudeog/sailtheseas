@@ -4,32 +4,44 @@ import const
 from cargo import CARGO_GOLD, CARGO_LUMBER, CARGO_LIVESTOCK
 
 def _event_find_gold(island):
-    gs.output("You find gold")
-    gs.ship.cargo.add_remove(CARGO_GOLD, 10)
+    o=gs.desc_gen.explore_island_gold(island)
+    amt=choices_ex(gs.rng_play,[2,3,4,5],[6,4,3,1])
+    gs.ship.cargo.add_remove(CARGO_GOLD, amt)
+    gs.output(f"{o} You gain {amt} pounds of gold.")
 
 def _event_find_money(island):
-    gs.output("You find money!")
-    gs.player.add_remove_doubloons(100)
+    o=gs.desc_gen.explore_island_doubloons(island)
+    amt=choices_ex(gs.rng_play,[100,200,300,400],[6,4,3,1])
+    gs.output(f"{o} You gain {amt} doubloons.")
+    gs.player.add_remove_doubloons(amt)
 
 def _event_inane(island):
-    gs.output("You see some birds n stuff")
+    o=gs.desc_gen.explore_island_inane(island)
+    gs.output(o)
 
 def _event_lumber(island):
-    gs.output("You find felled trees = lumber")
-    gs.ship.cargo.add_remove(CARGO_LUMBER, 15)
+    o=gs.desc_gen.explore_island_lumber(island)
+    amt=choices_ex(gs.rng_play,[50,100],[3,1])
+    gs.output(f"{o} You gain {amt} tons of lumber.")
+    gs.ship.cargo.add_remove(CARGO_LUMBER, amt)
 
 def _event_livestock(island):
-    gs.output("You find livestock")
-    gs.ship.cargo.add_remove(CARGO_LIVESTOCK, 15)
+    o=gs.desc_gen.explore_island_livestock(island)
+    amt=choices_ex(gs.rng_play,[20,50],[3,1])
+    gs.output(f"{o} You gain {amt} head of livestock.")
+    gs.ship.cargo.add_remove(CARGO_LIVESTOCK, amt)
 
 def _event_loss_of_crew(island):
-    gs.output("Some crew die")
-    cur = gs.crew.seamen_count-10
+    o=gs.desc_gen.explore_island_crewloss(island)
+    amt=choices_ex(gs.rng_play,[5,10],[3,1])
+    gs.output(f"{o} You lose {amt} able-bodied seamen.")
+    cur = gs.crew.seamen_count-amt
     gs.crew.set_seamen_count(max(cur,0))
 
 def _event_ship_damage(island):
-    gs.output("While we were out exploring our ship was damaged")
-    # TODO figure this out
+    o=gs.desc_gen.explore_island_shipdamage(island)
+    gs.output(f"{o} TODO figure out ship damage.")
+
 
 class ExploreEvent:
     def __init__(self, fn, like):
@@ -41,13 +53,20 @@ class ExploreEvent:
 
 # these are randomly generated explore events
 explore_events = [
-    ExploreEvent(_event_inane,7),
+    # inane events have no effect
+    ExploreEvent(_event_inane,11),
+    # gain gold
     ExploreEvent(_event_find_gold,1),
-    ExploreEvent(_event_loss_of_crew,1),
-    ExploreEvent(_event_find_money,1),
-    ExploreEvent(_event_lumber,2),
-    ExploreEvent(_event_livestock,2),
-    ExploreEvent(_event_ship_damage,1),
+    # lose crew
+    ExploreEvent(_event_loss_of_crew,2),
+    # gain doubloons
+    ExploreEvent(_event_find_money,2),
+    # gain lumber
+    ExploreEvent(_event_lumber,4),
+    # gain livestock
+    ExploreEvent(_event_livestock,5),
+    # ship gets damaged
+    ExploreEvent(_event_ship_damage,2),
     ]
 temp = [
     # inane:
@@ -87,21 +106,26 @@ fixed = [
 
 
 def do_explore(island):
+
     if island.explored >= 100:
         gs.gm_output(f"It looks like you have already explored the entire island of {island.name}.")
         return
 
 
+    # add some percentage to exploration
     # eventually, various factors will influence the speed of exploration
-    pctage = gs.rng_play.randint(20, 30)
+    pctage = gs.rng_play.randint(10, 25)
 
     island.explored += pctage
+    if island.explored > 100:
+        island.explored = 100
 
     # if there is a quest item here we will need to find it as one of our explorations
     if not do_quest_find(island):
         # find something else to do
         event = choices_ex(gs.rng_play, explore_events, [x.likelihood for x in explore_events])
         event.fn(island)
+
 
     gs.gm_output(f"We have now explored {island.explored} percent of the island.")
 

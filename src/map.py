@@ -53,7 +53,7 @@ class Location:
 
 
 class Map:
-    def __init__(self, width, height, seed):
+    def __init__(self, width, height, seed, desc_gen):
         if width < 10 or height < 10:
             raise Exception("invalid size. min is 10x10")
 
@@ -72,7 +72,7 @@ class Map:
         # we have an array of populated places (squares that have an island)
         self.places: list[Location] = []
         self._populate_map()
-        self._define_islands()
+        self._define_islands(desc_gen)
 
     # places are populated coordinates in the map (right now that means they have an island)
     def get_place_by_index(self, index: int):
@@ -253,15 +253,15 @@ class Map:
         f = "".join(parts)
         return f.splitlines()
 
-    def _define_islands(self):
+    def _define_islands(self, desc_gen):
         g = islands.Generator(self.num_places, self.seed, self.rng)
 
         first = True  # we always want a port at the first location with high civ
         for loc in self.places:
             if first:
-                loc.island = g.generate_island(loc.index, const.ISLAND_CIV_CITY)
+                loc.island = g.generate_island(loc.index, desc_gen, const.ISLAND_CIV_CITY)
             else:
-                loc.island = g.generate_island(loc.index)
+                loc.island = g.generate_island(loc.index, desc_gen)
             first = False
 
     # render local area which includes islands that are nearby even if not visited

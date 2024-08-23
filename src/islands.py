@@ -2,7 +2,6 @@
 import const
 import stock
 from names import PlaceGenerator, NameGenerator
-from place_descriptions import DescGen, IslandModel
 from util import choices_ex
 from port import Port
 
@@ -43,7 +42,6 @@ class Generator:
 
         self.pg = PlaceGenerator(name_seed)
         self.ng = NameGenerator(name_seed)
-        self.desc_gen = DescGen(name_seed, self.ng, self.pg)
 
     def _gen_type(self):
 
@@ -57,9 +55,10 @@ class Generator:
                 self.civ_distribution[t] += 1
                 return t
 
-    def generate_island(self, idx, civ_type=-1, pc=None, sc=None):
+    def generate_island(self, idx, desc_gen, civ_type=-1, pc=None, sc=None):
         '''
         Generate an island optionally specifying civ level and/or primary/secondary classes
+        :param desc_gen: description generator (should be on global)
         :param idx:
         :param civ_type:
         :param pc:
@@ -76,8 +75,7 @@ class Generator:
             sc = const.ISLAND_CLASS_NONE
 
         island = Island(idx, civ_type, self.ng, self.pg, pc, sc, self.map_rng)
-        model = IslandModel(island)
-        island.description = self.desc_gen.generate(model)
+        island.description = desc_gen.generate(island)
         return island
 
     def _assign_classes(self, civ_type):
@@ -132,11 +130,8 @@ class Island:
         self.secondary_class = sc
         self.explored = 0  # percentage explored
         self.visit_count = 0  # number of arrivals at island
+        # this will be set to a quest item if it exists at this island
         self.quest_item = None
-
-        # after generating the map, we come back in and add fixed encounters here.
-        # these will always be encountered when exploring this island
-        self.encounters = None
 
         place_ethnicity = "e"  # default to exotic
         ruler_ethnicity = "e"

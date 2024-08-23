@@ -39,7 +39,7 @@ def describe_island(i):
 
 def custom_island():
     g=islands.Generator(1,1)
-    isl = g.generate_island(0,const.ISLAND_CIV_CITY, const.ISLAND_CLASS_FOREST)
+    isl = g.generate_island(0, None, const.ISLAND_CIV_CITY, const.ISLAND_CLASS_FOREST)
     print(f"Generated '{isl.name}'")
     return isl
 
@@ -73,7 +73,7 @@ i.port.trader.update()
 dump_trade_stuff_for_island(i)
 '''
 
-gs.map = map.Map(30, 30, gs.seed)
+gs.map = map.Map(30, 30, gs.seed, None)
 # describe_island(38)
 #
 

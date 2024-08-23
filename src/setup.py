@@ -7,6 +7,7 @@ import random
 import crew
 import state
 from names import NameGenerator, PlaceGenerator
+from place_descriptions import DescriptionGenerator
 from state import gs, NUM_QUESTS, NUM_QUEST_CLUES, NUM_QUEST_ARTIFACTS
 import phrase_gen
 from stock import do_full_restock
@@ -22,6 +23,8 @@ def base_setup():
 
     gs.rng_play = random.Random(gs.seed)
     gs.name_gen = NameGenerator(gs.seed+1)
+
+    gs.desc_gen = DescriptionGenerator(gs.seed+2, gs.name_gen, place_gen)
 
     # we should end up with the same name and place as was selected in determine seed
     gs.emperor = name_gen.name("m", "e")
