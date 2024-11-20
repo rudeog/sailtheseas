@@ -1,9 +1,14 @@
 from state import gs
 from command import Command, RunType
 
+game_intro = \
+"You are a sea captain, a trader and an explorer. " \
+"test"
+def do_intro():
+    gs.output(game_intro)
+
 topics = {"about": ["About the game",
-                    "This is a turn based game in which you sail to and explore islands, trade goods, do battle and "
-                    "collect rewards. You play this game by issuing text commands. The game will only "
+                    game_intro,
                     "progress as you enter commands. You are awarded points based on your accomplishments."],
           "trading": ["How to buy and sell goods",
                       "Buy low sell high!"],
@@ -23,7 +28,7 @@ def cmd_info(run_type: RunType, toks):
 
 
 def register_info_cmds():
-    gs.cmdsys.register(Command("read", cmd_info,
+    gs.cmdsys.register(Command("read", "",cmd_info,
                                                "Display information about the game. Optionally specify an info topic to "
                                                "display that topic."))
 

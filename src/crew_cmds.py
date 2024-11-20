@@ -7,15 +7,16 @@ import const
 from util import as_int
 
 def register_crew_cmds():
-    gs.cmdsys.register(Command("crew",  describe_crew_cmd, "Show information about your crew"))
-    gs.cmdsys.register(Command("hiring", hire_fire_cmd,
-                               "Hire or fire able-bodied seamen."))
-    gs.cmdsys.register(Command("payroll", pay_crew_cmd,
-                               "Pay any amount due to crew of able-bodied seamen."))
-    gs.cmdsys.register(Command("ration", rations_cmd,
+    gs.cmdsys.register(Command("crew", "info", describe_crew_cmd, "Show information about your crew"))
+    gs.cmdsys.register(Command("ration","action", rations_cmd,
                                "Set the rationing level for able-bodied seamen."))
-    gs.cmdsys.register(Command("grog", grog_cmd,
+    gs.cmdsys.register(Command("grog","action", grog_cmd,
                                "Set the grog apportionment for able-bodied seamen."))
+    gs.cmdsys.register(Command("hiring","action", hire_fire_cmd,
+                               "Hire or fire able-bodied seamen."))
+    gs.cmdsys.register(Command("payroll", "action",pay_crew_cmd,
+                               "Pay any amount due to crew of able-bodied seamen."))
+
 
 
 def rations_cmd(rt: RunType, toks):

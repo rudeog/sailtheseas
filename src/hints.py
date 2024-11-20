@@ -1,6 +1,10 @@
 from command import RunType
 from state import gs
 
+# instructions for adding hints:
+# 1. add to below array with name
+# 2. call gs.hints.show("hint id here") where you want it displayed
+
 _hints = {
     "about": "Since you are just starting out, you will get hints whenever you do something new. Use the hint command to control them.",
     "basic": "You will interact with the game by entering commands. Some commands have subcommands which may be optional "
@@ -17,6 +21,8 @@ _hints = {
     "landed": "When you arrive at an island, you may save your progress using the 'save' command.",
     "jettison": "If your are at sea and you need to get rid of cargo, you can jettison some cargo using the 'jet' command. You might "
         "want to first use the 'restock' command to see if you can convert any cargo into stock items.",
+    "quest_item": "As you explore, you may find clues or artifacts related to quests. Use the 'quests' command to get a view of "
+        "your quests and what needs to be done to complete each.",
 }
 # idx into above
 HINT_ID_ABOUTHINTS = 0

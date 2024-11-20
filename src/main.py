@@ -12,7 +12,7 @@ from state import gs, MAP_WIDTH, MAP_HEIGHT, GAME_VERSION, GAME_NAME
 import setup
 import map
 from command import CommandSystem, RunType, Command
-from help import register_info_cmds
+from help import register_info_cmds, do_intro
 from save import save_file_exists, load_game, save_game, load_trading_and_visited_data
 from player import Player
 from ship import Ship
@@ -34,7 +34,10 @@ def cmd_quit(run_type, toks):
     gs.quitting = True
 
 ##################################################################
-
+# Env vars:
+#   STS_DEBUG_MODE - set to something other than 0 for debug mode
+#
+#
 # check for config options
 parser = argparse.ArgumentParser(description="Parse command-line arguments")
 parser.add_argument("-l", "--logfile", required=False, help="Send logging output to specified file")
@@ -87,6 +90,9 @@ if save_file_exists():
             game_loaded = True
 
 if cont and not game_loaded:
+    if gs.confirm("Would you like to read an introduction to the game?", True):
+        do_intro()
+
     cont = setup.determine_seed()
 
 if cont:
@@ -104,16 +110,17 @@ if cont:
     # set up the command interpreter
     gs.cmdsys = CommandSystem()
 
-    gs.cmdsys.register(Command("!",  cmd_quit,
+    gs.cmdsys.register(Command("!","",  cmd_quit,
                                "Quit the game."))
-    gs.cmdsys.register(Command("hints", cmd_hints, "Reset or turn off all hints"))
-    gs.cmdsys.register(Command("quests", cmd_quests, "Show information about quests"))
+    gs.cmdsys.register(Command("hints","", cmd_hints, "Reset or turn off all hints"))
+    gs.cmdsys.register(Command("quests","", cmd_quests, "Show information about quests"))
 
     # register other commands
     register_info_cmds()
     register_status_cmds()
-    register_port_cmds()
     register_nav_cmds()
+    register_port_cmds()
+
     register_crew_cmds()
 
     if game_loaded:

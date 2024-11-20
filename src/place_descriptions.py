@@ -35,11 +35,11 @@ outlines = [
 explore_doubloons = [
     "Seaman [person,m,w,f] finds several doubloons on the [p,beach,rocks,sand].",
     "You have [p,uncovered,unearthed,discovered] a [p,purse,bag,box] of coins.",
-    "Your chaplain, [m,chaplain], is given a sign from above which leads to a pile of coins.",
+    "[m,chaplain] is given a sign from above which leads to a pile of coins.",
     ]
 explore_gold = [
     "You have discovered a [p,pot,sack,wooden box,tin] containing gold [p,coins,nuggets,pieces].",
-    "Seaman [person,m,w,f] finds a cache of gold. It is surrendered to you.",
+    "Seaman [person,m,w,f] finds a [p,cache of gold,pirate treasure in the form of gold]. It is surrendered to you.",
     "An ignorant local named [person,m,e,f] hands you some gold.",
     "A few of your crew pan for gold in a [p,dirty,small,bubbling] river and find gold.",
     ]
@@ -51,9 +51,18 @@ explore_inane_outlines = [
 
 explore_lumber = [
     "You discover some good hardwood trees.",
+    "You find some trees felled by a recent storm.",
+    "Your crew has come across some lumber from a wrecked ship."
+]
+explore_food = [
+    "While walking the beach, seaman [person,m,w,f] discovers barrels from a shipwreck.",
+    "Several of your crew find a cache of [p,well,poorly,hastily] hidden foodstuffs.",
+    "Your crew has found some preserved food, possibly left by previous visitors to this region."
 ]
 explore_livestock = [
-    "You find some wandering cattle."
+    "You find some wandering cattle.",
+    "You manage to capture some slow moving [p,antelope,feral hogs].",
+    "Seaman [person,m,w,f] manages to secure some fairly tame [p,cattle,sheep]."
     ]
 explore_crewloss = [
     "You are attacked by savages."
@@ -96,16 +105,17 @@ item_disposal = [
     "[m,chaplain] casts holy water over it.",
     "A local named [person,f,w,f] claims that it has been there since before her time.",
     "A local man named [person,m,w,f] claims ownership of it.",
-    "There is a [p,lively,heated,long] debate over it's origin.",
+    "There is a [p,lively,heated,long] debate among ther crew over it's origin.",
     "It is soon forgotten.",
-    "[m,chaplain] indicates that it is a [p,good,bad,definite] omen.",
+    "[m,chaplain] [p,declares,indicates,mutters] that it is a [p,good,bad,definite] omen.",
     ]
 
 # discovered items
 food_item_found = [
     "[p,a young,an ugly,a black,a friendly,a frightened] lamb",
-    "[p,an old,a cute young,a billy,a fat, a skinny] goat",
+    "[p,an old,a cute young,a billy,a fat,a skinny] goat",
     "a [p,fluffy,hairless,starved] rabbit",
+    "a [p,plump,red,black] [p,hen,rooster] with [p,beautiful plumage,an angry disposition,a bad temper]",
     "[p,an abandoned,a small,a half-empty] pot of [p,stew,soup,porridge,vittles]",
 ]
 # something that happens to a found food item
@@ -490,6 +500,7 @@ class DescriptionGenerator:
         self.explore_gold_selector = ListSelector(self.rng, explore_gold)
         self.explore_doubloons_selector = ListSelector(self.rng, explore_doubloons)
         self.explore_lumber_selector = ListSelector(self.rng, explore_lumber)
+        self.explore_food_selector = ListSelector(self.rng, explore_food)
         self.explore_livestock_selector = ListSelector(self.rng, explore_livestock)
         self.explore_crewloss_selector = ListSelector(self.rng, explore_crewloss)
         self.explore_shipdamage_selector = ListSelector(self.rng, explore_shipdamage)
@@ -532,6 +543,8 @@ class DescriptionGenerator:
 
     def explore_island_lumber(self, island=None):
             return self._explore_island(self.explore_lumber_selector, island)
+    def explore_island_food(self, island=None):
+        return self._explore_island(self.explore_food_selector, island)
     def explore_island_livestock(self, island=None):
         return self._explore_island(self.explore_livestock_selector, island)
     def explore_island_shipdamage(self, island=None):

@@ -6,32 +6,37 @@ from util import list_valid_directions, is_direction_valid, Direction, direction
 
 def register_nav_cmds():
     # TODO REMOVE THIS!!!
-    gs.cmdsys.register(Command("warp", warp_cmd,
-                               "Do not use!."))
+    if gs.debug_mode:
+        gs.cmdsys.register(Command("warp","", warp_cmd,
+                                   "Do not use!."))
 
-    # not really a nav command but...
-    gs.cmdsys.register(Command("rest", rest_cmd,
-                               "Rest for a watch."))
-
-    gs.cmdsys.register(Command("nav", navigate_cmd,
+    gs.cmdsys.register(Command("m", "info",map_cmd,
+                               "Display a local map with nearby islands."))
+    gs.cmdsys.register(Command("nav","action", navigate_cmd,
                                "Navigate to an island specified by its numeric id."))
-
-    gs.cmdsys.register(Command("dir", direction_cmd,
+    gs.cmdsys.register(Command("dir","action", direction_cmd,
                                "Set your ship to sail in a specific direction (sets bearing)."))
 
-    gs.cmdsys.register(Command("s", sail_cmd,
+
+    gs.cmdsys.register(Command("s","action", sail_cmd,
                                "Sail your ship. This assumes you are navigating to a location or have set your bearing."))
 
-    gs.cmdsys.register(Command("m", map_cmd,
-                               "Display a local map with nearby islands."))
+    # not really a nav command but...
+    gs.cmdsys.register(Command("rest", "action", rest_cmd,
+                               "Rest for a watch."))
 
-    gs.cmdsys.register(Command("world", world_cmd,
-                               "Display a world map."))
-
-    gs.cmdsys.register(Command("islands", list_islands_cmd,
-                               "Display details of all known islands."))
-    gs.cmdsys.register(Command("nearby", list_islands_nearby_cmd,
+    gs.cmdsys.register(Command("nearby","info", list_islands_nearby_cmd,
                                "Display details of nearby islands."))
+
+    gs.cmdsys.register(Command("islands","info", list_islands_cmd,
+                               "Display details of all known islands in the world."))
+
+    gs.cmdsys.register(Command("world","info", world_cmd,
+                               "Display a world map, showing known islands."))
+
+
+
+
 
 
 def rest_cmd(rt: RunType, toks):

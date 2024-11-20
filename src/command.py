@@ -1,6 +1,6 @@
 from state import gs
 from enum import Enum
-
+from functools import cmp_to_key
 
 class RunType(Enum):
     CHECK_AVAILABLE = 1
@@ -22,11 +22,19 @@ class Command:
 
     """
 
-    def __init__(self, name,  fn, help_text):
+    def __init__(self, name, cat: str, fn, help_text):
+        """
+        :param name: name of command
+        :param cat: category. empty string for 'general' category. valid categories:
+           "info", "action"
+        :param fn:
+        :param help_text:
+        """
         self.name = name  # name of command
         self.fn = fn  # function to run
         self.help_text = help_text  # help topic
-
+        self.cat = cat # category
+        self.priority = 0
 
 class CommandSystem:
     def __init__(self):
@@ -68,15 +76,43 @@ class CommandSystem:
         if cmd.name in self.cmds:
             raise ValueError(f"Command {cmd.name} already registered.")
         self.cmds[cmd.name] = cmd
+        # priority is based on the order added
+        cmd.priority = len(self.cmds)
 
 
     def _list_cmds(self):
-        gs.output(f"Available commands while {gs.player.get_state_str()}:")
+
         tl = 0
+        info_cmds = []
+        action_cmds = []
+        general_cmds = []
+
+        # calc max name lengths to figure pretty printout
         for k, v in self.cmds.items():
             tl = max(tl, len(v.name))
+            if v.cat == 'info':
+                info_cmds.append(v)
+            elif v.cat == 'action':
+                action_cmds.append(v)
+            else:
+                general_cmds.append(v)
         tl+=2
-        for k, v in self.cmds.items():
+
+        def print_cmd(v: Command):
+            # see if its available now
             if v.fn(RunType.CHECK_AVAILABLE, []):
                 gs.output(f"{v.name.ljust(tl,'.')}{v.help_text}", sub_indented=True)
+
+        gs.output(f"General commands:")
+        for item in general_cmds:
+            print_cmd(item)
+        gs.output("")
+        gs.output(f"Action commands while {gs.player.get_state_str()}:")
+        for item in action_cmds:
+            print_cmd(item)
+        gs.output("")
+        gs.output(f"Informational commands while {gs.player.get_state_str()}:")
+        for item in info_cmds:
+            print_cmd(item)
+
         gs.output("You may enter a command followed by the word 'help' for more information about the command.")

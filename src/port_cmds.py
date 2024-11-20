@@ -11,28 +11,31 @@ from turn import pass_time
 
 
 def register_port_cmds():
-    gs.cmdsys.register(Command("land", land_cmd,
+    gs.cmdsys.register(Command("save","",  cmd_save,
+                               "Save game."))
+    gs.cmdsys.register(Command("land", "action", land_cmd,
                                "Land on an island. If the island has a port you will dock at the "
                                "port, otherwise you will drop anchor and disembark."))
-    gs.cmdsys.register(Command("depart", depart_cmd,
-                               "Depart from an island and return to the seas."))
-    gs.cmdsys.register(Command("trade", trade_list_cmd,
-                               "List cargo for buying and selling."))
-    gs.cmdsys.register(Command("buy", trade_buy_cmd,
-                               "Buy cargo."))
-    gs.cmdsys.register(Command("sell", trade_sell_cmd,
-                               "Sell cargo."))
-    gs.cmdsys.register(Command("jet", trade_jettison_cmd,
-                               "Jettison cargo into the sea."))
-    gs.cmdsys.register(Command("pawn", trade_pawn_cmd,
-                               "Sell unwanted cargo at a lower rate."))
-    gs.cmdsys.register(Command("exp", explore_cmd,
+    gs.cmdsys.register(Command("exp","action", explore_cmd,
                                "Explore the island."))
-    gs.cmdsys.register(Command("restock",  restock_cmd,
-                               "Restock your ship with supplies."))
-    gs.cmdsys.register(Command("save",  cmd_save,
-                               "Save game."))
 
+    gs.cmdsys.register(Command("trade", "info", trade_list_cmd,
+                               "List cargo for buying and selling."))
+    gs.cmdsys.register(Command("buy","action",trade_buy_cmd,
+                               "Buy cargo."))
+    gs.cmdsys.register(Command("sell","action",trade_sell_cmd,
+                               "Sell cargo."))
+    gs.cmdsys.register(Command("pawn","action", trade_pawn_cmd,
+                               "Sell unwanted cargo at a lower rate."))
+
+    gs.cmdsys.register(Command("jet", "action",trade_jettison_cmd,
+                               "Jettison cargo into the sea."))
+
+
+    gs.cmdsys.register(Command("restock","action",  restock_cmd,
+                               "Restock your ship with supplies."))
+    gs.cmdsys.register(Command("depart","action", depart_cmd,
+                               "Depart from an island and return to the seas."))
 
 def restock_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
@@ -412,6 +415,7 @@ def trade_jettison_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
         if gs.player.is_sailing():
             return True
+        return False
     if rt == RunType.HELP or len(toks) != 2:
         gs.output("Dump cargo into the sea. If your ship is overburdened, this is your only option. ")
         gs.output("Specify quantity and cargo code (use 'cargo' to see codes), for example:")

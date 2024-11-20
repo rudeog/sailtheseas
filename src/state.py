@@ -1,5 +1,6 @@
 # manage global game state. This is at the top level.
 # also handles IO
+import os
 import textwrap
 import shutil
 from datetime import datetime
@@ -10,7 +11,7 @@ from util import as_int
 #
 # Game level defaults
 #
-DEBUGGING = True
+
 GAME_NAME = "Sail The Seas"
 GAME_VERSION = "0.1"
 DEFAULT_SEED = 51047
@@ -41,6 +42,9 @@ NUM_QUEST_CLUES = 2
 NUM_QUEST_ARTIFACTS = (2,3,5)
 
 DEFAULT_STARTING_DOUBLOONS = 10000
+
+# approximate value for found items while exploring
+AVG_VALUE_EXPLORE_ITEM = 200
 
 # max islands to keep on last visited list. When an island is
 # bumped from this list its trading data is updated. Therefore given island X, a player must visit this many
@@ -87,7 +91,10 @@ class GlobalState:
         self.num_commands = 0
         self.quitting = False
 
-        self.debug_mode = DEBUGGING
+        self.debug_mode = False
+        d = os.getenv("STS_DEBUG_MODE","0")
+        if d != "0":
+            self.debug_mode = True
 
         terminal_size = shutil.get_terminal_size(fallback=(120, 24))
         self.wrap_width = min(terminal_size.columns, 120)
