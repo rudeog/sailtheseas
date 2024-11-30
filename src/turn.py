@@ -4,9 +4,12 @@
 import ship
 from state import gs
 from explore import do_explore
+from sea_encounter import check_encounter
 
 def pass_time(resting: bool, exploring: bool=False):
     day_elapsed = gs.player.time_increment()
+
+
 
     # ship takes wear and tear, and also may get repaired
     # may also possibly sink at this point causing game over
@@ -17,7 +20,7 @@ def pass_time(resting: bool, exploring: bool=False):
     if day_elapsed:
 
 
-        if gs.player.is_sailing():
+        if gs.player.is_at_sea():
 
             # possibly change wind direction
             gs.wind.change_random()
@@ -37,26 +40,28 @@ def pass_time(resting: bool, exploring: bool=False):
         gs.output(f"{gs.crew.boatswain}: Our crew of able-bodied seamen needs to be paid for their services. You will not be able to "
                   f"purchase anything or hire anyone until they are paid. Amount owed {gs.crew.amt_due()}D.")
 
+    if not resting:
+        # if we are sailing we need to move if possible
+        if gs.player.is_at_sea() and gs.ship.b.is_set():
+            if _sail():
+                # entered new square, see if we have an encounter to deal with
+                check_encounter()
 
-    # if we are sailing we need to move if possible
-    if not resting and gs.player.is_sailing() and gs.ship.b.is_set():
-        _sail()
-
-    # if exploring we need to explore
-    if not resting and exploring and gs.player.is_onland():
-        place = gs.map.get_place_at_location(gs.ship.location)
-        if place and place.island:  # should be true
-            do_explore(place.island)
+        # if exploring we need to explore
+        elif exploring and gs.player.is_on_land():
+            place = gs.map.get_place_at_location(gs.ship.location)
+            if place and place.island:  # should be true
+                do_explore(place.island)
 
 def _ship_set_cond() -> bool:
 
     gs.ship.condition -= 1 # normal wear each watch
 
     # the carpenter is able to repair up to 2% damage each watch right now while sailing, and 4% while on land
-    if gs.player.is_sailing():
+    if gs.player.is_at_sea():
         repair_amt = 2
     else:
-        repair_amt = 4
+        repair_amt = 6
 
     want = min(repair_amt,100 - gs.ship.condition)
     repaired = gs.stock.consume_materials(want)
@@ -79,7 +84,12 @@ def _ship_set_cond() -> bool:
         gs.output(f"{gs.crew.carpenter}: Our ship is in poor condition, captain!")
     return True
 
-def _sail():
+def _sail() -> bool:
+    '''
+
+    :return: true if we entered a new square
+    '''
+    res=False
     # make sure we are not overburdened
     if gs.ship.cargo.total_weight() >  gs.ship.cargo_capacity:
         gs.output(f"{gs.crew.firstmate}: {gs.ship.name} is overburdened with cargo! We can't sail.")
@@ -136,7 +146,9 @@ def _sail():
             dist = gs.ship.distance_to_location(gs.ship.location)
             gs.output(f"{gs.crew.lookout}: I have sighted the island of {pl.island.name}!")
             gs.output(f"{gs.crew.navigator}: The island is {dist} miles away, captain.")
+        res=True
     gs.hints.show("sailing")
+    return res
 
 
 def _feed_crew():

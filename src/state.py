@@ -41,6 +41,8 @@ NUM_QUESTS = 2
 NUM_QUEST_CLUES = 2
 NUM_QUEST_ARTIFACTS = (2,3,5)
 
+NUM_PIRATES = 5
+
 DEFAULT_STARTING_DOUBLOONS = 10000
 
 # approximate value for found items while exploring
@@ -72,6 +74,7 @@ class GlobalState:
 
         self.map = None
         self.quests = None
+        self.pirates = None
         self.cmdsys = None
 
 

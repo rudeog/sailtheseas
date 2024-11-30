@@ -96,11 +96,13 @@ if cont and not game_loaded:
     cont = setup.determine_seed()
 
 if cont:
-    setup.base_setup()
+    name_gen = setup.base_setup()
     # generate the map
     gs.map = map.Map(MAP_WIDTH, MAP_HEIGHT, gs.seed, gs.desc_gen)
     # generate quests
     setup.quest_setup()
+    # generate pirates
+    setup.pirate_setup(name_gen)
 
 
     if not game_loaded:

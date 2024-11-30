@@ -269,3 +269,12 @@ def cmd_quests(run_type, toks):
     for q in gs.quests:
         gs.output(f"Quest {c}: {q.describe()}")
         c += 1
+
+    gs.output("Pirates:")
+    for p in gs.pirates:
+        if p.completed:
+            gs.output(f"You have defeated {p.name}")
+    for p in gs.pirates:
+        if not p.completed:
+            gs.output(f"You must defeat {p.name}")
+

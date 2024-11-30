@@ -1,5 +1,7 @@
 import json
 from pathlib import Path
+
+from src.quest import QuestItem
 from state import gs
 import os
 
@@ -87,7 +89,8 @@ def save_game():
             "visited": _save_visited_data(),
             "wind": gs.wind.get(),
             "hint": gs.hints.get(),
-            "quests": [q.get() for q in gs.quests]
+            "quests": [q.get() for q in gs.quests],
+            "pirates": [p.get() for p in gs.pirates],
             }
 
     json_string = json.dumps(data)
@@ -143,6 +146,9 @@ def load_trading_and_visited_data(loaded: dict):
         # quest stuff
         for i, v in enumerate(loaded["quests"]):
             gs.quests[i].set(v)
+
+        for i, v in enumerate(loaded["pirates"]):
+            gs.pirates[i].set(v)
 
         return True
 

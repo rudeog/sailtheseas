@@ -108,7 +108,7 @@ def describe_crew_cmd(rt: RunType, toks):
 
 def hire_fire_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_onland():
+        if gs.player.is_on_land():
             # can only hire/fire when docked at a port
             place = gs.map.get_place_at_location(gs.ship.location)
             if place and place.island and place.island.port:

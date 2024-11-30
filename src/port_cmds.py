@@ -51,7 +51,7 @@ def restock_cmd(rt: RunType, toks):
 
 def land_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_sailing():
+        if gs.player.is_at_sea():
             # we will show the command even if unavailable to give the opportunity to explain that we still need to sail
             p = gs.map.get_place_at_location(gs.ship.location)
             if p:
@@ -98,7 +98,7 @@ def cmd_save(rt, toks):
             "This command allows you to save your game. You may save your game when on land.")
         return
 
-    if not gs.player.is_onland():
+    if not gs.player.is_on_land():
         gs.gm_output(f"Sorry, {gs.player.name}, but you can only save your progress when you are on land.")
         return
 
@@ -112,7 +112,7 @@ def cmd_save(rt, toks):
 
 def depart_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_onland():
+        if gs.player.is_on_land():
             return True
         return False
     if rt == RunType.HELP:
@@ -160,7 +160,7 @@ def trade_pawn_cmd(rt: RunType, toks):
 
 def trade_shared_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_onland():
+        if gs.player.is_on_land():
             place = gs.map.get_place_at_location(gs.ship.location)
             if place:  # should be true
                 return True # we'll let it succeed even if no trading to let them know that fact
@@ -401,7 +401,7 @@ def trade_pawn(t: TradingPost, qty, type_idx, pm):
 
 def explore_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_onland():
+        if gs.player.is_on_land():
             return True
         return False
     if rt == RunType.HELP:
@@ -413,7 +413,7 @@ def explore_cmd(rt: RunType, toks):
 
 def trade_jettison_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_sailing():
+        if gs.player.is_at_sea():
             return True
         return False
     if rt == RunType.HELP or len(toks) != 2:

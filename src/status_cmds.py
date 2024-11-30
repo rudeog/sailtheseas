@@ -64,7 +64,7 @@ def describe_island_cmd(rt: RunType, toks):
 
 def show_wind(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        return not gs.player.is_onland()
+        return not gs.player.is_on_land()
     if rt == RunType.HELP:
         gs.output(
             "This shows wind conditions.")
@@ -99,7 +99,7 @@ def show_status(rt: RunType, toks):
 
             # there should always be an island at a place
             op += f"You are {prox} {place.island.name}"
-            if gs.player.is_onland():
+            if gs.player.is_on_land():
                 if place.island.port:
                     op += f" and {gs.ship.name} is docked at {place.island.port.name}. "
                 else:
@@ -107,7 +107,7 @@ def show_status(rt: RunType, toks):
             else:
                 op += ". "
 
-        if gs.player.is_sailing():
+        if gs.player.is_at_sea():
             if gs.ship.b.is_direction():
                 op += f"{gs.ship.name} is heading to the {gs.ship.b.as_target_or_direction()}.\n"
             elif gs.ship.b.is_target():

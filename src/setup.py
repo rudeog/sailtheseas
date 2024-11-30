@@ -8,6 +8,8 @@ import crew
 import state
 from names import NameGenerator, PlaceGenerator
 from place_descriptions import DescriptionGenerator
+from src.pirate import Pirate
+from src.state import NUM_PIRATES
 from state import gs, NUM_QUESTS, NUM_QUEST_CLUES, NUM_QUEST_ARTIFACTS
 import phrase_gen
 from stock import do_full_restock
@@ -30,7 +32,7 @@ def base_setup():
     gs.emperor = name_gen.name("m", "e")
     gs.game_master = name_gen.name("m", "w")
     gs.world_name = place_gen.name('f')
-
+    return name_gen # for later usage in setup
 
 def quest_setup():
     qg = quest.QuestGenerator(gs.seed)
@@ -38,6 +40,20 @@ def quest_setup():
     for i in range(NUM_QUESTS):
         q = qg.generate(gs.map,NUM_QUEST_ARTIFACTS[i], NUM_QUEST_CLUES)
         gs.quests.append(q)
+
+def pirate_setup(name_gen: NameGenerator):
+    gs.pirates = []
+    prefixes = ["The dread pirate", "Bloodthirsty", "Bearded", "The brutal", "Lawless"]
+    ship_prefixes = ["Rusty","Holy","Deadly","Fatal","Dire","Headless"]
+    for i in range(NUM_PIRATES):
+        prefix_index = i % len(prefixes)
+        ship_index = i % len(ship_prefixes)
+        p = name_gen.name("","w")
+        ps = name_gen.name("f","s")
+        sn = f"The {ship_prefixes[ship_index]} {ps.first}"
+        t = f"{prefixes[prefix_index]} {p.first} {p.last}"
+        gs.pirates.append(Pirate(t,sn))
+
 
 # This should find out what seed the user wants to use
 def determine_seed() -> bool:

@@ -66,7 +66,7 @@ class Player:
             self._days = self._days + 1
             self._day_frags = 0 # morning of the next day
 
-            if self.is_sailing():
+            if self.is_at_sea():
                 self._days_at_sea += 1
                 self._days_since_port += 1
 
@@ -89,10 +89,10 @@ class Player:
     def current_time(self):
         return self._day_frags
 
-    def is_sailing(self):
+    def is_at_sea(self):
         return self._state is self._state_e.ATSEA
 
-    def is_onland(self):
+    def is_on_land(self):
         return self._state is self._state_e.ONLAND
 
     def set_state_sailing(self):
@@ -107,9 +107,9 @@ class Player:
 
 
     def get_state_str(self):
-        if self.is_onland():
+        if self.is_on_land():
             return "on land"
-        elif self.is_sailing():
+        elif self.is_at_sea():
             return "aboard ship"
         else:
             return ""

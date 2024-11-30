@@ -54,7 +54,7 @@ def rest_cmd(rt: RunType, toks):
 
 def navigate_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_sailing():
+        if gs.player.is_at_sea():
             return True
         return False
     if rt == RunType.HELP or not toks:
@@ -88,7 +88,7 @@ def navigate_cmd(rt: RunType, toks):
 
 def warp_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_sailing():
+        if gs.player.is_at_sea():
             return True
         return False
     if rt == RunType.HELP:
@@ -107,7 +107,7 @@ def warp_cmd(rt: RunType, toks):
 
 def direction_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_sailing():
+        if gs.player.is_at_sea():
             return True
         return False
     if rt == RunType.HELP or not toks or not is_direction_valid(toks[0]):
@@ -157,7 +157,7 @@ def world_cmd(rt: RunType, toks):
 
 def sail_cmd(rt: RunType, toks):
     if rt == RunType.CHECK_AVAILABLE:
-        if gs.player.is_sailing():
+        if gs.player.is_at_sea():
             return True
         return False
     if rt == RunType.HELP or not gs.ship.b.is_set():

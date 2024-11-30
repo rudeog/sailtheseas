@@ -62,7 +62,7 @@ class Stock:
 
             # cannon balls and powder. consumed during battles. each battle round consumes 1
             # unit.
-            StockItem(const.STOCK_ORDNANCE_IDX, 0, 10, 70),
+            StockItem(const.STOCK_ORDNANCE_IDX, 1, 12, 70),
         ]
 
     def set(self, lst: list):
@@ -121,6 +121,23 @@ class Stock:
             return False
         item.qty -= to_consume
         return True
+
+    def consume_ordnance(self) -> bool:
+        '''
+        consume a bout's worth of ordnance
+        :return: False if we came up short, true otherwise
+        '''
+        item = self.items[const.STOCK_ORDNANCE_IDX]
+        to_consume = item.consumption_rate
+        if item.qty < to_consume:
+            item.qty = 0
+            return False
+        item.qty -= to_consume
+        return True
+    def get_ordnance(self) -> int:
+        item = self.items[const.STOCK_ORDNANCE_IDX]
+        return item.qty
+
 
     def consume_materials(self, amount) -> int:
         '''
@@ -268,7 +285,7 @@ def do_interactive_restock():
     while True:
         restock_options: list[_restock] = []
         # a dict keyed off stock idx. value is description
-        if gs.player.is_onland():
+        if gs.player.is_on_land():
             place = gs.map.get_place_at_location(gs.ship.location)
             avail_at_island = place.island.available_stock()
         else:

@@ -71,6 +71,12 @@ explore_shipdamage = [
     "While exploring, your ship is vandalized."
     ]
 
+insults = [
+    "[p,I've heard,It is said,It's well known] that [player,name] is a [p,landlubberly,faint-hearted,snivelling] [p,goose,mammal,sod]!",
+    "I'm going to [p,blast,send] [player,ship] to [p,the next world,her watery grave,the briny deep,kingdom come]!",
+    "Only [p,cowards,weaklings,fools] come from [player,birthplace]!",
+    "[player,ship] looks like a [p,wash tub,cook pot,poorly designed out-house]!"
+]
 scenery = [
     "a valley of [l,look_adj] [l,plant]",
     "a grove of [l,fruit]",
@@ -317,12 +323,13 @@ class _Model:
     has island info etc attached
     '''
 
-    def __init__(self, parent, island: _IslandModel):
+    def __init__(self, parent, island: _IslandModel=None):
         self.rng = parent.rng
         self.lu_selectors = parent.lu_selectors
         self.island = island
-        self.civ_select = parent.civ_selectors[island.civ_type]
-        self.class_select = parent.class_selectors[island.primary_class]
+        if island:
+            self.civ_select = parent.civ_selectors[island.civ_type]
+            self.class_select = parent.class_selectors[island.primary_class]
         self.ng = parent.ng
         self.pg = parent.pg
 
@@ -427,6 +434,14 @@ def ru_person(model: _Model, args: list):
         return n.last
     return n.first + " " + n.last
 
+def ru_player(model: _Model, args: list):
+    if len(args) > 0:
+        if args[0]=='birthplace':
+            return gs.player.birthplace
+        elif args[0]=='name':
+            return gs.player.name
+        elif args[0]=='ship':
+            return gs.ship.name
 
 
 # each rule has a function. it can optionally have args in which case its a list
@@ -446,6 +461,8 @@ rules = {
     # place: args are w=western,e=exotic,f=fancy
     "place": ru_place,
     "word": ru_word,
+    # player info
+    "player": ru_player,
 }
 
 
@@ -504,6 +521,7 @@ class DescriptionGenerator:
         self.explore_livestock_selector = ListSelector(self.rng, explore_livestock)
         self.explore_crewloss_selector = ListSelector(self.rng, explore_crewloss)
         self.explore_shipdamage_selector = ListSelector(self.rng, explore_shipdamage)
+        self.insult_selector = ListSelector(self.rng, insults)
         self.class_selectors = []
         for l in class_lists:
             self.class_selectors.append(ListSelector(self.rng, l))
@@ -567,6 +585,11 @@ class DescriptionGenerator:
         model = _Model(self, im)
         r = sel.select()
         res = _replace_tokens(r, model)
+        return res
+
+    def pirate_insult(self):
+        r = self.insult_selector.select()
+        res = _replace_tokens(r, _Model(self,None))
         return res
 
 if __name__ == "__main__":
