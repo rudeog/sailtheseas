@@ -17,6 +17,9 @@ def get_prompt():
 
 def run_loop():
     while True:
+        if gs.game_over:
+            gs.gm_output(f"Well, {gs.player.name} it looks like its Game Over.")
+            break
         if gs.quitting:
             if gs.gm_confirm("Are you sure you want to quit the game?"):
                 break

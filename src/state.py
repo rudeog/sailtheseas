@@ -90,6 +90,7 @@ class GlobalState:
         # number of commands issued
         self.num_commands = 0
         self.quitting = False
+        self.game_over = False
 
         self.debug_mode = False
         d = os.getenv("STS_DEBUG_MODE","0")

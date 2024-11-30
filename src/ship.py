@@ -104,6 +104,7 @@ class Ship:
         self.miles_traveled = 0
         self.cargo: CargoCollection = CargoCollection()
         self._location: tuple = (-1, -1)
+        self.condition=100
 
         # if sailing we might have a dir/target
         self.b: Bearing = Bearing()
@@ -282,6 +283,18 @@ class Ship:
         wt = int(self.cargo.total_weight()/2000)
         ret = f"{self.name} is a merchant ship that has a cargo capacity of {int(self.cargo_capacity/2000)} tons. "
         ret += f"It has traveled {self.miles_traveled} nautical miles in the seas of {gs.world_name}. "
+        if self.condition < 20:
+            cond="dangerously bad"
+        elif self.condition < 40:
+            cond = "poor"
+        elif self.condition < 60:
+            cond = "mediocre"
+        elif self.condition < 80:
+            cond = "fair"
+        else:
+            cond = "good"
+        ret += f"It is in {cond} condition ({self.condition}%). "
+
         if wt:
             ret += f" It is currently carrying cargo to the weight of approximately {wt} tons."
         else:

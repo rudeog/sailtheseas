@@ -8,9 +8,17 @@ from explore import do_explore
 def pass_time(resting: bool, exploring: bool=False):
     day_elapsed = gs.player.time_increment()
 
+    # ship takes wear and tear, and also may get repaired
+    # may also possibly sink at this point causing game over
+    if not _ship_set_cond():
+        return
+
     # if we are sailing and a day has elapsed
     if day_elapsed:
+
+
         if gs.player.is_sailing():
+
             # possibly change wind direction
             gs.wind.change_random()
             gs.output(f"{gs.crew.lookout}: The wind is {gs.wind}, captain.")
@@ -20,6 +28,8 @@ def pass_time(resting: bool, exploring: bool=False):
             # feed and water the crew (when on land they can find their own damn food)
             _feed_crew()
             gs.stock.check_important_stock(False)
+
+
 
     # see if the crew needs to be paid (every n days)
     pd = gs.crew.update_pay_due()
@@ -38,6 +48,36 @@ def pass_time(resting: bool, exploring: bool=False):
         if place and place.island:  # should be true
             do_explore(place.island)
 
+def _ship_set_cond() -> bool:
+
+    gs.ship.condition -= 1 # normal wear each watch
+
+    # the carpenter is able to repair up to 2% damage each watch right now while sailing, and 4% while on land
+    if gs.player.is_sailing():
+        repair_amt = 2
+    else:
+        repair_amt = 4
+
+    want = min(repair_amt,100 - gs.ship.condition)
+    repaired = gs.stock.consume_materials(want)
+    if repaired == 0:
+        gs.output(f"{gs.crew.carpenter}: Captain, we were unable to perform repairs on {gs.ship.name}. We have no materials!")
+    else:
+        gs.ship.condition += repaired
+    # if we did major repairs, let the captain know
+    if repaired > 2:
+        gs.output(f"{gs.crew.carpenter}: Captain we were able to do major repairs on {gs.ship.name}.")
+    elif repaired > 1:
+        gs.output(f"{gs.crew.carpenter}: Captain we were able to perform some minor repairs on {gs.ship.name}.")
+
+    if gs.ship.condition <= 0:
+        gs.ship.condition = 0
+        gs.output(f"{gs.crew.lookout}: Captain, {gs.ship.name} is sinking!")
+        gs.game_over=True
+        return False
+    elif gs.ship.condition < 20:
+        gs.output(f"{gs.crew.carpenter}: Our ship is in poor condition, captain!")
+    return True
 
 def _sail():
     # make sure we are not overburdened

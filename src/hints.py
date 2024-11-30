@@ -23,6 +23,7 @@ _hints = {
         "want to first use the 'restock' command to see if you can convert any cargo into stock items.",
     "quest_item": "As you explore, you may find clues or artifacts related to quests. Use the 'quests' command to get a view of "
         "your quests and what needs to be done to complete each.",
+    "food_and_grog": "You may change your crew's food and grog setting using the 'ration' and 'grog' commands.",
 }
 # idx into above
 HINT_ID_ABOUTHINTS = 0

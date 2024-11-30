@@ -58,7 +58,7 @@ class Stock:
             # materials to fix the ship. the ship can become damaged due to storm, animals, battles.
             # it also has a natural wear and tear. 1 unit gets consumed normally per day.
             # generally available
-            StockItem(const.STOCK_MATERIALS_IDX, 1, 20, 30),
+            StockItem(const.STOCK_MATERIALS_IDX, 1, 100, 7),
 
             # cannon balls and powder. consumed during battles. each battle round consumes 1
             # unit.
@@ -121,6 +121,22 @@ class Stock:
             return False
         item.qty -= to_consume
         return True
+
+    def consume_materials(self, amount) -> int:
+        '''
+        right now one unit of materials equals 1 percent of ship health
+        Consume ship materials.
+        :return: amount we were able to consume
+        '''
+        item = self.items[const.STOCK_MATERIALS_IDX]
+        if item.qty <= amount:
+            consumed = item.qty
+            item.qty = 0
+        else:
+            consumed = amount
+            item.qty -= amount
+        return consumed
+
 
     def set_rations(self, amt):
         """

@@ -106,6 +106,7 @@ def player_setup() -> bool:
         return False
     if not setup_abs():
         return False
+
     gs.output(f"{gs.crew.firstmate}: We need to stock our ship with necessary supplies for sailing. The crew needs "
               f"to be fed and watered. If we have grog on hand, it can be rationed. Medical supplies help to keep "
               f"the crew healthy. Materials are needed to do routine maintenance on the ship as well as repairs in "
@@ -184,7 +185,11 @@ def setup_abs():
         gs.crew.update_pay_due()
         pd = gs.crew.pay_crew()
         gs.output(f"{gs.crew.boatswain}: We hired {nc} ABS and paid them "
-                  f"up-front for {state.ABS_PAY_PERIOD} days at an amount of {pd}D.")
+                  f"up-front for {state.ABS_PAY_PERIOD} days at an amount of {pd}D. "
+                    "They will be given full rations and a normal portion of grog each day.")
+        gs.hints.show("food_and_grog")
+
+
         return True
 
 # create the initial set of cargo at each port

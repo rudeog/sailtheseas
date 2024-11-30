@@ -60,7 +60,7 @@ class Player:
     def time_increment(self) -> bool:
         """
 
-        :return: true if one day at sea has elapsed since last time increment
+        :return: true if one day has elapsed since last time increment
         """
         if self._day_frags == 3:
             self._days = self._days + 1
@@ -69,7 +69,8 @@ class Player:
             if self.is_sailing():
                 self._days_at_sea += 1
                 self._days_since_port += 1
-                return True
+
+            return True
         else:
             self._day_frags = self._day_frags + 1
 

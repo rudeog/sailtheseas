@@ -45,7 +45,8 @@ def rest_cmd(rt: RunType, toks):
     if rt == RunType.HELP:
         gs.output(
             "This command will allow the crew to rest for a period of six hours (one watch). If sailing, "
-            "your ship will be anchored. Your crew will still consume resources when resting.")
+            "your ship will be anchored. Your crew will still consume resources when resting. The carpenter "
+            "will still perform repairs on the ship while resting.")
         return
     gs.output(f"{gs.crew.boatswain}: I've ordered the crew to do nothing until {fancy_time(gs.player.current_time()+1)}, captain.")
     pass_time(True)

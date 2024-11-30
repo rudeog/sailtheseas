@@ -57,14 +57,20 @@ def _event_livestock(island):
 
 def _event_loss_of_crew(island):
     o=gs.desc_gen.explore_island_crewloss(island)
+    gs.output(o)
     amt=choices_ex(gs.rng_play,[5,10],[3,1])
-    gs.output(f"{o} You lose {amt} able-bodied seamen.")
-    cur = gs.crew.seamen_count-amt
-    gs.crew.set_seamen_count(max(cur,0))
+    if gs.crew.seamen_count-amt >= 0:
+        gs.gm_output(f"You lose {amt} able-bodied seamen.")
+        cur = gs.crew.seamen_count-amt
+        gs.crew.set_seamen_count(max(cur,0))
 
 def _event_ship_damage(island):
     o=gs.desc_gen.explore_island_shipdamage(island)
-    gs.output(f"{o} TODO figure out ship damage.")
+    gs.output(o)
+    dam = choices_ex(gs.rng_play,[8,16],[3,1])
+    if gs.ship.condition - dam >= 0:
+        gs.ship.condition -= dam
+        gs.gm_output(f"Your ship has taken {dam}% damage and is now at {gs.ship.condition}%.")
 
 
 class ExploreEvent:
