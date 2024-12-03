@@ -8,8 +8,8 @@ import crew
 import state
 from names import NameGenerator, PlaceGenerator
 from place_descriptions import DescriptionGenerator
-from src.pirate import Pirate
-from src.state import NUM_PIRATES
+from pirate import Pirate
+from state import NUM_PIRATES
 from state import gs, NUM_QUESTS, NUM_QUEST_CLUES, NUM_QUEST_ARTIFACTS
 import phrase_gen
 from stock import do_full_restock

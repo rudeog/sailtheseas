@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from src.quest import QuestItem
+from quest import QuestItem
 from state import gs
 import os
 
